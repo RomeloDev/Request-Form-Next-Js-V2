@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --background: #f6f8fb;
+  --foreground: #192a42;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono);
+}
+
+@theme {
+  --color-brand: #2458d3;
+  --color-ink: #192a42;
+  --color-muted: #52627b;
+  --color-line: #cbd5e1;
+  --color-danger: #b42332;
+  --background-image-auth-brand:
+    radial-gradient(ellipse at 0% 100%, #245ab7 0%, transparent 62%),
+    linear-gradient(150deg, #162f65, #12284e 65%, #163d7b);
+  --background-image-auth-header: linear-gradient(120deg, #f3f7ff, #fcfdff 70%);
+}
+
+@layer base {
+  body {
+    @apply bg-background font-sans text-foreground;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
