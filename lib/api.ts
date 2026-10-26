@@ -24,6 +24,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
       ? AbortSignal.any([options.signal, AbortSignal.timeout(20_000)])
       : AbortSignal.timeout(20_000),
   });
+  if (response.status === 204) return undefined as T;
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {

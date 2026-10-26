@@ -2,7 +2,15 @@ import { ApiError, apiRequest, type ValidationErrors } from "@/lib/api";
 import { prepareCsrfSession } from "@/lib/csrf";
 
 export type LoginCredentials = { email: string; password: string };
-export type AuthenticatedUser = { id: number; role: string };
+export type AuthenticatedUser = {
+  id: number;
+  role: string;
+  name?: string;
+  firstName?: string;
+  email?: string;
+  position?: string | null;
+  branch?: string | null;
+};
 
 type LoginResponse = {
   status?: boolean;
@@ -10,6 +18,23 @@ type LoginResponse = {
   errors?: ValidationErrors;
 };
 type ProfileResponse = { status: boolean; data: AuthenticatedUser };
+
+export async function getProfile(signal?: AbortSignal): Promise<AuthenticatedUser> {
+  const profile = await sessionRequest<ProfileResponse>("/profile", { signal });
+  if (!profile.status || !profile.data || typeof profile.data.id !== "number" || typeof profile.data.role !== "string") {
+    throw new ApiError(502, "We couldn’t confirm your sign-in. Please try again.");
+  }
+  return profile.data;
+}
+
+export async function signOut(): Promise<void> {
+  const token = await prepareCsrfSession();
+  try {
+    await sessionRequest<void>("/logout", { method: "POST", headers: { "X-XSRF-TOKEN": token } });
+  } catch (error) {
+    if (!(error instanceof ApiError && error.status === 401)) throw error;
+  }
+}
 
 async function sessionRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
   try {
@@ -37,11 +62,7 @@ export async function signIn(credentials: LoginCredentials): Promise<Authenticat
   }
 
   // Confirm the cookie session; a stored registration token is not proof of login.
-  const profile = await sessionRequest<ProfileResponse>("/profile");
-  if (!profile.status || !profile.data || typeof profile.data.id !== "number" || typeof profile.data.role !== "string") {
-    throw new ApiError(502, "We couldn’t confirm your sign-in. Please try again.");
-  }
-  return profile.data;
+  return getProfile();
 }
 
 export function dashboardFor(user: AuthenticatedUser): string {
