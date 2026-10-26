@@ -14,9 +14,11 @@ import RefreshButton from "@/components/ui/refresh-button";
 import RowAction from "@/components/ui/row-action";
 import TablePagination from "@/components/ui/table-pagination";
 import UserDetailsDialog from "@/components/admin/users/user-details-dialog";
+import UserActionDialog, { type UserAction } from "@/components/admin/users/user-action-dialog";
 import { useUserDirectory, type UserSortKey } from "@/components/admin/users/use-user-directory";
 import { branchCodeFor, userFullName, type AdminUser } from "@/lib/admin/users";
 import { dashboardFor } from "@/lib/auth";
+import EditUserDialog from "@/components/admin/users/edit-user-dialog";
 
 const secondaryButton = "min-h-12 rounded-xl border border-line bg-white px-4 py-3 text-base leading-6 font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-500";
 
@@ -25,9 +27,12 @@ export default function UsersPage() {
   const canView = currentUser.role === "Admin";
   const directory = useUserDirectory(canView);
   const [selected, setSelected] = useState<AdminUser | null>(null);
+  const [pendingAction, setPendingAction] = useState<{ kind: UserAction; user: AdminUser } | null>(null);
+  const [actionNotice, setActionNotice] = useState("");
   const { data, state } = directory;
   const loading = state.status === "loading";
   const hasFilters = Boolean(directory.search || directory.role || directory.status);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
 
   if (!canView || state.status === "forbidden") {
     return <section className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-7"><p className="text-sm font-medium text-brand">ADMINISTRATION</p><h1 className="mt-3 text-2xl font-semibold">Access restricted</h1><p className="mt-3 text-base leading-7 text-muted">You don’t have permission to view the users list.</p><div className="mt-5"><TextLink href={dashboardFor(currentUser)}>Back to dashboard</TextLink></div></section>;
@@ -38,13 +43,18 @@ export default function UsersPage() {
     { key: "name", label: "Name", sortable: true, render: (user) => <div className="min-w-44"><p className="font-medium text-ink">{userFullName(user)}</p><p className="mt-1 text-sm text-muted">@{user.username}</p></div> },
     { key: "branch", label: "Branch code", sortable: true, render: (user) => <span className="whitespace-nowrap">{branchCodeFor(user, data?.branchCodes ?? {})}</span> },
     { key: "email", label: "Email", sortable: true, render: (user) => <span className="text-muted">{user.email || "Not provided"}</span> },
-    { key: "role", label: "Role", sortable: true, render: (user) => <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 text-sm font-medium whitespace-nowrap">{user.role}</span> },
+    { key: "role", label: "Role", sortable: true, render: (user) => <span className="inline-flex rounded-lg bg-sky-100 border border-sky-200 text-sky-800 px-2.5 py-1 text-sm font-medium whitespace-nowrap">{user.role}</span> },
     { key: "status", label: "Status", sortable: true, render: (user) => <StatusBadge status={user.verification_status} /> },
     { key: "actions", label: "Actions", render: (user) => <div className="flex items-center gap-2 whitespace-nowrap">
       <RowAction label={`View details for ${userFullName(user)}`} icon="eye" tone="blue" onClick={() => setSelected(user)} />
-      <RowAction label={`Edit ${userFullName(user)}`} icon="pencil" disabled />
-      <RowAction label={`Delete ${userFullName(user)}`} icon="trash" tone="danger" disabled />
-      {user.email_verified_at === null && <RowAction label={`Verify ${userFullName(user)}`} icon="shieldCheck" tone="success" disabled />}
+      <RowAction
+        label={`Edit ${userFullName(user)}`}
+        icon="pencil"
+        tone="blue"
+        onClick={() => setEditingUser(user)}
+      />
+      <RowAction label={`Delete ${userFullName(user)}`} icon="trash" tone="danger" onClick={() => { setActionNotice(""); setPendingAction({ kind: "delete", user }); }} />
+      {user.email_verified_at === null && <RowAction label={`Verify ${userFullName(user)}`} icon="shieldCheck" tone="success" onClick={() => { setActionNotice(""); setPendingAction({ kind: "verify", user }); }} />}
     </div> },
   ];
 
@@ -54,6 +64,8 @@ export default function UsersPage() {
         <RefreshButton label="Refresh users" onClick={directory.refresh} loading={loading} showLabel />
         <button type="button" disabled title="Account creation is not available yet." className="inline-flex min-h-12 cursor-not-allowed items-center gap-2 rounded-xl bg-slate-200 px-5 py-3 text-base font-semibold text-slate-600"><Icon name="plus" />Add User</button>
       </PageHeader>
+
+      {actionNotice && <div role="status" className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-base leading-7 text-emerald-900"><Icon name="checkCircle" className="mt-1 size-5" /><p className="min-w-0 flex-1 wrap-anywhere">{actionNotice}</p><button type="button" aria-label="Dismiss account action message" onClick={() => setActionNotice("")} className="grid size-11 shrink-0 place-items-center rounded-lg hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-emerald-700"><Icon name="close" /></button></div>}
 
       <section aria-label="User summary" className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4">
         <MetricCard headingLevel={2} label="All users" value={data?.users.length} icon="users" tone="blue" loading={loading} note="Registered accounts" />
@@ -82,6 +94,20 @@ export default function UsersPage() {
         </section>
       )}
       <UserDetailsDialog user={selected} branchCodes={data?.branchCodes ?? {}} onClose={() => setSelected(null)} />
+      {pendingAction && <UserActionDialog key={`${pendingAction.kind}-${pendingAction.user.id}`} action={pendingAction.kind} user={pendingAction.user} onClose={() => setPendingAction(null)} onStale={directory.refresh} onSuccess={(message) => { setPendingAction(null); setActionNotice(message); directory.refresh(); }} />}
+
+      {editingUser && (
+        <EditUserDialog
+          key={editingUser.id}
+          user={editingUser}
+          onClose={() => setEditingUser(null)}
+          onSaved={(message) => {
+            setEditingUser(null);
+            setActionNotice(message);
+            directory.refresh();
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,57 @@
 import { ApiError, apiRequest } from "@/lib/api";
+import { prepareCsrfSession } from "@/lib/csrf";
+
+export type UpdateUserInput = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  userName: string;
+  contact: string;
+  employee_id: string;
+  position: string;
+  role: string;
+  branch_code: string | null;
+  branch: string | null;
+  password?: string;
+};
+
+export async function updateUser( id:number, values: UpdateUserInput): Promise<{ message: string }> {
+  const csrfToken = await prepareCsrfSession();
+
+  return apiRequest<{ message: string }>(
+    `/update-profile/${id}`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-XSRF-TOKEN": csrfToken,
+      },
+      body: JSON.stringify(values),
+    },
+  );
+}
+
+export async function deleteUser(id: number): Promise<{ status: boolean; message: string }> {
+  const token = await prepareCsrfSession();
+  const response = await apiRequest<{ status: boolean; message: string }>(`/delete-user/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: { "X-XSRF-TOKEN": token },
+  });
+  if (response.status !== true) throw new ApiError(502, "Deletion could not be confirmed.");
+  return response;
+}
+
+export async function verifyUser(id: number): Promise<{ message: string }> {
+  const token = await prepareCsrfSession();
+  return apiRequest<{ message: string }>(`/verified-user/${id}`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json", "X-XSRF-TOKEN": token },
+    body: JSON.stringify({}),
+  });
+}
 
 export type AdminUser = {
   id: number;
@@ -10,7 +63,7 @@ export type AdminUser = {
   role: string;
   position: string;
   contact: string;
-  branch_code: string;
+  branch_code: string | null;
   branch: string | null;
   profile_picture: string | null;
   signature: string | null;
@@ -55,4 +108,35 @@ export function publicStorageUrl(path: string | null): string | null {
   const parts = path.replace(/\\/g, "/").replace(/^\/?storage\//, "").split("/").filter(Boolean);
   if (!parts.length || parts.some((part) => part === "." || part === "..")) return null;
   return `/storage/${parts.map(encodeURIComponent).join("/")}`;
+}
+
+export type BranchOption = {
+  id: number;
+  branch_code: string;
+  branch: string;
+};
+
+export type PositionOption = {
+  id: number;
+  label: string;
+  value: string;
+};
+
+export async function loadEditUserOptions(signal: AbortSignal) {
+  const [branches, positions] = await Promise.all([
+    apiRequest<{ data: BranchOption[] }>("/view-branch", { signal }),
+    apiRequest<{ position: PositionOption[] }>("/positions", { signal }),
+  ]);
+
+  if (
+    !Array.isArray(branches.data) ||
+    !Array.isArray(positions.position)
+  ) {
+    throw new ApiError(502, "Unexpected dropdown response.");
+  }
+
+  return {
+    branches: branches.data,
+    positions: positions.position,
+  };
 }
