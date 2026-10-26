@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/api/v1/:path*", destination: `${apiServer}/api/v1/:path*` },
       { source: "/sanctum/csrf-cookie", destination: `${apiServer}/sanctum/csrf-cookie` },
+      { source: "/storage/:path*", destination: `${apiServer}/storage/:path*` },
     ];
   },
   /* config options here */

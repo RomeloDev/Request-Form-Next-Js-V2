@@ -7,28 +7,22 @@ import { ApiError } from "@/lib/api";
 import { dashboardFor } from "@/lib/auth";
 import { isAuditor } from "@/lib/navigation";
 import { loadDashboard, type DashboardData, type RequestSummary } from "@/lib/dashboard";
+import Icon, { type IconName } from "@/components/ui/icon";
+import MetricCard, { type MetricTone } from "@/components/ui/metric-card";
+import RefreshButton from "@/components/ui/refresh-button";
 
-const summaries: { key: keyof RequestSummary; label: string; color: string }[] = [
-  { key: "total", label: "Total requests", color: "bg-blue-50 text-blue-700" },
-  { key: "completed", label: "Completed", color: "bg-emerald-50 text-emerald-700" },
-  { key: "ongoing", label: "Ongoing", color: "bg-cyan-50 text-cyan-700" },
-  { key: "pending", label: "Pending", color: "bg-amber-50 text-amber-800" },
-  { key: "disapproved", label: "Disapproved", color: "bg-rose-50 text-rose-700" },
+const summaries: { key: keyof RequestSummary; label: string; icon: IconName; tone: MetricTone }[] = [
+  { key: "total", label: "Total requests", icon: "file", tone: "blue" },
+  { key: "completed", label: "Completed", icon: "checkCircle", tone: "emerald" },
+  { key: "ongoing", label: "Ongoing", icon: "progress", tone: "cyan" },
+  { key: "pending", label: "Pending", icon: "clock", tone: "amber" },
+  { key: "disapproved", label: "Disapproved", icon: "xCircle", tone: "rose" },
 ];
 
 function SummaryCards({ data, loading }: { data: RequestSummary | null; loading: boolean }) {
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-4">
-      {summaries.map(({ key, label, color }) => (
-        <article key={key} className="min-w-0 rounded-2xl border border-line/60 bg-white p-5 shadow-sm">
-          <span aria-hidden="true" className={`mb-4 grid size-10 place-items-center rounded-xl text-lg ${color}`}>▤</span>
-          <h3 className="text-sm leading-6 font-medium text-muted">{label}</h3>
-          <p className="mt-2 text-3xl leading-tight font-semibold tracking-tight text-ink" aria-label={data?.[key] == null ? `${label}: unavailable` : undefined}>
-            {loading ? <span className="inline-block h-8 w-14 rounded bg-slate-100 motion-safe:animate-pulse" aria-label="Loading" /> : data?.[key]?.toLocaleString() ?? "—"}
-          </p>
-          {!loading && data?.[key] == null && <p className="mt-2 text-sm text-muted">Unavailable</p>}
-        </article>
-      ))}
+      {summaries.map(({ key, label, icon, tone }) => <MetricCard key={key} label={label} value={data?.[key]} icon={icon} tone={tone} loading={loading} />)}
     </div>
   );
 }
@@ -69,14 +63,20 @@ export default function DashboardOverview({ approvalView = false }: { approvalVi
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div><p className="text-sm font-medium text-muted">WORKSPACE OVERVIEW</p><h1 className="mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">{approvalView ? "Approver dashboard" : "Dashboard"}</h1></div>
-        <button type="button" onClick={refresh} disabled={loading} className="min-h-12 rounded-xl border border-line bg-white px-4 py-3 text-base font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60">{loading ? "Refreshing…" : "Refresh overview"}</button>
+        <RefreshButton label="Refresh overview" onClick={refresh} loading={loading} />
       </div>
 
-      <section aria-labelledby="welcome-title" className="relative overflow-hidden rounded-2xl border border-blue-100 bg-auth-header p-6 sm:p-8">
-        <p className="text-sm font-medium text-brand">{access}{isAuditor(user) ? " · Audit access" : ""}</p>
-        <h2 id="welcome-title" className="mt-3 text-2xl leading-tight font-semibold tracking-tight wrap-anywhere sm:text-3xl">Welcome back, {name}.</h2>
-        <p className="mt-3 max-w-2xl text-base leading-7 text-muted">{approvalView ? "Keep track of your requests and the approvals waiting for your attention." : user.role === "Admin" ? "Your account, your team, and your workplace in one connected space." : "Keep your requests organized and follow their progress in one place."}</p>
-        {user.role !== "Admin" && <button type="button" disabled title="Request creation is not available yet." className="mt-5 min-h-12 cursor-not-allowed rounded-xl bg-slate-200 px-5 py-3 text-base font-semibold text-slate-600">Create a Request</button>}
+      <section aria-labelledby="welcome-title" className="relative isolate overflow-hidden rounded-3xl border border-blue-200 bg-linear-to-br from-blue-100 via-blue-100/80 to-indigo-100 p-6 shadow-[0_2px_12px_#0f172a04] sm:p-9">
+        <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-12 -z-10 size-80 rounded-full border-[40px] border-blue-200/40" />
+        <div className="flex items-center justify-between gap-6">
+          <div className="min-w-0">
+            <p className="inline-flex flex-wrap items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1.5 text-sm font-medium text-blue-800"><Icon name={user.role === "Admin" ? "shieldCheck" : "profile"} className="size-4" />{access}{isAuditor(user) ? " · Audit access" : ""}</p>
+            <h2 id="welcome-title" className="mt-5 text-2xl leading-tight font-semibold tracking-tight wrap-anywhere sm:text-3xl">Welcome back, <span className="text-blue-800">{name}.</span></h2>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">{approvalView ? "Keep track of your requests and the approvals waiting for your attention." : user.role === "Admin" ? "Your account, your team, and your workplace in one connected space." : "Keep your requests organized and follow their progress in one place."}</p>
+            {user.role !== "Admin" && <button type="button" disabled title="Request creation is not available yet." className="mt-5 inline-flex min-h-12 cursor-not-allowed items-center gap-2 rounded-xl bg-slate-200 px-5 py-3 text-base font-semibold text-slate-600"><Icon name="plus" />Create a Request</button>}
+          </div>
+          <div aria-hidden="true" className="hidden size-28 shrink-0 place-items-center rounded-3xl border border-white bg-white/70 text-blue-700 shadow-[0_8px_32px_#1e40af0a] xl:grid"><Icon name={user.role === "Admin" ? "shieldCheck" : "clipboard"} className="size-12" /></div>
+        </div>
       </section>
 
       {unavailable && <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-base leading-7 text-amber-950">Some request information is currently unavailable. You can refresh the overview to try again.</p>}
