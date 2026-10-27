@@ -28,7 +28,7 @@ export function navigationFor(user: AuthenticatedUser): NavigationItem[] {
   if (isAuditor(user)) return [dashboard, ...personal, ...(user.role === "approver" ? [process] : []), reports, shared, help];
   if (user.role === "approver") return [dashboard, ...personal, process, shared, help];
   if (user.role === "Admin") {
-    return [dashboard, item("Users", "/admin/users", true), item("Positions", "/admin/positions"),
+    return [dashboard, item("Users", "/admin/users", true), item("Positions", "/admin/positions", true),
       item("Branches", "/admin/branches"), item("Approvers", "/admin/approvers"),
       item("AVP Staffs", "/admin/avp-staffs"), item("Area Managers", "/admin/area-managers"),
       item("Branch Heads", "/admin/branch-heads"), item("Feedbacks", "/admin/feedbacks"),
