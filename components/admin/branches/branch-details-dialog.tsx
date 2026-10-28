@@ -8,10 +8,7 @@ type BranchDetailsDialogProps = {
   onClose: () => void;
 };
 
-export default function BranchDetailsDialog({
-  branch,
-  onClose,
-}: BranchDetailsDialogProps) {
+export default function BranchDetailsDialog({ branch, onClose, }: BranchDetailsDialogProps) {
   const details: Array<[string, string | number]> = [
     ["Branch ID", branch.id],
     ["Company", branch.branch],
