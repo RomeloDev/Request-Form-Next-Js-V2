@@ -19,6 +19,9 @@ import {
   getBranches,
   type BranchRecord,
 } from "@/lib/admin/branches";
+import BranchFormDialog from "@/components/admin/branches/branch-form-dialog";
+import BranchDetailsDialog from "@/components/admin/branches/branch-details-dialog";
+import DeleteBranchDialog from "@/components/admin/branches/delete-branch-dialog";
 
 type SortKey = keyof BranchRecord;
 
@@ -26,6 +29,10 @@ type Sort = {
   key: SortKey;
   direction: "asc" | "desc";
 };
+
+type BranchFormState =
+  | { mode: "create" }
+  | { mode: "edit"; branch: BranchRecord };
 
 const fieldColumns: { key: SortKey; label: string }[] = [
   { key: "id", label: "ID" },
@@ -54,6 +61,10 @@ export default function BranchesPage() {
   });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [form, setForm] = useState<BranchFormState | null>(null);
+  const [notice, setNotice] = useState("");
+  const [detailsTarget, setDetailsTarget] = useState<BranchRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<BranchRecord | null>(null);
 
   useEffect(() => {
     if (!canView) return;
@@ -120,7 +131,12 @@ export default function BranchesPage() {
 
   const filtered = branches
     .filter((branch) => {
-      const matchesSearch = Object.values(branch)
+      const matchesSearch = [
+        branch.branch_code,
+        branch.branch_name,
+        branch.branch,
+        branch.acronym,
+      ]
         .join(" ")
         .toLowerCase()
         .includes(query);
@@ -177,18 +193,31 @@ export default function BranchesPage() {
             label={`View details for ${branch.branch_code}`}
             icon="eye"
             tone="blue"
-            disabled
+            onClick={() => {
+              setNotice("");
+              setDetailsTarget(branch);
+            }}
           />
           <RowAction
             label={`Edit ${branch.branch_code}`}
             icon="pencil"
-            disabled
+            tone="blue"
+            onClick={() => {
+              setNotice("");
+              setForm({
+                mode: "edit",
+                branch,
+              });
+            }}
           />
           <RowAction
             label={`Delete ${branch.branch_code}`}
             icon="trash"
             tone="danger"
-            disabled
+            onClick={() => {
+              setNotice("");
+              setDeleteTarget(branch);
+            }}
           />
         </div>
       ),
@@ -227,14 +256,26 @@ export default function BranchesPage() {
 
         <button
           type="button"
-          disabled
-          title="Add Branch is not available yet."
-          className="inline-flex min-h-12 cursor-not-allowed items-center gap-2 rounded-xl bg-slate-200 px-5 py-3 text-base font-semibold text-slate-600"
+          disabled={loading}
+          onClick={() => {
+            setNotice("");
+            setForm({ mode: "create" });
+          }}
+          className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-700 px-5 py-3 text-base font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50"
         >
           <Icon name="plus" />
           Add Branch
         </button>
       </PageHeader>
+
+      {notice && (
+        <p
+          role="status"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-base leading-7 text-emerald-900"
+        >
+          {notice}
+        </p>
+      )}
 
       {status === "error" ? (
         <FormAlert message="We couldn’t load branches. Check your connection and try Refresh branches." />
@@ -345,6 +386,49 @@ export default function BranchesPage() {
             }}
           />
         </section>
+      )}
+
+      {form && (
+        <BranchFormDialog
+          key={
+            form.mode === "edit"
+              ? `edit-${form.branch.id}`
+              : "create"
+          }
+          branch={
+            form.mode === "edit"
+              ? form.branch
+              : undefined
+          }
+          onClose={() => setForm(null)}
+          onSaved={(message) => {
+            setForm(null);
+            setNotice(message);
+            refresh();
+          }}
+        />
+      )}
+
+      {detailsTarget && (
+        <BranchDetailsDialog
+          key={detailsTarget.id}
+          branch={detailsTarget}
+          onClose={() => setDetailsTarget(null)}
+        />
+      )}
+
+      {deleteTarget && (
+        <DeleteBranchDialog
+          key={deleteTarget.id}
+          branch={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onStale={refresh}
+          onDeleted={(message) => {
+            setDeleteTarget(null);
+            setNotice(message);
+            refresh();
+          }}
+        />
       )}
     </div>
   );
