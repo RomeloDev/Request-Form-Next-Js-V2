@@ -57,7 +57,6 @@ export default function EditUserDialog({
     contact: user.contact,
     employee_id: user.employee_id,
     position: user.position,
-    role: user.role,
     branch_code: user.branch_code,
     branch: user.branch,
     password: "",
@@ -213,10 +212,6 @@ export default function EditUserDialog({
       (branch) => String(branch.id) === values.branch_code,
     );
 
-  const missingRole =
-    values.role &&
-    !["User", "approver", "Admin"].includes(values.role);
-
   return (
     <Modal
       open
@@ -326,24 +321,6 @@ export default function EditUserDialog({
               }
             />
 
-            <FormSelect
-              id={`${formId}-role`}
-              label="Role"
-              required
-              value={values.role}
-              error={errors.role?.[0]}
-              onChange={(event) =>
-                changeField("role", event.target.value)
-              }
-            >
-              <option value="" disabled>Select role</option>
-              {missingRole && (
-                <option value={values.role}>{values.role}</option>
-              )}
-              <option value="User">User</option>
-              <option value="approver">Approver</option>
-              <option value="Admin">Admin</option>
-            </FormSelect>
 
             <FormField
               id={`${formId}-password`}

@@ -9,13 +9,12 @@ export type UpdateUserInput = {
   contact: string;
   employee_id: string;
   position: string;
-  role: string;
   branch_code: string | null;
   branch: string | null;
   password?: string;
 };
 
-export async function updateUser( id:number, values: UpdateUserInput): Promise<{ message: string }> {
+export async function updateUser(id: number, values: UpdateUserInput): Promise<{ message: string }> {
   const csrfToken = await prepareCsrfSession();
 
   return apiRequest<{ message: string }>(
@@ -60,6 +59,8 @@ export type AdminUser = {
   username: string;
   email: string;
   employee_id: string;
+  // The directory displays the Spatie role returned by Laravel.
+  // Role changes are handled by dedicated role-management endpoints.
   role: string;
   position: string;
   contact: string;

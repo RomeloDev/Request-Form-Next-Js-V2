@@ -90,7 +90,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           {logoutError && <FormAlert message={logoutError} onDismiss={() => setLogoutError("")} />}
           {children}
         </main>
-        <footer className="mx-auto max-w-7xl px-5 pb-6 text-sm text-muted sm:px-8">SMCT Group of Companies · One connected workplace.</footer>
+        <footer className="mx-auto px-5 pb-6 text-sm text-muted sm:px-8">SMCT Group of Companies · One connected workplace.</footer>
       </div>
     </div>
   );
