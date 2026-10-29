@@ -2,7 +2,38 @@
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 
-export default function Modal({ open, title, children, onClose, footer, dismissible = true }: { open: boolean; title: string; children: ReactNode; onClose: () => void; footer?: ReactNode; dismissible?: boolean }) {
+// Map common sizes to full Tailwind classes so the compiler detects them
+const maxWidthClasses = {
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
+  "4xl": "max-w-4xl",
+  "5xl": "max-w-5xl",
+  full: "max-w-full",
+} as const;
+
+type ModalMaxWidth = keyof typeof maxWidthClasses;
+
+export default function Modal({ 
+  open, 
+  title, 
+  children, 
+  onClose, 
+  footer, 
+  dismissible = true, 
+  maxWidth = "3xl" 
+}: { 
+  open: boolean; 
+  title: string; 
+  children: ReactNode; 
+  onClose: () => void; 
+  footer?: ReactNode; 
+  dismissible?: boolean; 
+  maxWidth?: ModalMaxWidth; 
+}) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -14,11 +45,19 @@ export default function Modal({ open, title, children, onClose, footer, dismissi
     return () => { if (dialog.open) dialog.close(); };
   }, [open]);
 
+  // Fallback to max-w-3xl if the key isn't found
+  const maxWidthClass = maxWidthClasses[maxWidth];
+
   return (
-    <dialog ref={ref} onClose={(event) => {
-      // Strict Mode can reopen the dialog before a cleanup's queued close event arrives.
-      if (!event.currentTarget.open) onClose();
-    }} onCancel={(event) => { if (!dismissible) event.preventDefault(); }} aria-labelledby={titleId} className="fixed inset-0 m-auto max-h-[90svh] w-[calc(100%_-_2rem)] max-w-3xl overflow-hidden rounded-2xl border border-line/60 bg-white p-0 text-ink shadow-2xl backdrop:bg-slate-950/50 open:flex open:flex-col">
+    <dialog 
+      ref={ref} 
+      onClose={(event) => {
+        if (!event.currentTarget.open) onClose();
+      }} 
+      onCancel={(event) => { if (!dismissible) event.preventDefault(); }} 
+      aria-labelledby={titleId} 
+      className={`fixed inset-0 m-auto max-h-[90svh] w-[calc(100%_-_2rem)] ${maxWidthClass} overflow-hidden rounded-2xl border border-line/60 bg-white p-0 text-ink shadow-2xl backdrop:bg-slate-950/50 open:flex open:flex-col`}
+    >
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-line/60 bg-slate-50 px-5 py-4 sm:px-7">
         <h2 id={titleId} className="text-xl leading-7 font-semibold">{title}</h2>
         <button type="button" disabled={!dismissible} onClick={() => ref.current?.close()} aria-label="Close dialog" className="grid size-11 shrink-0 place-items-center rounded-lg text-2xl text-muted hover:bg-slate-200 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50">×</button>
