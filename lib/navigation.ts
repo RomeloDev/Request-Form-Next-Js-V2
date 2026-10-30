@@ -30,7 +30,7 @@ export function navigationFor(user: AuthenticatedUser): NavigationItem[] {
   if (user.role === "Admin") {
     return [dashboard, item("Users", "/admin/users", true), item("Positions", "/admin/positions", true),
       item("Branches", "/admin/branches", true), item("Approvers", "/admin/approvers", true),
-      item("AVP Staffs", "/admin/avp-staffs"), item("Area Managers", "/admin/area-managers"),
+      item("AVP Staffs", "/admin/avp-staffs", true), item("Area Managers", "/admin/area-managers"),
       item("Branch Heads", "/admin/branch-heads"), item("Feedbacks", "/admin/feedbacks"),
       item("Request Access", "/admin/request-access"), reports, help];
   }
