@@ -1,5 +1,6 @@
 import { ApiError, apiRequest, type ValidationErrors } from "@/lib/api";
 import { prepareCsrfSession } from "@/lib/csrf";
+import { APP_ROLES } from "@/lib/roles";
 
 export type LoginCredentials = { email: string; password: string };
 export type AuthenticatedUser = {
@@ -66,5 +67,5 @@ export async function signIn(credentials: LoginCredentials): Promise<Authenticat
 }
 
 export function dashboardFor(user: AuthenticatedUser): string {
-  return user.role === "approver" ? "/approver/dashboard" : "/dashboard";
+  return user.role === APP_ROLES.APPROVER ? "/approver/dashboard" : "/dashboard";
 }

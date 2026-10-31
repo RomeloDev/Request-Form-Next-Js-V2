@@ -31,6 +31,28 @@ Frontend checks are UX only, never security.
 - Never pass full API/DB objects to Client Components. Return only the
   fields the UI needs (no roles, hashes, internal IDs, emails of others).
 
+### Protected pages and roles (admin, approver, user panels)
+- Every protected page and layout must check the session ON THE SERVER
+  (Server Component, layout, or server-side helper) before rendering or
+  fetching data. A client-side redirect (`useEffect` + `router.push`) is NOT
+  protection.
+- Middleware/proxy is only a first-layer redirect for UX. Authorization
+  must also be checked in the page/layout and in Laravel.
+- Check the ROLE for each panel, not just "logged in". An approver must not
+  be able to open admin pages by typing the URL.
+- Get the current user and role from Laravel (e.g. `/api/user`), never from
+  a cookie, URL, or localStorage value the client can edit.
+- Data for a panel must be fetched server-side with the user's session, and
+  Laravel must enforce the role again on every endpoint. Hiding a menu item
+  or button is not security.
+- Do not render admin-only data or components for other roles, and do not
+  send admin-only data to the browser in props.
+- Use `cache: "no-store"` (or dynamic rendering) for authenticated and
+  per-user data, so one user's data is never cached and shown to another.
+- Handle expired sessions: on 401/419 from Laravel, clear client state and
+  redirect to login. On 403, show a "not allowed" page, not a crash.
+- Logout must invalidate the session on Laravel, not only clear the UI.
+
 ### API calls to Laravel
 - Never trust client-sent user IDs, roles, prices, or totals. Backend derives
   them from the authenticated user.

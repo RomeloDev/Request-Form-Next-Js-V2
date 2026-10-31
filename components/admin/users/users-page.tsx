@@ -19,12 +19,13 @@ import { useUserDirectory, type UserSortKey } from "@/components/admin/users/use
 import { branchCodeFor, userFullName, type AdminUser } from "@/lib/admin/users";
 import { dashboardFor } from "@/lib/auth";
 import EditUserDialog from "@/components/admin/users/edit-user-dialog";
+import { APP_ROLES } from "@/lib/roles";
 
 const secondaryButton = "min-h-12 rounded-xl border border-line bg-white px-4 py-3 text-base leading-6 font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-500";
 
 export default function UsersPage() {
   const { user: currentUser } = useSession();
-  const canView = currentUser.role === "Admin";
+  const canView = currentUser.role === APP_ROLES.ADMIN;
   const directory = useUserDirectory(canView);
   const [selected, setSelected] = useState<AdminUser | null>(null);
   const [pendingAction, setPendingAction] = useState<{ kind: UserAction; user: AdminUser } | null>(null);

@@ -14,9 +14,15 @@ export function useSession() {
   return session;
 }
 
-export default function SessionProvider({ children }: { children: ReactNode }) {
+export default function SessionProvider({
+  children,
+  initialUser,
+}: {
+  children: ReactNode;
+  initialUser: AuthenticatedUser;
+}) {
   const router = useRouter();
-  const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [user, setUser] = useState<AuthenticatedUser | null>(initialUser);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
 

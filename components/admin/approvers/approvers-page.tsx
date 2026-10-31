@@ -27,6 +27,7 @@ import {
   type ApproverUser,
   type PaginationMeta,
 } from "@/lib/admin/approvers";
+import { APP_ROLES } from "@/lib/roles";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import AddApproverDialog from "@/components/admin/approvers/add-approver-dialog";
 import RemoveApproverDialog from "@/components/admin/approvers/remove-approver-dialog";
@@ -57,7 +58,7 @@ const emptyMeta: PaginationMeta = {
 export default function ApproversPage() {
   const { user } = useSession();
   const router = useRouter();
-  const canView = user.role === "Admin";
+  const canView = user.role === APP_ROLES.ADMIN;
 
   const [approvers, setApprovers] = useState<ApproverUser[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>(emptyMeta);

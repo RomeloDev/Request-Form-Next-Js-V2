@@ -1,5 +1,6 @@
 import { dashboardFor, type AuthenticatedUser } from "@/lib/auth";
 import type { IconName } from "@/components/ui/icon";
+import { APP_ROLES } from "@/lib/roles";
 
 export type NavigationItem = { label: string; href: string; available: boolean; icon: IconName };
 const icons: Record<string, IconName> = {
@@ -25,13 +26,13 @@ export function navigationFor(user: AuthenticatedUser): NavigationItem[] {
   const process = item("Process Request", "/approver/request?status=Pending");
 
   // The reference checks Audit capability before the Admin navigation branch.
-  if (isAuditor(user)) return [dashboard, ...personal, ...(user.role === "approver" ? [process] : []), reports, shared, help];
-  if (user.role === "approver") return [dashboard, ...personal, process, shared, help];
-  if (user.role === "Admin") {
+  if (isAuditor(user)) return [dashboard, ...personal, ...(user.role === APP_ROLES.APPROVER ? [process] : []), reports, shared, help];
+  if (user.role === APP_ROLES.APPROVER) return [dashboard, ...personal, process, shared, help];
+  if (user.role === APP_ROLES.ADMIN) {
     return [dashboard, item("Users", "/admin/users", true), item("Positions", "/admin/positions", true),
       item("Branches", "/admin/branches", true), item("Approvers", "/admin/approvers", true),
-      item("AVP Staffs", "/admin/avp-staffs", true), item("Area Managers", "/admin/area-managers"),
-      item("Branch Heads", "/admin/branch-heads"), item("Feedbacks", "/admin/feedbacks"),
+      item("AVP Staffs", "/admin/avp-staffs", true), //item("Area Managers", "/admin/area-managers"),
+      item("Branch Heads", "/admin/branch-heads", true), item("Feedbacks", "/admin/feedbacks"),
       item("Request Access", "/admin/request-access"), reports, help];
   }
   return [dashboard, ...personal, shared, help];

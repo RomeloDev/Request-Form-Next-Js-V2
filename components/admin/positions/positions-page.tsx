@@ -18,6 +18,7 @@ import {
   getPositions,
   type PositionRecord,
 } from "@/lib/admin/positions";
+import { APP_ROLES } from "@/lib/roles";
 import PositionFormDialog from "@/components/admin/positions/position-form-dialog";
 import DeletePositionDialog from "@/components/admin/positions/delete-position-dialog";
 
@@ -34,7 +35,7 @@ type PositionFormState =
 export default function PositionsPage() {
   const { user } = useSession();
   const router = useRouter();
-  const canView = user.role === "Admin";
+  const canView = user.role === APP_ROLES.ADMIN;
 
   const [positions, setPositions] = useState<PositionRecord[]>([]);
   const [status, setStatus] = useState<

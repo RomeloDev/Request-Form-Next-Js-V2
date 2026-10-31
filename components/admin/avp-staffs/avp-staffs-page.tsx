@@ -26,6 +26,7 @@ import {
   type AvpStaffAssignmentSort,
   type PaginationMeta,
 } from "@/lib/admin/avp-staffs";
+import { APP_ROLES } from "@/lib/roles";
 
 type Sort = { key: AvpStaffAssignmentSort; direction: "asc" | "desc" };
 const sortableKeys: AvpStaffAssignmentSort[] = ["id", "created_at"];
@@ -39,7 +40,7 @@ function formatDate(value: string): string {
 export default function AvpStaffsPage() {
   const { user } = useSession();
   const router = useRouter();
-  const canView = user.role === "Admin";
+  const canView = user.role === APP_ROLES.ADMIN;
   const [records, setRecords] = useState<AvpStaffAssignment[]>([]);
   const [meta, setMeta] = useState(emptyMeta);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");

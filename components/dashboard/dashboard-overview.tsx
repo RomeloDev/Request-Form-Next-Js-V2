@@ -10,6 +10,7 @@ import { loadDashboard, type DashboardData, type RequestSummary } from "@/lib/da
 import Icon, { type IconName } from "@/components/ui/icon";
 import MetricCard, { type MetricTone } from "@/components/ui/metric-card";
 import RefreshButton from "@/components/ui/refresh-button";
+import { APP_ROLES } from "@/lib/roles";
 
 const summaries: { key: keyof RequestSummary; label: string; icon: IconName; tone: MetricTone }[] = [
   { key: "total", label: "Total requests", icon: "file", tone: "blue" },
@@ -33,7 +34,7 @@ export default function DashboardOverview({ approvalView = false }: { approvalVi
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [attempt, setAttempt] = useState(0);
-  const allowed = approvalView === (user.role === "approver");
+  const allowed = approvalView === (user.role === APP_ROLES.APPROVER);
 
   useEffect(() => {
     if (!allowed) { router.replace(dashboardFor(user)); return; }
@@ -56,7 +57,7 @@ export default function DashboardOverview({ approvalView = false }: { approvalVi
   }
 
   const name = user.firstName || user.name || "there";
-  const access = user.role === "Admin" ? "Administrator" : user.role === "approver" ? "Approver" : "User";
+  const access = user.role === APP_ROLES.ADMIN ? "Administrator" : user.role === APP_ROLES.APPROVER ? "Approver" : "User";
   const unavailable = !loading && (!data?.personal || !data?.recent || (approvalView && !data?.approval));
 
   return (
@@ -70,12 +71,12 @@ export default function DashboardOverview({ approvalView = false }: { approvalVi
         <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-12 -z-10 size-80 rounded-full border-[40px] border-blue-200/40" />
         <div className="flex items-center justify-between gap-6">
           <div className="min-w-0">
-            <p className="inline-flex flex-wrap items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1.5 text-sm font-medium text-blue-800"><Icon name={user.role === "Admin" ? "shieldCheck" : "profile"} className="size-4" />{access}{isAuditor(user) ? " · Audit access" : ""}</p>
+            <p className="inline-flex flex-wrap items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1.5 text-sm font-medium text-blue-800"><Icon name={user.role === APP_ROLES.ADMIN ? "shieldCheck" : "profile"} className="size-4" />{access}{isAuditor(user) ? " · Audit access" : ""}</p>
             <h2 id="welcome-title" className="mt-5 text-2xl leading-tight font-semibold tracking-tight wrap-anywhere sm:text-3xl">Welcome back, <span className="text-blue-800">{name}.</span></h2>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">{approvalView ? "Keep track of your requests and the approvals waiting for your attention." : user.role === "Admin" ? "Your account, your team, and your workplace in one connected space." : "Keep your requests organized and follow their progress in one place."}</p>
-            {user.role !== "Admin" && <button type="button" disabled title="Request creation is not available yet." className="mt-5 inline-flex min-h-12 cursor-not-allowed items-center gap-2 rounded-xl bg-slate-200 px-5 py-3 text-base font-semibold text-slate-600"><Icon name="plus" />Create a Request</button>}
+            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">{approvalView ? "Keep track of your requests and the approvals waiting for your attention." : user.role === APP_ROLES.ADMIN ? "Your account, your team, and your workplace in one connected space." : "Keep your requests organized and follow their progress in one place."}</p>
+            {user.role !== APP_ROLES.ADMIN && <button type="button" disabled title="Request creation is not available yet." className="mt-5 inline-flex min-h-12 cursor-not-allowed items-center gap-2 rounded-xl bg-slate-200 px-5 py-3 text-base font-semibold text-slate-600"><Icon name="plus" />Create a Request</button>}
           </div>
-          <div aria-hidden="true" className="hidden size-28 shrink-0 place-items-center rounded-3xl border border-white bg-white/70 text-blue-700 shadow-[0_8px_32px_#1e40af0a] xl:grid"><Icon name={user.role === "Admin" ? "shieldCheck" : "clipboard"} className="size-12" /></div>
+          <div aria-hidden="true" className="hidden size-28 shrink-0 place-items-center rounded-3xl border border-white bg-white/70 text-blue-700 shadow-[0_8px_32px_#1e40af0a] xl:grid"><Icon name={user.role === APP_ROLES.ADMIN ? "shieldCheck" : "clipboard"} className="size-12" /></div>
         </div>
       </section>
 

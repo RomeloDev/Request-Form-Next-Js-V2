@@ -19,6 +19,7 @@ import {
   getBranches,
   type BranchRecord,
 } from "@/lib/admin/branches";
+import { APP_ROLES } from "@/lib/roles";
 import BranchFormDialog from "@/components/admin/branches/branch-form-dialog";
 import BranchDetailsDialog from "@/components/admin/branches/branch-details-dialog";
 import DeleteBranchDialog from "@/components/admin/branches/delete-branch-dialog";
@@ -45,7 +46,7 @@ const fieldColumns: { key: SortKey; label: string }[] = [
 export default function BranchesPage() {
   const { user } = useSession();
   const router = useRouter();
-  const canView = user.role === "Admin";
+  const canView = user.role === APP_ROLES.ADMIN;
 
   const [branches, setBranches] = useState<BranchRecord[]>([]);
   const [status, setStatus] = useState<
