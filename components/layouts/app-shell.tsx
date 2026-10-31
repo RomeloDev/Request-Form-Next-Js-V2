@@ -11,6 +11,7 @@ import FormAlert from "@/components/ui/form-alert";
 import Icon from "@/components/ui/icon";
 import AccountMenu from "@/components/layouts/account-menu";
 import { APP_ROLES } from "@/lib/roles";
+import LogoutConfirmationDialog from "@/components/auth/logout-confirmation-dialog";
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const { user, logout } = useSession();
@@ -18,6 +19,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [logoutError, setLogoutError] = useState("");
   const roleLabel = user.role === APP_ROLES.ADMIN ? "Administrator" : user.role === APP_ROLES.APPROVER ? "Approver" : "User";
@@ -30,12 +32,27 @@ export default function AppShell({ children }: { children: ReactNode }) {
     return () => query.removeEventListener("change", handleResize);
   }, []);
 
+  function requestLogout() {
+    if (leaving) return;
+    dialog.current?.close();
+    setLogoutError("");
+    setLogoutConfirmationOpen(true);
+  }
+
+  function cancelLogout() {
+    if (!leaving) setLogoutConfirmationOpen(false);
+  }
+
   async function handleLogout() {
-    if (leaving || !window.confirm("Sign out of your account?")) return;
+    if (leaving) return;
     setLeaving(true);
     setLogoutError("");
     try { await logout(); }
-    catch { setLogoutError("We couldn’t sign you out. Please try again."); setLeaving(false); }
+    catch {
+      setLogoutConfirmationOpen(false);
+      setLogoutError("We couldn’t sign you out. Please try again.");
+      setLeaving(false);
+    }
   }
 
   function sidebar(collapsed = false) {
@@ -79,7 +96,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <div className={`shrink-0 border-t border-white/10 ${collapsed ? "p-2" : "p-4"}`}>
           <p className={collapsed ? "sr-only" : "truncate px-3 text-base font-medium"}>{name}</p>
           <p className={collapsed ? "sr-only" : "mt-1 px-3 text-sm text-blue-100/80"}>{roleLabel}{isAuditor(user) ? " · Audit access" : ""}</p>
-          <button type="button" disabled={leaving} onClick={handleLogout} title={collapsed ? (leaving ? "Signing out…" : "Sign out") : undefined} className={`flex min-h-12 w-full items-center rounded-xl border border-white/20 px-3 py-3 text-left text-base font-medium hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-60 ${collapsed ? "justify-center" : "mt-3 gap-3"}`}><Icon name="logout" /><span className={collapsed ? "sr-only" : undefined}>{leaving ? "Signing out…" : "Sign out"}</span></button>
+          <button type="button" disabled={leaving} onClick={requestLogout} title={collapsed ? (leaving ? "Signing out…" : "Sign out") : undefined} className={`flex min-h-12 w-full items-center rounded-xl border border-white/20 px-3 py-3 text-left text-base font-medium hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-60 ${collapsed ? "justify-center" : "mt-3 gap-3"}`}><Icon name="logout" /><span className={collapsed ? "sr-only" : undefined}>{leaving ? "Signing out…" : "Sign out"}</span></button>
         </div>
       </div>
     );
@@ -100,7 +117,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <button type="button" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!sidebarCollapsed} aria-controls="workspace-sidebar" title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((current) => !current)} className="hidden size-11 shrink-0 place-items-center rounded-xl border border-line text-muted hover:bg-slate-50 hover:text-brand focus-visible:outline-2 focus-visible:outline-brand lg:grid"><Icon name={sidebarCollapsed ? "chevronRight" : "chevronLeft"} /></button>
             <div><p className="text-sm text-muted">SMCT Request Form</p><p className="text-base font-semibold">Your workspace</p></div>
           </div>
-          <AccountMenu name={name} email={user.email} roleLabel={roleLabel} leaving={leaving} onLogout={handleLogout} />
+          <AccountMenu name={name} email={user.email} roleLabel={roleLabel} leaving={leaving} onLogout={requestLogout} />
         </header>
         <main id="workspace-content" tabIndex={-1} className="mx-auto p-5 focus:outline-none sm:p-8">
           {logoutError && <FormAlert message={logoutError} onDismiss={() => setLogoutError("")} />}
@@ -108,6 +125,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </main>
         <footer className="mx-auto px-5 pb-6 text-sm text-muted sm:px-8">SMCT Group of Companies · One connected workplace.</footer>
       </div>
+      <LogoutConfirmationDialog open={logoutConfirmationOpen} accountName={name} pending={leaving} onCancel={cancelLogout} onConfirm={handleLogout} />
     </div>
   );
 }
