@@ -21,7 +21,14 @@ export function navigationFor(user: AuthenticatedUser): NavigationItem[] {
   const dashboard = item("Dashboard", dashboardFor(user), true);
   const reports = item("Reports", "/reports");
   const help = item("Help", "/help");
-  const personal = [item("My Request", "/request"), item("Create Request", "/create-request?title=Stock%20Requisition")];
+  const personal = [
+    item("My Request", "/request", true), 
+    item(
+      "Create Request", 
+      "/create-request?title=Stock%20Requisition", 
+      true
+    ),
+  ];
   const shared = item("Shared Requests", "/shared-requests");
   const process = item("Process Request", "/approver/request?status=Pending");
 
