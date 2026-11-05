@@ -58,7 +58,6 @@ export default function EditUserDialog({
     employee_id: user.employee_id,
     position: user.position,
     branch_code: user.branch_code,
-    branch: user.branch,
     password: "",
   }));
 
@@ -84,6 +83,20 @@ export default function EditUserDialog({
 
         setBranches(options.branches);
         setPositions(options.positions);
+        setValues((previous) => {
+          const selected = options.branches.find(
+            (branch) =>
+              branch.branch_code === previous.branch_code ||
+              String(branch.id) === previous.branch_code,
+          );
+
+          return selected
+            ? {
+                ...previous,
+                branch_code: selected.branch_code,
+              }
+            : previous;
+        });
         setLookupState("ready");
       })
       .catch(() => {
@@ -111,24 +124,22 @@ export default function EditUserDialog({
     }));
   }
 
-  function changeBranch(id: string) {
+  function changeBranch(branchCode: string) {
     const selected = branches.find(
-      (branch) => String(branch.id) === id,
+      (branch) => branch.branch_code === branchCode,
     );
 
     if (!selected) return;
 
-    // Update the branch ID and its company together.
+    // Send only the code; Laravel derives the matching company.
     setValues((previous) => ({
       ...previous,
-      branch_code: String(selected.id),
-      branch: selected.branch,
+      branch_code: selected.branch_code,
     }));
 
     setErrors((previous) => ({
       ...previous,
       branch_code: [],
-      branch: [],
     }));
   }
 
@@ -209,8 +220,12 @@ export default function EditUserDialog({
   const missingBranch =
     values.branch_code &&
     !branches.some(
-      (branch) => String(branch.id) === values.branch_code,
+      (branch) => branch.branch_code === values.branch_code,
     );
+
+  const selectedBranch = branches.find(
+    (branch) => branch.branch_code === values.branch_code,
+  );
 
   return (
     <Modal
@@ -380,12 +395,12 @@ export default function EditUserDialog({
 
               {missingBranch && (
                 <option value={values.branch_code ?? ""}>
-                  Current branch ID: {values.branch_code}
+                  Current branch code: {values.branch_code}
                 </option>
               )}
 
               {branches.map((branch) => (
-                <option key={branch.id} value={String(branch.id)}>
+                <option key={branch.id} value={branch.branch_code}>
                   {branch.branch_code}
                 </option>
               ))}
@@ -396,8 +411,7 @@ export default function EditUserDialog({
                 id={`${formId}-company`}
                 label="Branch / company"
                 readOnly
-                value={values.branch ?? ""}
-                error={errors.branch?.[0]}
+                value={selectedBranch?.branch ?? user.branch ?? ""}
                 hint="Automatically selected from the branch code."
               />
             </div>

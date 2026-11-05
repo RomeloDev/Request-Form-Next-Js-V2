@@ -24,8 +24,8 @@ buttons and links with registration. Its identifier accepts email, username or
 employee ID. The frontend prepares a CSRF cookie, submits JSON credentials to
 `/api/v1/login`, then confirms `/api/v1/profile` before redirecting. The Next.js
 rewrite also forwards `/sanctum/csrf-cookie`. Session cookies and the decoded
-`X-XSRF-TOKEN` header are used; the registration localStorage token does not
-establish a login session.
+`X-XSRF-TOKEN` header are used; registration does not issue or store an
+authentication token in browser storage.
 
 The learner has not implemented Laravel login/profile routes yet. The screen
 therefore reports unavailable sign-in against the current backend. Live successful

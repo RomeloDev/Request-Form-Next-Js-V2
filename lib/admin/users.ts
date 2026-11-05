@@ -10,7 +10,6 @@ export type UpdateUserInput = {
   employee_id: string;
   position: string;
   branch_code: string | null;
-  branch: string | null;
   password?: string;
 };
 
@@ -90,7 +89,14 @@ export async function loadUserDirectory(signal: AbortSignal): Promise<UserDirect
   const hasBranches = branches.status === "fulfilled" && Array.isArray(branches.value.data);
   return {
     users: users.value.data,
-    branchCodes: hasBranches ? Object.fromEntries(branches.value.data.map((branch) => [String(branch.id), branch.branch_code])) : {},
+    branchCodes: hasBranches
+      ? Object.fromEntries(
+          branches.value.data.flatMap((branch) => [
+            [String(branch.id), branch.branch_code],
+            [branch.branch_code, branch.branch_code],
+          ]),
+        )
+      : {},
     branchLabelsUnavailable: !hasBranches,
   };
 }
@@ -100,7 +106,7 @@ export function userFullName(user: AdminUser): string {
 }
 
 export function branchCodeFor(user: AdminUser, branchCodes: Record<string, string>): string {
-  return branchCodes[String(user.branch_code)] ?? (user.branch_code ? `ID ${user.branch_code}` : "Not provided");
+  return branchCodes[String(user.branch_code)] ?? user.branch_code ?? "Not provided";
 }
 
 /** Only relative paths on Laravel's public storage disk are displayed. */

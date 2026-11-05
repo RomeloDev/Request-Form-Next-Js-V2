@@ -21,7 +21,7 @@ export default function RegistrationForm() {
   const router = useRouter();
   const [lookup, setLookup] = useState<LookupState>({ status: "loading" });
   const [retryAttempt, setRetryAttempt] = useState(0);
-  const [branchId, setBranchId] = useState("");
+  const [branchCode, setBranchCode] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -48,7 +48,7 @@ export default function RegistrationForm() {
   }, []);
 
   const options = lookup.status === "ready" ? lookup.data : null;
-  const selectedBranch = options?.branches.find((branch) => String(branch.id) === branchId);
+  const selectedBranch = options?.branches.find((branch) => branch.branch_code === branchCode);
   const hasOptions = Boolean(options?.branches.length && options?.positions.length);
   const locked = busy || succeeded;
 
@@ -69,7 +69,7 @@ export default function RegistrationForm() {
 
   function retryLookups() {
     setLookup({ status: "loading" });
-    setBranchId("");
+    setBranchCode("");
     setRetryAttempt((attempt) => attempt + 1);
   }
 
@@ -108,18 +108,16 @@ export default function RegistrationForm() {
       }
 
       data.set("signature", signature);
-      data.set("branch", selectedBranch!.branch);
       // Match the reference screen's existing name formatting.
       for (const name of ["firstName", "lastName"]) {
         data.set(name, String(data.get(name)).replace(/\b\w+/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase()));
       }
 
       const response = await registerAccount(data);
-      if (!response.status || typeof response.token !== "string" || !response.token) {
+      if (!response.status || typeof response.message !== "string") {
         throw new ApiError(502, "Unexpected registration response.");
       }
-      // Retain the reference token behavior; login remains a separate step.
-      try { localStorage.setItem("token", response.token); } catch { /* Registration already succeeded if storage is unavailable. */ }
+
       setSucceeded(true);
       redirectTimer.current = setTimeout(() => router.push("/login"), 2000);
     } catch (error) {
@@ -293,12 +291,45 @@ export default function RegistrationForm() {
             <option value="" disabled>Select your position</option>
             {options?.positions.map((position) => <option key={position.id} value={position.value}>{position.label}</option>)}
           </FormSelect>
-          <FormSelect id="branch_code" name="branch_code" label="Branch code" value={branchId} onChange={(event) => setBranchId(event.target.value)} required disabled={lookup.status !== "ready" || !options?.branches.length} error={errors.branch_code}>
-            <option value="" disabled>Select your branch</option>
-            {options?.branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.branch_code}</option>)}
+          <FormSelect
+            id="branch_code"
+            name="branch_code"
+            label="Branch code"
+            value={branchCode}
+            onChange={(event) => {
+              setBranchCode(event.target.value);
+            }}
+            required
+            disabled={
+              lookup.status !== "ready" ||
+              !options?.branches.length
+            }
+            error={errors.branch_code}
+          >
+            <option value="" disabled>
+              Select your branch
+            </option>
+
+            {options?.branches.map((branch) => (
+              <option
+                key={branch.id}
+                value={branch.branch_code}
+              >
+                {branch.branch_code}
+              </option>
+            ))}
           </FormSelect>
           <div className="sm:col-span-2">
-            <FormField id="branch" name="branch" label="Branch / company" placeholder="Filled automatically when you select a branch" value={selectedBranch?.branch ?? ""} readOnly required error={errors.branch} hint="This follows your selected branch code." className="bg-slate-100/70" />
+            <FormField
+              id="branch"
+              label="Branch / company"
+              placeholder="Filled automatically when you select a branch"
+              value={selectedBranch?.branch ?? ""}
+              readOnly
+              required
+              hint="This follows your selected branch code."
+              className="bg-slate-100/70"
+            />
           </div>
         </FormSection>
 

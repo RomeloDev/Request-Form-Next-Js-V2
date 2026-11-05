@@ -1,6 +1,9 @@
 import { ApiError, apiRequest } from "@/lib/api";
 import { prepareCsrfSession } from "@/lib/csrf";
-
+import type {
+  StockRequisitionKind,
+  StockRequisitionPurpose,
+} from "@/lib/requests/stock-requisition-options";
 
 export type ApproverCandidate = {
   id: number;
@@ -42,8 +45,8 @@ export type StockRequisitionItemInput = {
 };
 
 export type CreateStockRequisitionInput = {
-  kindOfRequest: string;
-  purpose: string;
+  kindOfRequest: StockRequisitionKind;
+  purpose: StockRequisitionPurpose;
   notedByIds: number[];
   approvedByIds: number[];
   items: StockRequisitionItemInput[];

@@ -9,7 +9,7 @@ export type BranchOption = {
 
 export type PositionOption = { id: number; label: string; value: string };
 export type RegistrationOptions = { branches: BranchOption[]; positions: PositionOption[] };
-export type RegistrationResponse = { status: boolean; message: string; token: string };
+export type RegistrationResponse = { status: boolean; message: string };
 
 export async function loadRegistrationOptions(signal: AbortSignal): Promise<RegistrationOptions> {
   const [branches, positions] = await Promise.all([
