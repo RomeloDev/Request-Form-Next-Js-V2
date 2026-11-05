@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import PageHeader from "@/components/layouts/page-header";
 import RequestItemsEditor, {
   createDraftRequestItem,
   type DraftRequestItem,
 } from "@/components/requests/stock-requisition/request-items-editor";
+import StockRequisitionSupportingDocument from "@/components/requests/stock-requisition/stock-requisition-supporting-document";
 import FormRadioGroup from "@/components/ui/form-radio-group";
 import FormSelect from "@/components/ui/form-select";
 import FormSection from "@/components/ui/form-section";
+import FormAlert from "@/components/ui/form-alert";
+import SubmitButton from "@/components/ui/submit-button";
 import ApproverSelector from "@/components/requests/stock-requisition/approver-selector";
 import type { ApproverCandidate } from "@/lib/requests/stock-requisitions";
 import {
@@ -18,6 +21,7 @@ import {
   type StockRequisitionKind,
   type StockRequisitionPurpose,
 } from "@/lib/requests/stock-requisition-options";
+import StockRequisitionReviewDialog from "@/components/requests/stock-requisition/stock-requisition-review-dialog";
 
 export default function StockRequisitionPage() {
   const [kindOfRequest, setKindOfRequest] =
@@ -29,6 +33,22 @@ export default function StockRequisitionPage() {
   ]);
   const [notedBy, setNotedBy] = useState<ApproverCandidate[]>([]);
   const [approvedBy, setApprovedBy] = useState<ApproverCandidate[]>([]);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [formError, setFormError] = useState("");
+  const [reviewOpen, setReviewOpen] = useState(false);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (approvedBy.length === 0) {
+      setFormError("Select at least one Approved By user.");
+      setReviewOpen(false);
+      return;
+    }
+
+    setFormError("");
+    setReviewOpen(true);
+  }
 
   return (
     <div className="space-y-8">
@@ -40,13 +60,7 @@ export default function StockRequisitionPage() {
 
       <form
         className="rounded-2xl border border-line/70 bg-white p-5 shadow-sm sm:p-8"
-        onSubmit={(event) => {
-          /*
-           * Submission will be implemented after the remaining sections and
-           * client-side validation are ready.
-           */
-          event.preventDefault();
-        }}
+        onSubmit={handleSubmit}
       >
         <FormSection
           number="1"
@@ -114,7 +128,11 @@ export default function StockRequisitionPage() {
                 notedBy={notedBy}
                 approvedBy={approvedBy}
                 onNotedByChange={setNotedBy}
-                onApprovedByChange={setApprovedBy}
+                onApprovedByChange={(nextApprovedBy) => {
+                  setApprovedBy(nextApprovedBy);
+                  setFormError("");
+                  setReviewOpen(false);
+                }}
             />
         </FormSection>
 
@@ -123,11 +141,46 @@ export default function StockRequisitionPage() {
           title="Supporting documents"
           description="Attach quotations or other documents that support the request."
         >
-          <p className="text-sm text-muted sm:col-span-2">
-            Attachments are optional and will remain private.
-          </p>
+          <StockRequisitionSupportingDocument
+            files={attachments}
+            onFilesChange={setAttachments}
+          />
         </FormSection>
+
+        <div className="mt-8 border-t border-line/70 pt-6">
+          {formError && (
+            <FormAlert
+              message={formError}
+              onDismiss={() => setFormError("")}
+            />
+          )}
+
+          {reviewOpen && (
+            <p
+              role="status"
+              className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 font-medium text-emerald-800"
+            >
+              The request draft is ready for final confirmation.
+            </p>
+          )}
+
+          <SubmitButton>
+            Review request
+          </SubmitButton>
+        </div>
       </form>
+
+      {reviewOpen && (
+        <StockRequisitionReviewDialog
+          kindOfRequest={kindOfRequest}
+          purpose={purpose}
+          itemCount={items.length}
+          notedBy={notedBy}
+          approvedBy={approvedBy}
+          attachmentCount={attachments.length}
+          onClose={() => setReviewOpen(false)}
+        />
+      )}
     </div>
   );
 }
