@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ApiError } from "@/lib/api";
@@ -171,10 +171,10 @@ export function useMyRequests() {
     );
   }
 
-  function refresh() {
+  const refresh = useCallback(() => {
     setLoadStatus("loading");
     setAttempt((current) => current + 1);
-  }
+  }, []);
 
   return {
     records,

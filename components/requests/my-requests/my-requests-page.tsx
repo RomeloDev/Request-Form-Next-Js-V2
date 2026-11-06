@@ -1,6 +1,8 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import PageHeader from "@/components/layouts/page-header";
+import MyRequestDetailsDialog from "@/components/requests/my-requests/my-request-details-dialog";
 import FormAlert from "@/components/ui/form-alert";
 import FormField from "@/components/ui/form-field";
 import FormSelect from "@/components/ui/form-select";
@@ -9,6 +11,7 @@ import DataTable, {
   type TableColumn,
 } from "@/components/ui/data-table";
 import RefreshButton from "@/components/ui/refresh-button";
+import RowAction from "@/components/ui/row-action";
 import TablePagination from "@/components/ui/table-pagination";
 import {
   type MyRequest,
@@ -43,6 +46,8 @@ function formatDate(value: string | null): string {
 }
 
 export default function MyRequestsPage() {
+  const [selectedRequestId, setSelectedRequestId] =
+    useState<number | null>(null);
   const {
     records,
     meta,
@@ -64,6 +69,10 @@ export default function MyRequestsPage() {
     loadStatus === "error" ||
     loadStatus === "forbidden" ||
     loadStatus === "rate-limited";
+
+  const closeDetails = useCallback(() => {
+    setSelectedRequestId(null);
+  }, []);
 
   const columns: TableColumn<MyRequest>[] = [
     {
@@ -117,6 +126,20 @@ export default function MyRequestsPage() {
         >
           {request.status}
         </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (request) => (
+        <RowAction
+          label={`View request ${request.request_code}`}
+          icon="eye"
+          tone="blue"
+          onClick={() => {
+            setSelectedRequestId(request.id);
+          }}
+        />
       ),
     },
   ];
@@ -323,6 +346,15 @@ export default function MyRequestsPage() {
             }}
           />
         </section>
+      )}
+
+      {selectedRequestId !== null && (
+        <MyRequestDetailsDialog
+          key={selectedRequestId}
+          requestId={selectedRequestId}
+          onClose={closeDetails}
+          onStale={refresh}
+        />
       )}
     </div>
   );

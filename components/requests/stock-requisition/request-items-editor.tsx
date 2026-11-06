@@ -38,12 +38,16 @@ const currencyFormatter = new Intl.NumberFormat("en-PH", {
 function calculateLineTotal(
   item: DraftRequestItem,
 ): number | null {
-  const quantity = Number.parseFloat(item.quantity);
-  const unitCost = Number.parseFloat(item.unitCost);
+  const quantity = Number(item.quantity);
+  const unitCost = Number(item.unitCost);
 
   if (
-    !Number.isFinite(quantity) ||
-    !Number.isFinite(unitCost)
+    !Number.isInteger(quantity) ||
+    quantity < 1 ||
+    quantity > 100000 ||
+    !Number.isFinite(unitCost) ||
+    unitCost < 0 ||
+    unitCost > 999999
   ) {
     return null;
   }
@@ -152,10 +156,10 @@ export default function RequestItemsEditor({
                     id={`item-${item.clientId}-quantity`}
                     label="Quantity"
                     type="number"
-                    inputMode="decimal"
-                    min="0.001"
+                    inputMode="numeric"
+                    min="1"
                     max="100000"
-                    step="0.001"
+                    step="1"
                     value={item.quantity}
                     onChange={(event) => {
                         updateItem(

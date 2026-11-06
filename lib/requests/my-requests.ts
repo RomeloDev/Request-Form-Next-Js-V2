@@ -56,6 +56,253 @@ export type MyRequestFilters = {
   perPage?: 10 | 20 | 50;
 };
 
+export type MyRequestPerson = {
+  id: number;
+  firstname: string;
+  lastname: string;
+  position: string | null;
+};
+
+export type MyRequestItem = {
+  id: number;
+  line_number: number;
+  quantity: number;
+  unit: string | null;
+  description: string;
+  unit_cost: string;
+  line_total: string;
+  remarks: string | null;
+  item_data: Record<string, unknown> | null;
+};
+
+export type MyRequestAttachment = {
+  id: number;
+  original_name: string;
+  mime_type: string;
+  size_bytes: number;
+};
+
+export type MyRequestApprovalStep = {
+  id: number;
+  level: number;
+  step_type:
+    | "noted_by"
+    | "approved_by"
+    | "delegated_approval";
+  status:
+    | "Pending"
+    | "Approved"
+    | "Disapproved"
+    | "Skipped"
+    | "Canceled";
+  comment: string | null;
+  acted_at: string | null;
+  approver: MyRequestPerson;
+};
+
+export type MyRequestDetails = MyRequest & {
+  requester: MyRequestPerson;
+  items: MyRequestItem[];
+  attachments: MyRequestAttachment[];
+  approval_steps: MyRequestApprovalStep[];
+};
+
+type MyRequestDetailsResponse = {
+  message: string;
+  data: MyRequestDetails;
+};
+
+const requestStatuses: readonly MyRequestStatus[] = [
+  "Pending",
+  "Ongoing",
+  "Completed",
+  "Disapproved",
+  "Canceled",
+];
+
+const approvalStepTypes: readonly MyRequestApprovalStep["step_type"][] = [
+  "noted_by",
+  "approved_by",
+  "delegated_approval",
+];
+
+const approvalStepStatuses: readonly MyRequestApprovalStep["status"][] = [
+  "Pending",
+  "Approved",
+  "Disapproved",
+  "Skipped",
+  "Canceled",
+];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      !Array.isArray(value),
+  );
+}
+
+function isNullableString(value: unknown): value is string | null {
+  return value === null || typeof value === "string";
+}
+
+function isRequestStatus(value: unknown): value is MyRequestStatus {
+  return (
+    typeof value === "string" &&
+    requestStatuses.includes(value as MyRequestStatus)
+  );
+}
+
+function isPerson(value: unknown): value is MyRequestPerson {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    Number.isInteger(value.id) &&
+    typeof value.firstname === "string" &&
+    typeof value.lastname === "string" &&
+    isNullableString(value.position)
+  );
+}
+
+function isBranch(value: unknown): value is MyRequest["branch"] {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    Number.isInteger(value.id) &&
+    typeof value.branch_code === "string" &&
+    typeof value.branch_name === "string" &&
+    typeof value.branch === "string" &&
+    typeof value.acronym === "string"
+  );
+}
+
+function isRequestItem(value: unknown): value is MyRequestItem {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    Number.isInteger(value.id) &&
+    Number.isInteger(value.line_number) &&
+    Number.isInteger(value.quantity) &&
+    (value.quantity as number) >= 1 &&
+    isNullableString(value.unit) &&
+    typeof value.description === "string" &&
+    typeof value.unit_cost === "string" &&
+    typeof value.line_total === "string" &&
+    isNullableString(value.remarks) &&
+    (value.item_data === null || isRecord(value.item_data))
+  );
+}
+
+function isAttachment(
+  value: unknown,
+): value is MyRequestAttachment {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    Number.isInteger(value.id) &&
+    typeof value.original_name === "string" &&
+    typeof value.mime_type === "string" &&
+    Number.isInteger(value.size_bytes) &&
+    (value.size_bytes as number) >= 0
+  );
+}
+
+function isApprovalStep(
+  value: unknown,
+): value is MyRequestApprovalStep {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    Number.isInteger(value.id) &&
+    Number.isInteger(value.level) &&
+    typeof value.step_type === "string" &&
+    approvalStepTypes.includes(
+      value.step_type as MyRequestApprovalStep["step_type"],
+    ) &&
+    typeof value.status === "string" &&
+    approvalStepStatuses.includes(
+      value.status as MyRequestApprovalStep["status"],
+    ) &&
+    isNullableString(value.comment) &&
+    isNullableString(value.acted_at) &&
+    isPerson(value.approver)
+  );
+}
+
+function isMyRequestDetailsResponse(
+  value: unknown,
+): value is MyRequestDetailsResponse {
+  if (!isRecord(value) || typeof value.message !== "string") {
+    return false;
+  }
+
+  const details = value.data;
+
+  if (!isRecord(details)) {
+    return false;
+  }
+
+  return (
+    Number.isInteger(details.id) &&
+    typeof details.request_code === "string" &&
+    typeof details.form_type === "string" &&
+    isNullableString(details.kind_of_request) &&
+    typeof details.currency === "string" &&
+    isRequestStatus(details.status) &&
+    (details.form_data === null || isRecord(details.form_data)) &&
+    typeof details.grand_total === "string" &&
+    isPerson(details.requester) &&
+    isBranch(details.branch) &&
+    Array.isArray(details.items) &&
+    details.items.every(isRequestItem) &&
+    Array.isArray(details.attachments) &&
+    details.attachments.every(isAttachment) &&
+    Array.isArray(details.approval_steps) &&
+    details.approval_steps.every(isApprovalStep) &&
+    isNullableString(details.created_at) &&
+    isNullableString(details.updated_at)
+  );
+}
+
+export async function getMyRequest(
+  requestId: number,
+  signal?: AbortSignal,
+): Promise<MyRequestDetails> {
+  if (!Number.isInteger(requestId) || requestId < 1) {
+    throw new ApiError(
+      400,
+      "A valid request ID is required.",
+    );
+  }
+
+  const response = await apiRequest<unknown>(
+    `/request-forms/${requestId}`,
+    {
+      credentials: "include",
+      signal,
+    },
+  );
+
+  if (!isMyRequestDetailsResponse(response)) {
+    throw new ApiError(
+      502,
+      "The service returned unexpected request details.",
+    );
+  }
+
+  return response.data;
+}
+
 function myRequestQuery(filters: MyRequestFilters): string {
   const query = new URLSearchParams();
   const search = filters.search?.trim();
