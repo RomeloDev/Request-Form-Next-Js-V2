@@ -48,6 +48,7 @@ function formatDate(value: string | null): string {
 export default function MyRequestsPage() {
   const [selectedRequestId, setSelectedRequestId] =
     useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState("");
   const {
     records,
     meta,
@@ -73,6 +74,12 @@ export default function MyRequestsPage() {
   const closeDetails = useCallback(() => {
     setSelectedRequestId(null);
   }, []);
+
+  const handleCanceled = useCallback(() => {
+    setSelectedRequestId(null);
+    setSuccessMessage("Request canceled successfully.");
+    refresh();
+  }, [refresh]);
 
   const columns: TableColumn<MyRequest>[] = [
     {
@@ -137,6 +144,7 @@ export default function MyRequestsPage() {
           icon="eye"
           tone="blue"
           onClick={() => {
+            setSuccessMessage("");
             setSelectedRequestId(request.id);
           }}
         />
@@ -202,6 +210,25 @@ export default function MyRequestsPage() {
           onClick={refresh}
         />
       </PageHeader>
+
+      {successMessage && (
+        <div
+          role="status"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-base leading-7 text-emerald-800"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <p className="font-medium">{successMessage}</p>
+            <button
+              type="button"
+              onClick={() => setSuccessMessage("")}
+              aria-label="Dismiss success message"
+              className="-mt-1 -mr-1 grid size-11 shrink-0 place-items-center rounded-lg hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+            >
+              <Icon name="close" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {!failed && (
         <section
@@ -354,6 +381,7 @@ export default function MyRequestsPage() {
           requestId={selectedRequestId}
           onClose={closeDetails}
           onStale={refresh}
+          onCanceled={handleCanceled}
         />
       )}
     </div>

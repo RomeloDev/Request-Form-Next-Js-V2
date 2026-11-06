@@ -41,3 +41,45 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
 
   return payload as T;
 }
+
+export async function apiFileRequest(
+  path: string,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  const response = await fetch(`/api/v1${path}`, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+    headers: {
+      Accept: "*/*",
+    },
+    signal: signal
+      ? AbortSignal.any([
+          signal,
+          AbortSignal.timeout(20_000),
+        ])
+      : AbortSignal.timeout(20_000),
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+
+    throw new ApiError(
+      response.status,
+      payload?.message ??
+        "The attachment could not be retrieved.",
+      payload?.errors ?? {},
+    );
+  }
+
+  const file = await response.blob();
+
+  if (file.size === 0) {
+    throw new ApiError(
+      502,
+      "The service returned an empty attachment.",
+    );
+  }
+
+  return file;
+}

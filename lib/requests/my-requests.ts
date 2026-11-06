@@ -1,4 +1,9 @@
-import { ApiError, apiRequest } from "@/lib/api";
+import {
+  ApiError,
+  apiFileRequest,
+  apiRequest,
+} from "@/lib/api";
+import { prepareCsrfSession } from "@/lib/csrf";
 
 export type MyRequestStatus =
   | "Pending"
@@ -23,6 +28,7 @@ export type MyRequest = {
   kind_of_request: string | null;
   currency: string;
   status: MyRequestStatus;
+  cancellation_reason: string | null;
   form_data: Record<string, unknown> | null;
   grand_total: string;
   branch: {
@@ -112,6 +118,17 @@ type MyRequestDetailsResponse = {
   data: MyRequestDetails;
 };
 
+export type CancelMyRequestResult = {
+  id: number;
+  status: "Canceled";
+  cancellation_reason: string;
+};
+
+type CancelMyRequestResponse = {
+  message: string;
+  data: CancelMyRequestResult;
+};
+
 const requestStatuses: readonly MyRequestStatus[] = [
   "Pending",
   "Ongoing",
@@ -133,6 +150,62 @@ const approvalStepStatuses: readonly MyRequestApprovalStep["status"][] = [
   "Skipped",
   "Canceled",
 ];
+
+const previewableAttachmentTypes = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
+const downloadableAttachmentTypes = new Set([
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+]);
+
+export type RequestAttachmentAction =
+  | "preview"
+  | "download";
+
+export function getRequestAttachmentAction(
+  mimeType: string,
+): RequestAttachmentAction | null {
+  if (previewableAttachmentTypes.has(mimeType)) {
+    return "preview";
+  }
+
+  if (downloadableAttachmentTypes.has(mimeType)) {
+    return "download";
+  }
+
+  return null;
+}
+
+export async function getRequestAttachmentFile(
+  requestId: number,
+  attachmentId: number,
+  action: RequestAttachmentAction,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  if (!Number.isInteger(requestId) || requestId < 1) {
+    throw new ApiError(
+      400,
+      "A valid request ID is required.",
+    );
+  }
+
+  if (!Number.isInteger(attachmentId) || attachmentId < 1) {
+    throw new ApiError(
+      400,
+      "A valid attachment ID is required.",
+    );
+  }
+
+  return apiFileRequest(
+    `/request-forms/${requestId}/attachments/${attachmentId}/${action}`,
+    signal,
+  );
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(
@@ -259,6 +332,7 @@ function isMyRequestDetailsResponse(
     isNullableString(details.kind_of_request) &&
     typeof details.currency === "string" &&
     isRequestStatus(details.status) &&
+    isNullableString(details.cancellation_reason) &&
     (details.form_data === null || isRecord(details.form_data)) &&
     typeof details.grand_total === "string" &&
     isPerson(details.requester) &&
@@ -272,6 +346,76 @@ function isMyRequestDetailsResponse(
     isNullableString(details.created_at) &&
     isNullableString(details.updated_at)
   );
+}
+
+function isCancelMyRequestResponse(
+  value: unknown,
+): value is CancelMyRequestResponse {
+  if (!isRecord(value) || !isRecord(value.data)) {
+    return false;
+  }
+
+  return (
+    typeof value.message === "string" &&
+    Number.isInteger(value.data.id) &&
+    value.data.status === "Canceled" &&
+    typeof value.data.cancellation_reason === "string"
+  );
+}
+
+export async function cancelMyRequest(
+  requestId: number,
+  reason: string,
+): Promise<CancelMyRequestResult> {
+  if (!Number.isInteger(requestId) || requestId < 1) {
+    throw new ApiError(
+      400,
+      "A valid request ID is required.",
+    );
+  }
+
+  const cancellationReason = reason.trim();
+
+  if (
+    cancellationReason.length === 0 ||
+    cancellationReason.length > 1000
+  ) {
+    throw new ApiError(
+      422,
+      "Please provide a cancellation reason of no more than 1,000 characters.",
+      {
+        cancellation_reason: [
+          "Please provide a cancellation reason of no more than 1,000 characters.",
+        ],
+      },
+    );
+  }
+
+  const csrfToken = await prepareCsrfSession();
+
+  const response = await apiRequest<unknown>(
+    `/request-forms/${requestId}/cancel`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-XSRF-TOKEN": csrfToken,
+      },
+      body: JSON.stringify({
+        cancellation_reason: cancellationReason,
+      }),
+    },
+  );
+
+  if (!isCancelMyRequestResponse(response)) {
+    throw new ApiError(
+      502,
+      "The service returned an unexpected cancellation response.",
+    );
+  }
+
+  return response.data;
 }
 
 export async function getMyRequest(

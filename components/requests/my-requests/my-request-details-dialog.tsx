@@ -1,21 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import AttachmentPreviewDialog from "@/components/requests/my-requests/attachment-preview-dialog";
+import CancelRequestDialog from "@/components/requests/my-requests/cancel-request-dialog";
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
 import {
+  getRequestAttachmentAction,
+  getRequestAttachmentFile,
   getMyRequest,
+  type MyRequestAttachment,
   type MyRequestApprovalStep,
   type MyRequestDetails,
   type MyRequestPerson,
+  type RequestAttachmentAction,
 } from "@/lib/requests/my-requests";
 
 type MyRequestDetailsDialogProps = {
   requestId: number;
   onClose: () => void;
   onStale: () => void;
+  onCanceled: () => void;
+};
+
+type PendingAttachmentAction = {
+  attachmentId: number;
+  action: RequestAttachmentAction;
+};
+
+type AttachmentPreviewState = {
+  fileName: string;
+  mimeType: string;
+  objectUrl: string;
 };
 
 const requestStatusStyles: Record<
@@ -105,16 +123,49 @@ function formatFileSize(size: number): string {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function safeDownloadName(fileName: string): string {
+  const safeName = fileName
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .trim();
+
+  return safeName || "attachment";
+}
+
+function saveAttachment(blob: Blob, fileName: string): void {
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = objectUrl;
+  link.download = safeDownloadName(fileName);
+  link.hidden = true;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+}
+
 export default function MyRequestDetailsDialog({
   requestId,
   onClose,
   onStale,
+  onCanceled,
 }: MyRequestDetailsDialogProps) {
   const router = useRouter();
   const [details, setDetails] =
     useState<MyRequestDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [attachmentMessage, setAttachmentMessage] =
+    useState("");
+  const [pendingAttachment, setPendingAttachment] =
+    useState<PendingAttachmentAction | null>(null);
+  const [preview, setPreview] =
+    useState<AttachmentPreviewState | null>(null);
+  const [cancelDialogOpen, setCancelDialogOpen] =
+    useState(false);
+  const attachmentControllerRef =
+    useRef<AbortController | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -175,13 +226,156 @@ export default function MyRequestDetailsDialog({
     };
   }, [onClose, onStale, requestId, router]);
 
+  useEffect(() => {
+    return () => {
+      attachmentControllerRef.current?.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const objectUrl = preview?.objectUrl;
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [preview]);
+
+  async function handleAttachmentAction(
+    attachment: MyRequestAttachment,
+  ): Promise<void> {
+    const action = getRequestAttachmentAction(
+      attachment.mime_type,
+    );
+
+    if (!action) {
+      setAttachmentMessage(
+        "This attachment type is not available for preview or download.",
+      );
+      return;
+    }
+
+    attachmentControllerRef.current?.abort();
+
+    const controller = new AbortController();
+    attachmentControllerRef.current = controller;
+    setAttachmentMessage("");
+    setPendingAttachment({
+      attachmentId: attachment.id,
+      action,
+    });
+
+    try {
+      const file = await getRequestAttachmentFile(
+        requestId,
+        attachment.id,
+        action,
+        controller.signal,
+      );
+
+      if (controller.signal.aborted) {
+        return;
+      }
+
+      if (action === "preview") {
+        setPreview({
+          fileName: attachment.original_name,
+          mimeType: attachment.mime_type,
+          objectUrl: URL.createObjectURL(file),
+        });
+      } else {
+        saveAttachment(file, attachment.original_name);
+      }
+    } catch (error: unknown) {
+      if (controller.signal.aborted) {
+        return;
+      }
+
+      if (
+        error instanceof ApiError &&
+        (error.status === 401 || error.status === 419)
+      ) {
+        router.replace("/login");
+        handleClose();
+        return;
+      }
+
+      if (error instanceof ApiError && error.status === 403) {
+        setAttachmentMessage(
+          "You don’t have permission to access this attachment.",
+        );
+      } else if (
+        error instanceof ApiError &&
+        error.status === 404
+      ) {
+        setAttachmentMessage(
+          "This attachment is no longer available.",
+        );
+      } else if (
+        error instanceof ApiError &&
+        error.status === 415
+      ) {
+        setAttachmentMessage(
+          "This attachment type is not available for that action.",
+        );
+      } else if (
+        error instanceof ApiError &&
+        error.status === 429
+      ) {
+        setAttachmentMessage(
+          "Too many attachment requests were sent. Wait a moment and try again.",
+        );
+      } else {
+        setAttachmentMessage(
+          "We couldn’t retrieve this attachment. Please try again.",
+        );
+      }
+    } finally {
+      if (attachmentControllerRef.current === controller) {
+        attachmentControllerRef.current = null;
+      }
+
+      if (!controller.signal.aborted) {
+        setPendingAttachment(null);
+      }
+    }
+  }
+
+  function handleClose(): void {
+    attachmentControllerRef.current?.abort();
+    setPreview(null);
+    onClose();
+  }
+
   return (
-    <Modal
-      open
-      title="Request details"
-      onClose={onClose}
-      maxWidth="4xl"
-    >
+    <>
+      <Modal
+        open
+        title="Request details"
+        onClose={handleClose}
+        maxWidth="4xl"
+        footer={
+          <>
+            {details?.status === "Pending" && (
+              <button
+                type="button"
+                onClick={() => setCancelDialogOpen(true)}
+                className="min-h-11 rounded-xl border border-rose-300 bg-white px-5 py-2.5 text-base font-semibold text-rose-700 hover:bg-rose-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700"
+              >
+                Cancel request
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleClose}
+              className="min-h-11 rounded-xl border border-line bg-white px-5 py-2.5 text-base font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              Close
+            </button>
+          </>
+        }
+      >
       {loading ? (
         <p
           role="status"
@@ -261,6 +455,17 @@ export default function MyRequestDetailsDialog({
                   {formatDate(details.created_at)}
                 </dd>
               </div>
+              {details.status === "Canceled" &&
+                details.cancellation_reason && (
+                  <div className="sm:col-span-2 lg:col-span-3">
+                    <dt className="text-sm text-muted">
+                      Cancellation reason
+                    </dt>
+                    <dd className="mt-1 whitespace-pre-wrap wrap-anywhere font-medium text-ink">
+                      {details.cancellation_reason}
+                    </dd>
+                  </div>
+                )}
             </dl>
           </section>
 
@@ -453,30 +658,75 @@ export default function MyRequestDetailsDialog({
               </p>
             </div>
 
+            {attachmentMessage && (
+              <div className="mt-3">
+                <FormAlert message={attachmentMessage} />
+              </div>
+            )}
+
             {details.attachments.length === 0 ? (
               <p className="mt-3 rounded-2xl border border-line/60 bg-slate-50 p-5 text-muted">
                 No supporting documents were uploaded.
               </p>
             ) : (
               <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-                {details.attachments.map((attachment) => (
-                  <li
-                    key={attachment.id}
-                    className="rounded-xl border border-line/60 bg-slate-50 p-4"
-                  >
-                    <p className="font-medium wrap-anywhere text-ink">
-                      {attachment.original_name}
-                    </p>
-                    <p className="mt-1 text-sm wrap-anywhere text-muted">
-                      {attachment.mime_type} ·{" "}
-                      {formatFileSize(attachment.size_bytes)}
-                    </p>
-                    <p className="mt-3 text-xs leading-5 text-muted">
-                      Download will be available after its authorized
-                      backend endpoint is implemented.
-                    </p>
-                  </li>
-                ))}
+                {details.attachments.map((attachment) => {
+                  const action = getRequestAttachmentAction(
+                    attachment.mime_type,
+                  );
+                  const isPending =
+                    pendingAttachment?.attachmentId ===
+                    attachment.id;
+                  const actionLabel =
+                    action === "preview"
+                      ? "Preview"
+                      : action === "download"
+                        ? "Download"
+                        : null;
+
+                  return (
+                    <li
+                      key={attachment.id}
+                      className="rounded-xl border border-line/60 bg-slate-50 p-4"
+                    >
+                      <p className="font-medium wrap-anywhere text-ink">
+                        {attachment.original_name}
+                      </p>
+                      <p className="mt-1 text-sm wrap-anywhere text-muted">
+                        {attachment.mime_type} ·{" "}
+                        {formatFileSize(
+                          attachment.size_bytes,
+                        )}
+                      </p>
+
+                      {actionLabel ? (
+                        <button
+                          type="button"
+                          disabled={pendingAttachment !== null}
+                          onClick={() => {
+                            void handleAttachmentAction(
+                              attachment,
+                            );
+                          }}
+                          aria-label={`${actionLabel} ${attachment.original_name}`}
+                          className="mt-4 min-h-11 rounded-xl border border-brand bg-white px-4 py-2 text-sm font-semibold text-brand hover:bg-brand/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-60"
+                        >
+                          {isPending
+                            ? pendingAttachment.action ===
+                              "preview"
+                              ? "Preparing preview…"
+                              : "Preparing download…"
+                            : actionLabel}
+                        </button>
+                      ) : (
+                        <p className="mt-3 text-xs leading-5 text-muted">
+                          Preview and download are unavailable for
+                          this file type.
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>
@@ -497,6 +747,26 @@ export default function MyRequestDetailsDialog({
           </dl>
         </div>
       ) : null}
-    </Modal>
+      </Modal>
+
+      {preview && (
+        <AttachmentPreviewDialog
+          fileName={preview.fileName}
+          mimeType={preview.mimeType}
+          objectUrl={preview.objectUrl}
+          onClose={() => setPreview(null)}
+        />
+      )}
+
+      {cancelDialogOpen && details?.status === "Pending" && (
+        <CancelRequestDialog
+          requestId={details.id}
+          requestCode={details.request_code}
+          onClose={() => setCancelDialogOpen(false)}
+          onCanceled={onCanceled}
+          onStale={onStale}
+        />
+      )}
+    </>
   );
 }
