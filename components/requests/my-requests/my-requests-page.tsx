@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import PageHeader from "@/components/layouts/page-header";
+import CancelRequestDialog from "@/components/requests/my-requests/cancel-request-dialog";
 import MyRequestDetailsDialog from "@/components/requests/my-requests/my-request-details-dialog";
 import FormAlert from "@/components/ui/form-alert";
 import FormField from "@/components/ui/form-field";
@@ -48,6 +49,8 @@ function formatDate(value: string | null): string {
 export default function MyRequestsPage() {
   const [selectedRequestId, setSelectedRequestId] =
     useState<number | null>(null);
+  const [requestToCancel, setRequestToCancel] =
+    useState<MyRequest | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const {
     records,
@@ -77,6 +80,7 @@ export default function MyRequestsPage() {
 
   const handleCanceled = useCallback(() => {
     setSelectedRequestId(null);
+    setRequestToCancel(null);
     setSuccessMessage("Request canceled successfully.");
     refresh();
   }, [refresh]);
@@ -139,15 +143,29 @@ export default function MyRequestsPage() {
       key: "actions",
       label: "Actions",
       render: (request) => (
-        <RowAction
-          label={`View request ${request.request_code}`}
-          icon="eye"
-          tone="blue"
-          onClick={() => {
-            setSuccessMessage("");
-            setSelectedRequestId(request.id);
-          }}
-        />
+        <div className="flex items-center gap-2">
+          <RowAction
+            label={`View request ${request.request_code}`}
+            icon="eye"
+            tone="blue"
+            onClick={() => {
+              setSuccessMessage("");
+              setSelectedRequestId(request.id);
+            }}
+          />
+
+          {request.status === "Pending" && (
+            <RowAction
+              label={`Cancel request ${request.request_code}`}
+              icon="trash"
+              tone="danger"
+              onClick={() => {
+                setSuccessMessage("");
+                setRequestToCancel(request);
+              }}
+            />
+          )}
+        </div>
       ),
     },
   ];
@@ -382,6 +400,17 @@ export default function MyRequestsPage() {
           onClose={closeDetails}
           onStale={refresh}
           onCanceled={handleCanceled}
+        />
+      )}
+
+      {requestToCancel !== null && (
+        <CancelRequestDialog
+          key={requestToCancel.id}
+          requestId={requestToCancel.id}
+          requestCode={requestToCancel.request_code}
+          onClose={() => setRequestToCancel(null)}
+          onCanceled={handleCanceled}
+          onStale={refresh}
         />
       )}
     </div>

@@ -73,7 +73,6 @@ export type MyRequestItem = {
   id: number;
   line_number: number;
   quantity: number;
-  unit: string | null;
   description: string;
   unit_cost: string;
   line_total: string;
@@ -263,7 +262,6 @@ function isRequestItem(value: unknown): value is MyRequestItem {
     Number.isInteger(value.line_number) &&
     Number.isInteger(value.quantity) &&
     (value.quantity as number) >= 1 &&
-    isNullableString(value.unit) &&
     typeof value.description === "string" &&
     typeof value.unit_cost === "string" &&
     typeof value.line_total === "string" &&

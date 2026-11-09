@@ -38,7 +38,7 @@ export type ApproverCandidateFilters = {
 
 export type StockRequisitionItemInput = {
   quantity: string;
-  unit: string;
+  //unit: string;
   description: string;
   unitCost: string;
   remarks: string;
@@ -192,10 +192,10 @@ function buildStockRequisitionFormData(
       item.quantity,
     );
 
-    formData.append(
-      `items[${index}][unit]`,
-      item.unit.trim(),
-    );
+    // formData.append(
+    //   `items[${index}][unit]`,
+    //   item.unit.trim(),
+    // );
 
     formData.append(
       `items[${index}][description]`,

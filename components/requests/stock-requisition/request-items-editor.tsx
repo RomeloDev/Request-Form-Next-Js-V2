@@ -23,7 +23,7 @@ export function createDraftRequestItem(
   return {
     clientId,
     quantity: "1",
-    unit: "",
+    //unit: "",
     description: "",
     unitCost: "",
     remarks: "",
@@ -34,6 +34,38 @@ const currencyFormatter = new Intl.NumberFormat("en-PH", {
   style: "currency",
   currency: "PHP",
 });
+
+function formatUnitCost(value: string): string {
+  const [integerPart, decimalPart] = value.split(".");
+  const formattedInteger = integerPart.replace(
+    /\B(?=(\d{3})+(?!\d))/g,
+    ",",
+  );
+
+  return decimalPart === undefined
+    ? formattedInteger
+    : `${formattedInteger}.${decimalPart}`;
+}
+
+function getUnitCostValidationMessage(value: string): string {
+  if (value === "") {
+    return "";
+  }
+
+  if (!/^\d*\.?\d*$/.test(value) || value === ".") {
+    return "Enter a valid amount.";
+  }
+
+  if (Number(value) > 999999) {
+    return "The amount must be 999,999 or less.";
+  }
+
+  if ((value.split(".")[1]?.length ?? 0) > 2) {
+    return "Enter no more than two decimal places.";
+  }
+
+  return "";
+}
 
 function calculateLineTotal(
   item: DraftRequestItem,
@@ -172,7 +204,7 @@ export default function RequestItemsEditor({
                     disabled={disabled}
                     />
 
-                    <FormField
+                    {/* <FormField
                     id={`item-${item.clientId}-unit`}
                     label="Unit"
                     placeholder="Box, piece, ream"
@@ -186,23 +218,27 @@ export default function RequestItemsEditor({
                     }}
                     maxLength={50}
                     disabled={disabled}
-                    />
+                    /> */}
 
                     <FormField
                     id={`item-${item.clientId}-unit-cost`}
                     label="Estimated unit cost"
-                    type="number"
+                    type="text"
                     inputMode="decimal"
-                    min="0"
-                    max="999999"
-                    step="0.01"
                     placeholder="0.00"
-                    value={item.unitCost}
+                    value={formatUnitCost(item.unitCost)}
                     onChange={(event) => {
+                        const value = event.currentTarget.value.replace(
+                        /,/g,
+                        "",
+                        );
+                        event.currentTarget.setCustomValidity(
+                        getUnitCostValidationMessage(value),
+                        );
                         updateItem(
                         item.clientId,
                         "unitCost",
-                        event.target.value,
+                        value,
                         );
                     }}
                     required

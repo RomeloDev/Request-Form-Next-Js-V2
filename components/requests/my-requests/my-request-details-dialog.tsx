@@ -357,6 +357,16 @@ export default function MyRequestDetailsDialog({
         maxWidth="4xl"
         footer={
           <>
+            {details && details.status !== "Canceled" && (
+              <a
+                href={`/request/${details.id}/print`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center rounded-xl bg-brand px-5 py-2.5 text-base font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                Print
+              </a>
+            )}
             {details?.status === "Pending" && (
               <button
                 type="button"
@@ -520,7 +530,7 @@ export default function MyRequestDetailsDialog({
                           {item.line_number}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {item.quantity} {item.unit ?? ""}
+                          {item.quantity}
                         </td>
                         <td className="px-4 py-3 font-medium">
                           {item.description}
