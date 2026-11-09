@@ -394,7 +394,7 @@ export default function StockRequisitionPrintPage({
                   </td>
                   <td />
                   <td className="pt-2 text-center text-sm font-medium">
-                    ₱ {formatAmount(data.grand_total, data.currency)}
+                    {formatAmount(data.grand_total, data.currency)}
                   </td>
                   <td />
                 </tr>

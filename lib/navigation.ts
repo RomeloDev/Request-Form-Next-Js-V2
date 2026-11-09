@@ -30,7 +30,11 @@ export function navigationFor(user: AuthenticatedUser): NavigationItem[] {
     ),
   ];
   const shared = item("Shared Requests", "/shared-requests");
-  const process = item("Process Request", "/approver/request?status=Pending");
+  const process = item(
+    "Process Request",
+    "/approver/request?status=Pending",
+    true,
+  );
 
   // The reference checks Audit capability before the Admin navigation branch.
   if (isAuditor(user)) return [dashboard, ...personal, ...(user.role === APP_ROLES.APPROVER ? [process] : []), reports, shared, help];

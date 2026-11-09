@@ -70,15 +70,19 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <nav aria-label="Main navigation" className={`flex-1 overflow-y-auto py-6 ${collapsed ? "px-2" : "px-4"}`}>
           <p className={collapsed ? "sr-only" : "mb-3 px-3 text-xs font-semibold tracking-widest text-blue-100/80"}>WORKSPACE</p>
           <ul className="space-y-1">
-            {navigationFor(user).map((item) => (
+            {navigationFor(user).map((item) => {
+              const itemPathname = item.href.split("?", 1)[0];
+              const isActive = pathname === itemPathname;
+
+              return (
               <li key={item.label}>
                 {item.available ? (
                   <Link
                     href={item.href}
                     onClick={() => dialog.current?.close()}
-                    aria-current={pathname === item.href ? "page" : undefined}
+                    aria-current={isActive ? "page" : undefined}
                     title={collapsed ? item.label : undefined}
-                    className={`flex min-h-12 items-center rounded-xl px-3 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${collapsed ? "justify-center" : "gap-3"} ${pathname === item.href ? "bg-white text-brand shadow-sm" : "text-blue-50 hover:bg-white/10"}`}
+                    className={`flex min-h-12 items-center rounded-xl px-3 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${collapsed ? "justify-center" : "gap-3"} ${isActive ? "bg-white text-brand shadow-sm" : "text-blue-50 hover:bg-white/10"}`}
                   >
                     <Icon name={item.icon} />
                     <span className={collapsed ? "sr-only" : undefined}>{item.label}</span>
@@ -90,7 +94,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   </button>
                 )}
               </li>
-            ))}
+              );
+            })}
           </ul>
         </nav>
         <div className={`shrink-0 border-t border-white/10 ${collapsed ? "p-2" : "p-4"}`}>
