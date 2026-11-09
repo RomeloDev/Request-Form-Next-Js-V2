@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AttachmentPreviewDialog from "@/components/requests/my-requests/attachment-preview-dialog";
-import DeleteRequestDialog from "@/components/requests/my-requests/delete-request-dialog";
+import CancelRequestDialog from "@/components/requests/my-requests/cancel-request-dialog";
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
@@ -23,7 +23,7 @@ type MyRequestDetailsDialogProps = {
   requestId: number;
   onClose: () => void;
   onStale: () => void;
-  onDeleted: () => void;
+  onCanceled: () => void;
 };
 
 type PendingAttachmentAction = {
@@ -150,7 +150,7 @@ export default function MyRequestDetailsDialog({
   requestId,
   onClose,
   onStale,
-  onDeleted,
+  onCanceled,
 }: MyRequestDetailsDialogProps) {
   const router = useRouter();
   const [details, setDetails] =
@@ -163,7 +163,7 @@ export default function MyRequestDetailsDialog({
     useState<PendingAttachmentAction | null>(null);
   const [preview, setPreview] =
     useState<AttachmentPreviewState | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] =
+  const [cancelDialogOpen, setCancelDialogOpen] =
     useState(false);
   const attachmentControllerRef =
     useRef<AbortController | null>(null);
@@ -380,13 +380,13 @@ export default function MyRequestDetailsDialog({
                 Print
               </a>
             )}
-            {details && (
+            {details?.status === "Pending" && (
               <button
                 type="button"
-                onClick={() => setDeleteDialogOpen(true)}
+                onClick={() => setCancelDialogOpen(true)}
                 className="min-h-11 rounded-xl border border-rose-300 bg-white px-5 py-2.5 text-base font-semibold text-rose-700 hover:bg-rose-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700"
               >
-                Delete request
+                Cancel request
               </button>
             )}
             <button
@@ -781,13 +781,12 @@ export default function MyRequestDetailsDialog({
         />
       )}
 
-      {deleteDialogOpen && details && (
-        <DeleteRequestDialog
+      {cancelDialogOpen && details?.status === "Pending" && (
+        <CancelRequestDialog
           requestId={details.id}
           requestCode={details.request_code}
-          status={details.status}
-          onClose={() => setDeleteDialogOpen(false)}
-          onDeleted={onDeleted}
+          onClose={() => setCancelDialogOpen(false)}
+          onCanceled={onCanceled}
           onStale={onStale}
         />
       )}

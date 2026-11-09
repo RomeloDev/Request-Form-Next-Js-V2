@@ -94,6 +94,12 @@ export default function MyRequestsPage() {
     refresh();
   }, [changePage, page, records.length, refresh]);
 
+  const handleCanceled = useCallback(() => {
+    setSelectedRequestId(null);
+    setSuccessMessage("Request canceled successfully.");
+    refresh();
+  }, [refresh]);
+
   const columns: TableColumn<MyRequest>[] = [
     {
       key: "request_code",
@@ -417,7 +423,7 @@ export default function MyRequestsPage() {
           requestId={selectedRequestId}
           onClose={closeDetails}
           onStale={refresh}
-          onDeleted={handleDeleted}
+          onCanceled={handleCanceled}
         />
       )}
 
