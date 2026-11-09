@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/layouts/page-header";
-import CancelRequestDialog from "@/components/requests/my-requests/cancel-request-dialog";
+import DeleteRequestDialog from "@/components/requests/my-requests/delete-request-dialog";
 import MyRequestDetailsDialog from "@/components/requests/my-requests/my-request-details-dialog";
 import FormAlert from "@/components/ui/form-alert";
 import FormField from "@/components/ui/form-field";
@@ -52,7 +52,7 @@ export default function MyRequestsPage() {
   const router = useRouter();
   const [selectedRequestId, setSelectedRequestId] =
     useState<number | null>(null);
-  const [requestToCancel, setRequestToCancel] =
+  const [requestToDelete, setRequestToDelete] =
     useState<MyRequest | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const {
@@ -81,12 +81,18 @@ export default function MyRequestsPage() {
     setSelectedRequestId(null);
   }, []);
 
-  const handleCanceled = useCallback(() => {
+  const handleDeleted = useCallback(() => {
     setSelectedRequestId(null);
-    setRequestToCancel(null);
-    setSuccessMessage("Request canceled successfully.");
+    setRequestToDelete(null);
+    setSuccessMessage("Request deleted successfully.");
+
+    if (records.length === 1 && page > 1) {
+      changePage(page - 1);
+      return;
+    }
+
     refresh();
-  }, [refresh]);
+  }, [changePage, page, records.length, refresh]);
 
   const columns: TableColumn<MyRequest>[] = [
     {
@@ -168,17 +174,15 @@ export default function MyRequestsPage() {
             />
           )}
 
-          {request.status === "Pending" && (
-            <RowAction
-              label={`Cancel request ${request.request_code}`}
-              icon="trash"
-              tone="danger"
-              onClick={() => {
-                setSuccessMessage("");
-                setRequestToCancel(request);
-              }}
-            />
-          )}
+          <RowAction
+            label={`Delete request ${request.request_code}`}
+            icon="trash"
+            tone="danger"
+            onClick={() => {
+              setSuccessMessage("");
+              setRequestToDelete(request);
+            }}
+          />
         </div>
       ),
     },
@@ -413,17 +417,18 @@ export default function MyRequestsPage() {
           requestId={selectedRequestId}
           onClose={closeDetails}
           onStale={refresh}
-          onCanceled={handleCanceled}
+          onDeleted={handleDeleted}
         />
       )}
 
-      {requestToCancel !== null && (
-        <CancelRequestDialog
-          key={requestToCancel.id}
-          requestId={requestToCancel.id}
-          requestCode={requestToCancel.request_code}
-          onClose={() => setRequestToCancel(null)}
-          onCanceled={handleCanceled}
+      {requestToDelete !== null && (
+        <DeleteRequestDialog
+          key={requestToDelete.id}
+          requestId={requestToDelete.id}
+          requestCode={requestToDelete.request_code}
+          status={requestToDelete.status}
+          onClose={() => setRequestToDelete(null)}
+          onDeleted={handleDeleted}
           onStale={refresh}
         />
       )}

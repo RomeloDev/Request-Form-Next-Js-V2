@@ -60,6 +60,8 @@ export type UpdateStockRequisitionInput = {
   notedByIds: number[];
   approvedByIds: number[];
   items: StockRequisitionItemInput[];
+  attachments: File[];
+  removedAttachmentIds: number[];
 };
 
 export type UpdateStockRequisitionResponse = CreateStockRequisitionResponse;
@@ -284,6 +286,82 @@ export async function createStockRequisition(
   return response;
 }
 
+function buildUpdateStockRequisitionFormData(
+  input: UpdateStockRequisitionInput,
+): FormData {
+  const formData = new FormData();
+
+  /*
+   * PHP reliably parses multipart files from POST requests.
+   * Laravel changes this to PATCH after parsing the body.
+   */
+  formData.append("_method", "PATCH");
+  formData.append("updated_at", input.updatedAt.trim());
+
+  const kindOfRequest = input.kindOfRequest.trim();
+
+  if (kindOfRequest) {
+    formData.append("kind_of_request", kindOfRequest);
+  }
+
+  formData.append(
+    "form_data[purpose]",
+    input.purpose.trim(),
+  );
+
+  input.notedByIds.forEach((id, index) => {
+    formData.append(
+      `noted_by_ids[${index}]`,
+      String(id),
+    );
+  });
+
+  input.approvedByIds.forEach((id, index) => {
+    formData.append(
+      `approved_by_ids[${index}]`,
+      String(id),
+    );
+  });
+
+  input.items.forEach((item, index) => {
+    formData.append(
+      `items[${index}][quantity]`,
+      item.quantity,
+    );
+
+    formData.append(
+      `items[${index}][description]`,
+      item.description.trim(),
+    );
+
+    formData.append(
+      `items[${index}][unit_cost]`,
+      item.unitCost,
+    );
+
+    formData.append(
+      `items[${index}][remarks]`,
+      item.remarks.trim(),
+    );
+  });
+
+  input.attachments.forEach((file, index) => {
+    formData.append(
+      `attachments[${index}]`,
+      file,
+    );
+  });
+
+  input.removedAttachmentIds.forEach((id, index) => {
+    formData.append(
+      `removed_attachment_ids[${index}]`,
+      String(id),
+    );
+  });
+
+  return formData;
+}
+
 export async function updateStockRequisition(
   requestId: number,
   input: UpdateStockRequisitionInput,
@@ -311,31 +389,17 @@ export async function updateStockRequisition(
 
   const csrfToken = await prepareCsrfSession();
 
+  const body = buildUpdateStockRequisitionFormData(input);
+
   const response = await apiRequest<unknown>(
     `/request-forms/${requestId}/stock-requisition`,
     {
-      method: "PATCH",
+      method: "POST",
       credentials: "include",
       headers: {
-        "Content-Type": "application/json",
         "X-XSRF-TOKEN": csrfToken,
       },
-      body: JSON.stringify({
-        updated_at: updatedAt,
-        kind_of_request:
-          input.kindOfRequest.trim() || null,
-        form_data: {
-          purpose: input.purpose.trim(),
-        },
-        noted_by_ids: input.notedByIds,
-        approved_by_ids: input.approvedByIds,
-        items: input.items.map((item) => ({
-          quantity: item.quantity,
-          description: item.description.trim(),
-          unit_cost: item.unitCost,
-          remarks: item.remarks.trim() || null,
-        })),
-      }),
+      body,
     },
   );
 

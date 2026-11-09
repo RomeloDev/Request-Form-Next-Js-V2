@@ -103,6 +103,9 @@ export default function StockRequisitionPage({
       .map((step) => personToCandidate(step.approver)) ?? [],
   );
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [removedAttachmentIds, setRemovedAttachmentIds] = useState<number[]>(
+    [],
+  );
   const [formError, setFormError] = useState("");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -155,6 +158,8 @@ export default function StockRequisitionPage({
             ...commonInput,
             updatedAt: initialRequest.updated_at ?? "",
             kindOfRequest,
+            attachments,
+            removedAttachmentIds,
           })
         : isStockRequisitionKind(kindOfRequest) &&
             isStockRequisitionPurpose(purpose)
@@ -388,44 +393,19 @@ export default function StockRequisitionPage({
           title="Supporting documents"
           description={
             editing
-              ? "Existing documents are retained unchanged during this edit."
+              ? "Keep or remove existing documents and add replacement files when needed."
               : "Attach quotations or other documents that support the request."
           }
         >
-          {editing ? (
-            <div className="space-y-3 sm:col-span-2">
-              <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
-                Attachment changes are not included in this edit. The files
-                listed below will remain attached to the request.
-              </p>
-              {initialRequest.attachments.length === 0 ? (
-                <p className="text-muted">
-                  This request has no supporting documents.
-                </p>
-              ) : (
-                <ul className="grid gap-3 sm:grid-cols-2">
-                  {initialRequest.attachments.map((attachment) => (
-                    <li
-                      key={attachment.id}
-                      className="flex items-center gap-3 rounded-xl border border-line/70 bg-slate-50 p-4"
-                    >
-                      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-blue-100 text-brand">
-                        <Icon name="file" />
-                      </span>
-                      <span className="min-w-0 font-medium wrap-anywhere text-ink">
-                        {attachment.original_name}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ) : (
-            <StockRequisitionSupportingDocument
-              files={attachments}
-              onFilesChange={setAttachments}
-            />
-          )}
+          <StockRequisitionSupportingDocument
+            files={attachments}
+            onFilesChange={setAttachments}
+            existingFiles={initialRequest?.attachments}
+            removedExistingFileIds={removedAttachmentIds}
+            onRemovedExistingFileIdsChange={
+              editing ? setRemovedAttachmentIds : undefined
+            }
+          />
         </FormSection>
 
         <div className="mt-8 border-t border-line/70 pt-6">
@@ -450,8 +430,12 @@ export default function StockRequisitionPage({
           notedBy={notedBy}
           approvedBy={approvedBy}
           attachmentCount={
-            initialRequest?.attachments.length ?? attachments.length
+            (initialRequest?.attachments.length ?? 0) -
+            removedAttachmentIds.length +
+            attachments.length
           }
+          newAttachmentCount={attachments.length}
+          removedAttachmentCount={removedAttachmentIds.length}
           mode={editing ? "edit" : "create"}
           pending={submitting}
           error={submissionError}

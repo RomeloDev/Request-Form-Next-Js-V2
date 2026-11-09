@@ -12,6 +12,8 @@ type StockRequisitionReviewDialogProps = {
   notedBy: ApproverCandidate[];
   approvedBy: ApproverCandidate[];
   attachmentCount: number;
+  newAttachmentCount?: number;
+  removedAttachmentCount?: number;
   pending: boolean;
   error: string;
   onClose: () => void;
@@ -69,6 +71,8 @@ export default function StockRequisitionReviewDialog({
   notedBy,
   approvedBy,
   attachmentCount,
+  newAttachmentCount = 0,
+  removedAttachmentCount = 0,
   pending,
   error,
   onClose,
@@ -125,9 +129,25 @@ export default function StockRequisitionReviewDialog({
         <ReviewValue label="Purpose" value={purpose} />
         <ReviewValue label="Requested items" value={String(itemCount)} />
         <ReviewValue
-          label="Supporting documents"
+          label={
+            mode === "edit"
+              ? "Documents after update"
+              : "Supporting documents"
+          }
           value={String(attachmentCount)}
         />
+        {mode === "edit" && (
+          <>
+            <ReviewValue
+              label="New documents"
+              value={String(newAttachmentCount)}
+            />
+            <ReviewValue
+              label="Documents to remove"
+              value={String(removedAttachmentCount)}
+            />
+          </>
+        )}
       </dl>
 
       <ReviewPeople title="Noted By" candidates={notedBy} />

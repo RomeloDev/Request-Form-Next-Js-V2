@@ -128,6 +128,15 @@ type CancelMyRequestResponse = {
   data: CancelMyRequestResult;
 };
 
+export type DeleteMyRequestResult = {
+  id: number;
+};
+
+type DeleteMyRequestResponse = {
+  message: string;
+  data: DeleteMyRequestResult;
+};
+
 const requestStatuses: readonly MyRequestStatus[] = [
   "Pending",
   "Ongoing",
@@ -398,6 +407,49 @@ function isCancelMyRequestResponse(
     value.data.status === "Canceled" &&
     typeof value.data.cancellation_reason === "string"
   );
+}
+
+function isDeleteMyRequestResponse(
+  value: unknown,
+): value is DeleteMyRequestResponse {
+  return (
+    isRecord(value) &&
+    typeof value.message === "string" &&
+    isRecord(value.data) &&
+    Number.isInteger(value.data.id)
+  );
+}
+
+export async function deleteMyRequest(
+  requestId: number,
+): Promise<DeleteMyRequestResult> {
+  if (!Number.isInteger(requestId) || requestId < 1) {
+    throw new ApiError(
+      400,
+      "A valid request ID is required.",
+    );
+  }
+
+  const csrfToken = await prepareCsrfSession();
+  const response = await apiRequest<unknown>(
+    `/request-forms/${requestId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        "X-XSRF-TOKEN": csrfToken,
+      },
+    },
+  );
+
+  if (!isDeleteMyRequestResponse(response)) {
+    throw new ApiError(
+      502,
+      "The service returned an unexpected deletion response.",
+    );
+  }
+
+  return response.data;
 }
 
 export async function cancelMyRequest(
