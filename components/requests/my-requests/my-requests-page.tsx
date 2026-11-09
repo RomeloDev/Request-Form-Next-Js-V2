@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
 import PageHeader from "@/components/layouts/page-header";
 import CancelRequestDialog from "@/components/requests/my-requests/cancel-request-dialog";
 import MyRequestDetailsDialog from "@/components/requests/my-requests/my-request-details-dialog";
@@ -15,6 +16,7 @@ import RefreshButton from "@/components/ui/refresh-button";
 import RowAction from "@/components/ui/row-action";
 import TablePagination from "@/components/ui/table-pagination";
 import {
+  isEditCandidate,
   type MyRequest,
   type MyRequestStatus,
 } from "@/lib/requests/my-requests";
@@ -47,6 +49,7 @@ function formatDate(value: string | null): string {
 }
 
 export default function MyRequestsPage() {
+  const router = useRouter();
   const [selectedRequestId, setSelectedRequestId] =
     useState<number | null>(null);
   const [requestToCancel, setRequestToCancel] =
@@ -153,6 +156,17 @@ export default function MyRequestsPage() {
               setSelectedRequestId(request.id);
             }}
           />
+
+          {isEditCandidate(request) && (
+            <RowAction
+              label={`Edit request ${request.request_code}`}
+              icon="pencil"
+              tone="neutral"
+              onClick={() => {
+                router.push(`/request/${request.id}/edit`);
+              }}
+            />
+          )}
 
           {request.status === "Pending" && (
             <RowAction

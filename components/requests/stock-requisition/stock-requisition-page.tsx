@@ -19,14 +19,18 @@ import SubmitButton from "@/components/ui/submit-button";
 import { ApiError } from "@/lib/api";
 import {
   createStockRequisition,
+  updateStockRequisition,
   type ApproverCandidate,
 } from "@/lib/requests/stock-requisitions";
+import type {
+  MyRequestDetails,
+  MyRequestPerson,
+} from "@/lib/requests/my-requests";
 import {
   isStockRequisitionKind,
+  isStockRequisitionPurpose,
   STOCK_REQUISITION_KIND_OPTIONS,
   STOCK_REQUISITION_PURPOSE_OPTIONS,
-  type StockRequisitionKind,
-  type StockRequisitionPurpose,
 } from "@/lib/requests/stock-requisition-options";
 
 function firstValidationMessage(error: ApiError): string | undefined {
@@ -35,25 +39,75 @@ function firstValidationMessage(error: ApiError): string | undefined {
     .find((message) => message.trim() !== "");
 }
 
-export default function StockRequisitionPage() {
+type StockRequisitionPageProps = {
+  initialRequest?: MyRequestDetails;
+};
+
+function personToCandidate(person: MyRequestPerson): ApproverCandidate {
+  return {
+    id: person.id,
+    firstname: person.firstname,
+    lastname: person.lastname,
+    position: person.position,
+    branch_code: null,
+    branch: null,
+  };
+}
+
+function initialPurpose(request?: MyRequestDetails): string {
+  const purpose = request?.form_data?.purpose;
+
+  return typeof purpose === "string" ? purpose : "";
+}
+
+function initialItems(
+  request?: MyRequestDetails,
+): DraftRequestItem[] {
+  if (!request || request.items.length === 0) {
+    return [createDraftRequestItem(1)];
+  }
+
+  return request.items.map((item, index) => ({
+    clientId: index + 1,
+    quantity: String(item.quantity),
+    description: item.description,
+    unitCost: item.unit_cost,
+    remarks: item.remarks ?? "",
+  }));
+}
+
+export default function StockRequisitionPage({
+  initialRequest,
+}: StockRequisitionPageProps) {
   const router = useRouter();
   const submissionInFlight = useRef(false);
+  const editing = initialRequest !== undefined;
 
-  const [kindOfRequest, setKindOfRequest] =
-    useState<StockRequisitionKind | "">("");
-  const [purpose, setPurpose] =
-    useState<StockRequisitionPurpose | "">("");
-  const [items, setItems] = useState<DraftRequestItem[]>([
-    createDraftRequestItem(1),
-  ]);
-  const [notedBy, setNotedBy] = useState<ApproverCandidate[]>([]);
-  const [approvedBy, setApprovedBy] = useState<ApproverCandidate[]>([]);
+  const [kindOfRequest, setKindOfRequest] = useState(
+    initialRequest?.kind_of_request ?? "",
+  );
+  const [purpose, setPurpose] = useState(
+    initialPurpose(initialRequest),
+  );
+  const [items, setItems] = useState<DraftRequestItem[]>(() =>
+    initialItems(initialRequest),
+  );
+  const [notedBy, setNotedBy] = useState<ApproverCandidate[]>(() =>
+    initialRequest?.approval_steps
+      .filter((step) => step.step_type === "noted_by")
+      .map((step) => personToCandidate(step.approver)) ?? [],
+  );
+  const [approvedBy, setApprovedBy] = useState<ApproverCandidate[]>(() =>
+    initialRequest?.approval_steps
+      .filter((step) => step.step_type === "approved_by")
+      .map((step) => personToCandidate(step.approver)) ?? [],
+  );
   const [attachments, setAttachments] = useState<File[]>([]);
   const [formError, setFormError] = useState("");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState("");
-  const [createdRequestCode, setCreatedRequestCode] = useState("");
+  const [savedRequestCode, setSavedRequestCode] = useState("");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -84,23 +138,43 @@ export default function StockRequisitionPage() {
     setSubmissionError("");
 
     try {
-      const response = await createStockRequisition({
-        kindOfRequest,
+      const commonInput = {
         purpose,
         notedByIds: notedBy.map((candidate) => candidate.id),
         approvedByIds: approvedBy.map((candidate) => candidate.id),
         items: items.map((item) => ({
           quantity: item.quantity,
-          unit: item.unit,
           description: item.description,
           unitCost: item.unitCost,
           remarks: item.remarks,
         })),
-        attachments,
-      });
+      };
+
+      const response = initialRequest
+        ? await updateStockRequisition(initialRequest.id, {
+            ...commonInput,
+            updatedAt: initialRequest.updated_at ?? "",
+            kindOfRequest,
+          })
+        : isStockRequisitionKind(kindOfRequest) &&
+            isStockRequisitionPurpose(purpose)
+          ? await createStockRequisition({
+              ...commonInput,
+              kindOfRequest,
+              purpose,
+              attachments,
+            })
+          : null;
+
+      if (!response) {
+        setSubmissionError(
+          "Choose a valid request category and purpose.",
+        );
+        return;
+      }
 
       setReviewOpen(false);
-      setCreatedRequestCode(response.data.request_code);
+      setSavedRequestCode(response.data.request_code);
     } catch (error: unknown) {
       if (
         error instanceof ApiError &&
@@ -119,7 +193,25 @@ export default function StockRequisitionPage() {
       }
 
       if (error instanceof ApiError && error.status === 403) {
-        setSubmissionError("You are not allowed to create this request.");
+        setSubmissionError(
+          editing
+            ? "You are not allowed to edit this request."
+            : "You are not allowed to create this request.",
+        );
+        return;
+      }
+
+      if (error instanceof ApiError && error.status === 404) {
+        setSubmissionError(
+          "This request is no longer available. Return to My Requests and refresh the list.",
+        );
+        return;
+      }
+
+      if (error instanceof ApiError && error.status === 409) {
+        setSubmissionError(
+          "This request changed or is no longer editable. Return to My Requests, refresh, and review its latest status.",
+        );
         return;
       }
 
@@ -132,13 +224,13 @@ export default function StockRequisitionPage() {
 
       if (error instanceof ApiError) {
         setSubmissionError(
-          "The server could not complete the request. Wait a moment and verify the request status before trying again.",
+          `The server could not ${editing ? "update" : "create"} the request. Wait a moment and verify the request status before trying again.`,
         );
         return;
       }
 
       setSubmissionError(
-        "We couldn’t confirm whether the request was created. Do not submit it again immediately. Refresh and verify the request status first.",
+        `We couldn’t confirm whether the request was ${editing ? "updated" : "created"}. Do not submit it again immediately. Refresh and verify the request status first.`,
       );
     } finally {
       submissionInFlight.current = false;
@@ -146,13 +238,13 @@ export default function StockRequisitionPage() {
     }
   }
 
-  if (createdRequestCode) {
+  if (savedRequestCode) {
     return (
       <div className="space-y-8">
         <PageHeader
           eyebrow="REQUESTS"
-          title="Stock Requisition created"
-          description="The system accepted and saved your request."
+          title={`Stock Requisition ${editing ? "updated" : "created"}`}
+          description={`The system accepted and ${editing ? "updated" : "saved"} your request.`}
         />
 
         <section
@@ -165,13 +257,13 @@ export default function StockRequisitionPage() {
             </span>
             <div>
               <h2 className="text-xl font-semibold text-ink">
-                Request submitted successfully
+                Request {editing ? "updated" : "submitted"} successfully
               </h2>
               <p className="mt-2 text-muted">
                 Your request code is
                 {" "}
                 <strong className="font-semibold text-ink">
-                  {createdRequestCode}
+                  {savedRequestCode}
                 </strong>
                 .
               </p>
@@ -190,8 +282,12 @@ export default function StockRequisitionPage() {
     <div className="space-y-8">
       <PageHeader
         eyebrow="REQUESTS"
-        title="Create Stock Requisition"
-        description="Provide the request details, requested items, supporting documents, and required approvers."
+        title={`${editing ? "Edit" : "Create"} Stock Requisition`}
+        description={
+          editing
+            ? "Update the request details, items, and approval routing. Existing supporting documents will be retained."
+            : "Provide the request details, requested items, supporting documents, and required approvers."
+        }
       />
 
       <form
@@ -209,19 +305,22 @@ export default function StockRequisitionPage() {
               name="kindOfRequest"
               label="Kind of request"
               value={kindOfRequest}
-              onChange={(event) => {
-                const selectedValue = event.target.value;
-
-                if (isStockRequisitionKind(selectedValue)) {
-                  setKindOfRequest(selectedValue);
-                }
-              }}
+              onChange={(event) =>
+                setKindOfRequest(event.target.value)
+              }
               required
               hint="Choose the category that best matches the items being requested."
             >
               <option value="" disabled>
                 Select a kind of request
               </option>
+
+              {kindOfRequest &&
+                !isStockRequisitionKind(kindOfRequest) && (
+                  <option value={kindOfRequest}>
+                    {kindOfRequest}
+                  </option>
+                )}
 
               {STOCK_REQUISITION_KIND_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -232,10 +331,22 @@ export default function StockRequisitionPage() {
           </div>
 
           <div className="sm:col-span-2">
-            <FormRadioGroup<StockRequisitionPurpose>
+            <FormRadioGroup<string>
               name="purpose"
               label="Purpose"
-              options={STOCK_REQUISITION_PURPOSE_OPTIONS}
+              options={
+                purpose && !isStockRequisitionPurpose(purpose)
+                  ? [
+                      {
+                        value: purpose,
+                        label: purpose,
+                        description:
+                          "Purpose saved on the existing request.",
+                      },
+                      ...STOCK_REQUISITION_PURPOSE_OPTIONS,
+                    ]
+                  : STOCK_REQUISITION_PURPOSE_OPTIONS
+              }
               value={purpose}
               onValueChange={setPurpose}
               required
@@ -275,12 +386,46 @@ export default function StockRequisitionPage() {
         <FormSection
           number="4"
           title="Supporting documents"
-          description="Attach quotations or other documents that support the request."
+          description={
+            editing
+              ? "Existing documents are retained unchanged during this edit."
+              : "Attach quotations or other documents that support the request."
+          }
         >
-          <StockRequisitionSupportingDocument
-            files={attachments}
-            onFilesChange={setAttachments}
-          />
+          {editing ? (
+            <div className="space-y-3 sm:col-span-2">
+              <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
+                Attachment changes are not included in this edit. The files
+                listed below will remain attached to the request.
+              </p>
+              {initialRequest.attachments.length === 0 ? (
+                <p className="text-muted">
+                  This request has no supporting documents.
+                </p>
+              ) : (
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {initialRequest.attachments.map((attachment) => (
+                    <li
+                      key={attachment.id}
+                      className="flex items-center gap-3 rounded-xl border border-line/70 bg-slate-50 p-4"
+                    >
+                      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-blue-100 text-brand">
+                        <Icon name="file" />
+                      </span>
+                      <span className="min-w-0 font-medium wrap-anywhere text-ink">
+                        {attachment.original_name}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <StockRequisitionSupportingDocument
+              files={attachments}
+              onFilesChange={setAttachments}
+            />
+          )}
         </FormSection>
 
         <div className="mt-8 border-t border-line/70 pt-6">
@@ -292,7 +437,7 @@ export default function StockRequisitionPage() {
           )}
 
           <SubmitButton>
-            Review request
+            Review {editing ? "changes" : "request"}
           </SubmitButton>
         </div>
       </form>
@@ -304,7 +449,10 @@ export default function StockRequisitionPage() {
           itemCount={items.length}
           notedBy={notedBy}
           approvedBy={approvedBy}
-          attachmentCount={attachments.length}
+          attachmentCount={
+            initialRequest?.attachments.length ?? attachments.length
+          }
+          mode={editing ? "edit" : "create"}
           pending={submitting}
           error={submissionError}
           onConfirm={confirmSubmission}

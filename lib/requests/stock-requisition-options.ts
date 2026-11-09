@@ -55,3 +55,11 @@ export function isStockRequisitionKind(
   return (STOCK_REQUISITION_KIND_OPTIONS as readonly string[])
     .includes(value);
 }
+
+export function isStockRequisitionPurpose(
+  value: string,
+): value is StockRequisitionPurpose {
+  return STOCK_REQUISITION_PURPOSE_OPTIONS.some(
+    (option) => option.value === value,
+  );
+}

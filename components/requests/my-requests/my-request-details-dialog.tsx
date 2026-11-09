@@ -8,6 +8,7 @@ import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
 import {
+  canEditRequestDetails,
   getRequestAttachmentAction,
   getRequestAttachmentFile,
   getMyRequest,
@@ -357,6 +358,18 @@ export default function MyRequestDetailsDialog({
         maxWidth="4xl"
         footer={
           <>
+            {details && canEditRequestDetails(details) && (
+              <button
+                type="button"
+                onClick={() => {
+                  router.push(`/request/${details.id}/edit`);
+                  handleClose();
+                }}
+                className="min-h-11 rounded-xl border border-brand bg-white px-5 py-2.5 text-base font-semibold text-brand hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                Edit request
+              </button>
+            )}
             {details && details.status !== "Canceled" && (
               <a
                 href={`/request/${details.id}/print`}

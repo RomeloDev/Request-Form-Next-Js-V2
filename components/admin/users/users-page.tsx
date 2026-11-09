@@ -51,7 +51,7 @@ export default function UsersPage() {
       <RowAction
         label={`Edit ${userFullName(user)}`}
         icon="pencil"
-        tone="blue"
+        tone="neutral"
         onClick={() => setEditingUser(user)}
       />
       <RowAction label={`Delete ${userFullName(user)}`} icon="trash" tone="danger" onClick={() => { setActionNotice(""); setPendingAction({ kind: "delete", user }); }} />

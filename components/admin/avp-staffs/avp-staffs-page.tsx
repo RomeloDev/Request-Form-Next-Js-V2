@@ -107,7 +107,12 @@ export default function AvpStaffsPage() {
     { key: "staff", label: "AVP Staff", render: (assignment) => <div className="min-w-44"><p className="font-medium wrap-anywhere">{avpStaffPersonName(assignment.staff)}</p><p className="mt-1 text-sm text-muted wrap-anywhere">{assignment.staff.position}</p></div> },
     { key: "branches", label: "Assigned Branches", render: (assignment) => <div className="flex min-w-52 flex-wrap gap-2">{assignment.branches.map((branch) => <span key={branch.id} title={`${branch.branch_code} — ${branch.branch_name}`} className="rounded-full bg-blue-50 px-2.5 py-1 text-sm font-medium text-blue-800">{branch.branch_code}</span>)}</div> },
     { key: "created_at", label: "Created", sortable: true, render: (assignment) => <span className="whitespace-nowrap">{formatDate(assignment.created_at)}</span> },
-    { key: "actions", label: "Actions", render: (assignment) => <div className="flex gap-2"><RowAction label={`View assignment ${assignment.id} details`} icon="eye" tone="blue" onClick={() => setDetailsTarget(assignment)} /><RowAction label={`Edit branches for assignment ${assignment.id}`} icon="pencil" tone="blue" onClick={() => { setNotice(""); setEditTarget(assignment); }} /><RowAction label={`Delete assignment ${assignment.id}`} icon="trash" tone="danger" onClick={() => { setNotice(""); setDeleteTarget(assignment); }} /></div> },
+    { key: "actions", label: "Actions", render: (assignment) => 
+    <div className="flex gap-2">
+      <RowAction label={`View assignment ${assignment.id} details`} icon="eye" tone="blue" onClick={() => setDetailsTarget(assignment)} />
+      <RowAction label={`Edit branches for assignment ${assignment.id}`} icon="pencil" tone="neutral" onClick={() => { setNotice(""); setEditTarget(assignment); }} />
+      <RowAction label={`Delete assignment ${assignment.id}`} icon="trash" tone="danger" onClick={() => { setNotice(""); setDeleteTarget(assignment); }} />
+    </div> },
   ];
 
   if (!canView) {

@@ -202,7 +202,7 @@ export default function BranchesPage() {
           <RowAction
             label={`Edit ${branch.branch_code}`}
             icon="pencil"
-            tone="blue"
+            tone="neutral"
             onClick={() => {
               setNotice("");
               setForm({

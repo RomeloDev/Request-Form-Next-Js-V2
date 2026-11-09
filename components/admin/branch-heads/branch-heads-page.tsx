@@ -113,7 +113,12 @@ export default function BranchHeadsPage() {
     { key: "home_branch", label: "Home branch / company", render: (assignment) => <span className="block min-w-44 wrap-anywhere">{assignment.user.branch ?? assignment.user.branch_code ?? "Not assigned"}</span> },
     { key: "branches", label: "Assigned branches", render: (assignment) => <div className="flex min-w-56 flex-wrap gap-2">{assignment.branches.map((branch) => <span key={branch.id} title={`${branch.branch_code} — ${branch.branch_name}`} className="rounded-full bg-blue-50 px-2.5 py-1 text-sm font-medium text-blue-800">{branch.branch_code}</span>)}</div> },
     { key: "created_at", label: "Created", sortable: true, render: (assignment) => <span className="whitespace-nowrap">{formatDate(assignment.created_at)}</span> },
-    { key: "actions", label: "Actions", render: (assignment) => <div className="flex gap-2"><RowAction label={`View assignment ${assignment.id} details`} icon="eye" tone="blue" onClick={() => setDetailsTargetId(assignment.id)} /><RowAction label={`Edit branches for ${branchHeadName(assignment.user)}`} icon="pencil" tone="blue" onClick={() => { setNotice(""); setEditTarget(assignment); }} /><RowAction label={`Delete assignment for ${branchHeadName(assignment.user)}`} icon="trash" tone="danger" onClick={() => { setNotice(""); setDeleteTarget(assignment); }} /></div> },
+    { key: "actions", label: "Actions", render: (assignment) => 
+    <div className="flex gap-2">
+      <RowAction label={`View assignment ${assignment.id} details`} icon="eye" tone="blue" onClick={() => setDetailsTargetId(assignment.id)} />
+      <RowAction label={`Edit branches for ${branchHeadName(assignment.user)}`} icon="pencil" tone="neutral" onClick={() => { setNotice(""); setEditTarget(assignment); }} />
+      <RowAction label={`Delete assignment for ${branchHeadName(assignment.user)}`} icon="trash" tone="danger" onClick={() => { setNotice(""); setDeleteTarget(assignment); }} />
+    </div> },
   ];
 
   if (!canView) {

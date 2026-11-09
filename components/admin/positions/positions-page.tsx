@@ -184,7 +184,7 @@ export default function PositionsPage() {
                 <RowAction
                     label={`Edit ${position.label}`}
                     icon="pencil"
-                    tone="blue"
+                    tone="neutral"
                     onClick={() => {
                         setNotice("");
                         setForm({ mode: "edit", position });

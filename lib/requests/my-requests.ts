@@ -150,6 +150,32 @@ const approvalStepStatuses: readonly MyRequestApprovalStep["status"][] = [
   "Canceled",
 ];
 
+export function isEditCandidate(
+  request: Pick<MyRequest, "form_type" | "status">,
+): boolean {
+  return (
+    request.form_type === "Stock Requisition Slip" &&
+    (request.status === "Pending" ||
+      request.status === "Disapproved")
+  );
+}
+
+export function canEditRequestDetails(
+  request: MyRequestDetails,
+): boolean {
+  if (!isEditCandidate(request) || !request.updated_at) {
+    return false;
+  }
+
+  if (request.status === "Disapproved") {
+    return true;
+  }
+
+  return request.approval_steps.every(
+    (step) => step.status === "Pending" && step.acted_at === null,
+  );
+}
+
 const previewableAttachmentTypes = new Set([
   "application/pdf",
   "image/jpeg",
@@ -346,6 +372,19 @@ function isMyRequestDetailsResponse(
   );
 }
 
+export function parseMyRequestDetailsResponse(
+  value: unknown,
+): MyRequestDetails {
+  if (!isMyRequestDetailsResponse(value)) {
+    throw new ApiError(
+      502,
+      "The service returned unexpected request details.",
+    );
+  }
+
+  return value.data;
+}
+
 function isCancelMyRequestResponse(
   value: unknown,
 ): value is CancelMyRequestResponse {
@@ -435,14 +474,7 @@ export async function getMyRequest(
     },
   );
 
-  if (!isMyRequestDetailsResponse(response)) {
-    throw new ApiError(
-      502,
-      "The service returned unexpected request details.",
-    );
-  }
-
-  return response.data;
+  return parseMyRequestDetailsResponse(response);
 }
 
 function myRequestQuery(filters: MyRequestFilters): string {

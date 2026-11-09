@@ -53,6 +53,17 @@ export type CreateStockRequisitionInput = {
   attachments: File[];
 };
 
+export type UpdateStockRequisitionInput = {
+  updatedAt: string;
+  kindOfRequest: string;
+  purpose: string;
+  notedByIds: number[];
+  approvedByIds: number[];
+  items: StockRequisitionItemInput[];
+};
+
+export type UpdateStockRequisitionResponse = CreateStockRequisitionResponse;
+
 export type CreatedApprovalStep = {
   id: number;
   level: number;
@@ -223,7 +234,7 @@ function buildStockRequisitionFormData(
   return formData;
 }
 
-function isCreateStockRequisitionResponse(
+function isStockRequisitionMutationResponse(
   value: unknown,
 ): value is CreateStockRequisitionResponse {
   if (!value || typeof value !== "object") {
@@ -263,10 +274,75 @@ export async function createStockRequisition(
     },
   );
 
-  if (!isCreateStockRequisitionResponse(response)) {
+  if (!isStockRequisitionMutationResponse(response)) {
     throw new ApiError(
       502,
       "The service returned an unexpected request response.",
+    );
+  }
+
+  return response;
+}
+
+export async function updateStockRequisition(
+  requestId: number,
+  input: UpdateStockRequisitionInput,
+): Promise<UpdateStockRequisitionResponse> {
+  if (!Number.isInteger(requestId) || requestId < 1) {
+    throw new ApiError(
+      400,
+      "A valid request ID is required.",
+    );
+  }
+
+  const updatedAt = input.updatedAt.trim();
+
+  if (!updatedAt) {
+    throw new ApiError(
+      422,
+      "The request version is missing. Refresh the request and try again.",
+      {
+        updated_at: [
+          "The request version is missing. Refresh the request and try again.",
+        ],
+      },
+    );
+  }
+
+  const csrfToken = await prepareCsrfSession();
+
+  const response = await apiRequest<unknown>(
+    `/request-forms/${requestId}/stock-requisition`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-XSRF-TOKEN": csrfToken,
+      },
+      body: JSON.stringify({
+        updated_at: updatedAt,
+        kind_of_request:
+          input.kindOfRequest.trim() || null,
+        form_data: {
+          purpose: input.purpose.trim(),
+        },
+        noted_by_ids: input.notedByIds,
+        approved_by_ids: input.approvedByIds,
+        items: input.items.map((item) => ({
+          quantity: item.quantity,
+          description: item.description.trim(),
+          unit_cost: item.unitCost,
+          remarks: item.remarks.trim() || null,
+        })),
+      }),
+    },
+  );
+
+  if (!isStockRequisitionMutationResponse(response)) {
+    throw new ApiError(
+      502,
+      "The service returned an unexpected update response.",
     );
   }
 
