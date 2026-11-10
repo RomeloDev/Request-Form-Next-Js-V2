@@ -16,6 +16,7 @@ type RequestDecisionDialogProps = {
   requestId: number;
   requestCode: string;
   action: RequestDecisionAction;
+  allowApprovedAttachments: boolean;
   onClose: () => void;
   onDecided: (action: RequestDecisionAction) => void;
   onStale: () => void;
@@ -27,6 +28,7 @@ export default function RequestDecisionDialog({
   requestId,
   requestCode,
   action,
+  allowApprovedAttachments,
   onClose,
   onDecided,
   onStale,
@@ -36,11 +38,47 @@ export default function RequestDecisionDialog({
   const alertRef = useRef<HTMLDivElement>(null);
   const [comment, setComment] = useState("");
   const [commentError, setCommentError] = useState("");
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [attachmentError, setAttachmentError] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const isDisapproval = action === "disapprove";
   const actionLabel = isDisapproval ? "Disapprove" : "Approve";
+  const canUploadApprovedAttachments =
+    allowApprovedAttachments && !isDisapproval;
+
+  function handleFiles(files: FileList | null): void {
+    if (!files) return;
+
+    const nextFiles = [...attachments, ...Array.from(files)];
+    const allowedTypes = new Set([
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/gif",
+      "image/x-icon",
+      "image/vnd.microsoft.icon",
+    ]);
+
+    if (nextFiles.length > 10) {
+      setAttachmentError("Select no more than 10 approved attachments.");
+      return;
+    }
+
+    if (nextFiles.some((file) => !allowedTypes.has(file.type))) {
+      setAttachmentError("Use PNG, JPG, WEBP, GIF, or ICO image files.");
+      return;
+    }
+
+    if (nextFiles.some((file) => file.size > 5 * 1024 * 1024)) {
+      setAttachmentError("Each approved attachment must be 5 MB or smaller.");
+      return;
+    }
+
+    setAttachments(nextFiles);
+    setAttachmentError("");
+  }
 
   async function handleSubmit(): Promise<void> {
     if (inFlight.current || blocked) return;
@@ -71,6 +109,7 @@ export default function RequestDecisionDialog({
         requestId,
         action,
         normalizedComment,
+        attachments,
       );
       onDecided(action);
     } catch (error: unknown) {
@@ -84,10 +123,17 @@ export default function RequestDecisionDialog({
       }
 
       if (error instanceof ApiError && error.status === 422) {
-        setCommentError(
-          error.errors.comment?.[0] ??
-            "Check the decision comment and try again.",
-        );
+        const attachmentValidationMessage = Object.entries(error.errors)
+          .find(([field]) => field === "attachments" || field.startsWith("attachments."))?.[1]?.[0];
+
+        if (attachmentValidationMessage) {
+          setAttachmentError(attachmentValidationMessage);
+        } else {
+          setCommentError(
+            error.errors.comment?.[0] ??
+              "Check the decision comment and try again.",
+          );
+        }
       } else if (
         error instanceof ApiError &&
         error.status === 403
@@ -210,6 +256,55 @@ export default function RequestDecisionDialog({
           }
         />
       </div>
+
+      {canUploadApprovedAttachments && (
+        <div className="mt-6 rounded-2xl border border-line/60 bg-slate-50 p-5">
+          <label
+            htmlFor="approved-attachments"
+            className="text-base font-semibold text-ink"
+          >
+            Approved attachments <span className="font-normal text-muted">(optional)</span>
+          </label>
+          <p className="mt-1 text-sm leading-6 text-muted">
+            Upload the signed or approved image supplied for this delegated approval. Up to 10 images, 5 MB each.
+          </p>
+          <input
+            id="approved-attachments"
+            type="file"
+            multiple
+            accept=".png,.jpg,.jpeg,.webp,.gif,.ico,image/png,image/jpeg,image/webp,image/gif,image/x-icon,image/vnd.microsoft.icon"
+            disabled={submitting || blocked}
+            onChange={(event) => {
+              handleFiles(event.target.files);
+              event.currentTarget.value = "";
+            }}
+            className="mt-4 block w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:font-semibold file:text-brand hover:file:bg-blue-100 disabled:opacity-60"
+            aria-describedby={attachmentError ? "approved-attachments-error" : undefined}
+          />
+          {attachmentError && (
+            <p id="approved-attachments-error" className="mt-2 text-sm font-medium text-rose-700">
+              {attachmentError}
+            </p>
+          )}
+          {attachments.length > 0 && (
+            <ul className="mt-4 space-y-2">
+              {attachments.map((file, index) => (
+                <li key={`${file.name}-${file.lastModified}-${index}`} className="flex items-center justify-between gap-3 rounded-xl border border-line/60 bg-white px-3 py-2">
+                  <span className="min-w-0 truncate text-sm">{file.name}</span>
+                  <button
+                    type="button"
+                    disabled={submitting}
+                    onClick={() => setAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                    className="shrink-0 rounded-lg px-2 py-1 text-sm font-semibold text-rose-700 hover:bg-rose-50"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {submitting && (
         <p role="status" className="mt-4 text-sm text-muted">

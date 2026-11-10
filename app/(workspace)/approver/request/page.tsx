@@ -5,7 +5,7 @@ import { ApiError } from "@/lib/api";
 import { APP_ROLES } from "@/lib/roles";
 import { getAssignedRequestsServer } from "@/lib/requests/assigned-request-server";
 import type { AssignedRequestPage } from "@/lib/requests/assigned-requests";
-import type { MyRequestStatus } from "@/lib/requests/my-requests";
+import type { AssignedRequestStep } from "@/lib/requests/assigned-requests";
 import { requireRole } from "@/lib/server-auth";
 
 export const instant = false;
@@ -17,32 +17,34 @@ export const metadata: Metadata = {
 const allowedStatuses = new Set<string>([
   "ALL",
   "Pending",
-  "Ongoing",
-  "Completed",
+  "Approved",
   "Disapproved",
+  "Skipped",
 ]);
 
 export default async function ProcessRequestsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string | string[] }>;
+  searchParams: Promise<{
+    assignment_status?: string | string[];
+  }>;
 }) {
   await requireRole(APP_ROLES.APPROVER);
 
   const parameters = await searchParams;
-  const suppliedStatus = Array.isArray(parameters.status)
-    ? parameters.status[0]
-    : parameters.status;
-  const initialStatus =
+  const suppliedStatus = Array.isArray(parameters.assignment_status)
+    ? parameters.assignment_status[0]
+    : parameters.assignment_status;
+  const initialAssignmentStatus =
     suppliedStatus && allowedStatuses.has(suppliedStatus)
-      ? (suppliedStatus as "ALL" | MyRequestStatus)
+      ? (suppliedStatus as "ALL" | AssignedRequestStep["status"])
       : "Pending";
 
   let initialPage: AssignedRequestPage | null = null;
 
   try {
     initialPage = await getAssignedRequestsServer({
-      status: initialStatus,
+      assignmentStatus: initialAssignmentStatus,
       page: 1,
       perPage: 10,
     });
@@ -58,7 +60,7 @@ export default async function ProcessRequestsPage({
 
   return (
     <AssignedRequestsPage
-      initialStatus={initialStatus}
+      initialAssignmentStatus={initialAssignmentStatus}
       initialPage={initialPage}
     />
   );

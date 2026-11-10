@@ -32,7 +32,7 @@ export function navigationFor(user: AuthenticatedUser): NavigationItem[] {
   const shared = item("Shared Requests", "/shared-requests");
   const process = item(
     "Process Request",
-    "/approver/request?status=Pending",
+    "/approver/request?assignment_status=Pending",
     true,
   );
 

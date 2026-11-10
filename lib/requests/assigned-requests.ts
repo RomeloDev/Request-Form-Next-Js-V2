@@ -45,6 +45,7 @@ export type AssignedRequestPage = {
 export type AssignedRequestFilters = {
   search?: string;
   status?: "ALL" | MyRequestStatus;
+  assignmentStatus?: "ALL" | AssignedRequestStep["status"];
   page?: number;
   perPage?: 10 | 20 | 50;
 };
@@ -63,6 +64,10 @@ function assignedRequestQuery(
 
   if (filters.status) {
     query.set("status", filters.status);
+  }
+
+  if (filters.assignmentStatus) {
+    query.set("assignment_status", filters.assignmentStatus);
   }
 
   if (filters.page) {
@@ -246,6 +251,7 @@ export async function decideAssignedRequest(
   requestId: number,
   action: RequestDecisionAction,
   comment: string,
+  attachments: File[] = [],
 ): Promise<MyRequestDetails> {
   validateRequestId(requestId);
 
@@ -279,20 +285,51 @@ export async function decideAssignedRequest(
     );
   }
 
+  if (attachments.length > 10) {
+    throw new ApiError(422, "Select no more than 10 approved attachments.", {
+      attachments: ["Select no more than 10 approved attachments."],
+    });
+  }
+
+  const allowedTypes = new Set([
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/gif",
+    "image/x-icon",
+    "image/vnd.microsoft.icon",
+  ]);
+
+  if (attachments.some((file) => !allowedTypes.has(file.type))) {
+    throw new ApiError(422, "Approved attachments must be image files.", {
+      attachments: ["Use PNG, JPG, WEBP, GIF, or ICO image files."],
+    });
+  }
+
+  if (attachments.some((file) => file.size > 5 * 1024 * 1024)) {
+    throw new ApiError(422, "Each approved attachment must be 5 MB or smaller.", {
+      attachments: ["Each approved attachment must be 5 MB or smaller."],
+    });
+  }
+
   const csrfToken = await prepareCsrfSession();
+  const body = new FormData();
+  body.append("_method", "PATCH");
+  body.append("action", action);
+  if (normalizedComment) body.append("comment", normalizedComment);
+  attachments.forEach((file, index) => {
+    body.append(`attachments[${index}]`, file);
+  });
+
   const response = await apiRequest<unknown>(
     `/approver/request-forms/${requestId}/decision`,
     {
-      method: "PATCH",
+      method: "POST",
       credentials: "include",
       headers: {
-        "Content-Type": "application/json",
         "X-XSRF-TOKEN": csrfToken,
       },
-      body: JSON.stringify({
-        action,
-        comment: normalizedComment || null,
-      }),
+      body,
     },
   );
 

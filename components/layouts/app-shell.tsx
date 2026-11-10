@@ -12,8 +12,15 @@ import Icon from "@/components/ui/icon";
 import AccountMenu from "@/components/layouts/account-menu";
 import { APP_ROLES } from "@/lib/roles";
 import LogoutConfirmationDialog from "@/components/auth/logout-confirmation-dialog";
+import { getAssignedRequests } from "@/lib/requests/assigned-requests";
 
-export default function AppShell({ children }: { children: ReactNode }) {
+export default function AppShell({
+  children,
+  initialPendingApprovalCount,
+}: {
+  children: ReactNode;
+  initialPendingApprovalCount: number;
+}) {
   const { user, logout } = useSession();
   const pathname = usePathname();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -22,6 +29,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [logoutError, setLogoutError] = useState("");
+  const [pendingApprovalCount, setPendingApprovalCount] = useState(
+    initialPendingApprovalCount,
+  );
   const roleLabel = user.role === APP_ROLES.ADMIN ? "Administrator" : user.role === APP_ROLES.APPROVER ? "Approver" : "User";
   const name = user.name || user.firstName || "Your account";
 
@@ -31,6 +41,51 @@ export default function AppShell({ children }: { children: ReactNode }) {
     query.addEventListener("change", handleResize);
     return () => query.removeEventListener("change", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (user.role !== APP_ROLES.APPROVER) return;
+
+    let controller: AbortController | null = null;
+
+    const refreshPendingApprovalCount = () => {
+      controller?.abort();
+      const requestController = new AbortController();
+      controller = requestController;
+
+      getAssignedRequests(
+        {
+          assignmentStatus: "Pending",
+          page: 1,
+          perPage: 10,
+        },
+        requestController.signal,
+      )
+        .then((result) => {
+          if (!requestController.signal.aborted) {
+            setPendingApprovalCount(result.meta.total);
+          }
+        })
+        .catch(() => {
+          // Keep the last known badge count on temporary failures.
+        });
+    };
+
+    refreshPendingApprovalCount();
+    window.addEventListener("focus", refreshPendingApprovalCount);
+    window.addEventListener(
+      "assigned-requests-changed",
+      refreshPendingApprovalCount,
+    );
+
+    return () => {
+      controller?.abort();
+      window.removeEventListener("focus", refreshPendingApprovalCount);
+      window.removeEventListener(
+        "assigned-requests-changed",
+        refreshPendingApprovalCount,
+      );
+    };
+  }, [pathname, user.role]);
 
   function requestLogout() {
     if (leaving) return;
@@ -82,10 +137,25 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     onClick={() => dialog.current?.close()}
                     aria-current={isActive ? "page" : undefined}
                     title={collapsed ? item.label : undefined}
-                    className={`flex min-h-12 items-center rounded-xl px-3 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${collapsed ? "justify-center" : "gap-3"} ${isActive ? "bg-white text-brand shadow-sm" : "text-blue-50 hover:bg-white/10"}`}
+                    className={`relative flex min-h-12 items-center rounded-xl px-3 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${collapsed ? "justify-center" : "gap-3"} ${isActive ? "bg-white text-brand shadow-sm" : "text-blue-50 hover:bg-white/10"}`}
                   >
                     <Icon name={item.icon} />
                     <span className={collapsed ? "sr-only" : undefined}>{item.label}</span>
+                    {item.label === "Process Request" &&
+                      pendingApprovalCount > 0 && (
+                        <span
+                          aria-label={`${pendingApprovalCount.toLocaleString()} requests pending your decision`}
+                          className={`inline-flex min-w-6 items-center justify-center rounded-full bg-rose-600 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm ${
+                            collapsed
+                              ? "absolute top-1 right-1"
+                              : "ml-auto"
+                          }`}
+                        >
+                          {pendingApprovalCount > 99
+                            ? "99+"
+                            : pendingApprovalCount}
+                        </span>
+                      )}
                   </Link>
                 ) : (
                   <button type="button" disabled title={`${item.label} is not available yet.`} className={`flex min-h-12 w-full cursor-not-allowed items-center rounded-xl px-3 py-3 text-left text-base text-blue-100/70 ${collapsed ? "justify-center" : "gap-3"}`}>

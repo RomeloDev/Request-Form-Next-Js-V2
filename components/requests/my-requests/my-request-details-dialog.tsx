@@ -9,6 +9,7 @@ import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
 import {
   canEditRequestDetails,
+  getApprovalAttachmentFile,
   getRequestAttachmentAction,
   getRequestAttachmentFile,
   getMyRequest,
@@ -29,6 +30,7 @@ type MyRequestDetailsDialogProps = {
 type PendingAttachmentAction = {
   attachmentId: number;
   action: RequestAttachmentAction;
+  approvalStepId?: number;
 };
 
 type AttachmentPreviewState = {
@@ -245,10 +247,10 @@ export default function MyRequestDetailsDialog({
 
   async function handleAttachmentAction(
     attachment: MyRequestAttachment,
+    approvalStepId?: number,
+    requestedAction?: RequestAttachmentAction,
   ): Promise<void> {
-    const action = getRequestAttachmentAction(
-      attachment.mime_type,
-    );
+    const action = requestedAction ?? getRequestAttachmentAction(attachment.mime_type);
 
     if (!action) {
       setAttachmentMessage(
@@ -265,15 +267,24 @@ export default function MyRequestDetailsDialog({
     setPendingAttachment({
       attachmentId: attachment.id,
       action,
+      approvalStepId,
     });
 
     try {
-      const file = await getRequestAttachmentFile(
-        requestId,
-        attachment.id,
-        action,
-        controller.signal,
-      );
+      const file = approvalStepId
+        ? await getApprovalAttachmentFile(
+            requestId,
+            approvalStepId,
+            attachment.id,
+            action,
+            controller.signal,
+          )
+        : await getRequestAttachmentFile(
+            requestId,
+            attachment.id,
+            action,
+            controller.signal,
+          );
 
       if (controller.signal.aborted) {
         return;
@@ -658,6 +669,49 @@ export default function MyRequestDetailsDialog({
                           </div>
                         )}
                       </dl>
+                    )}
+                    {step.attachments.length > 0 && (
+                      <div className="mt-4 border-t border-line/60 pt-4">
+                        <p className="text-sm font-semibold text-ink">
+                          Approved attachments
+                        </p>
+                        <ul className="mt-2 space-y-2">
+                          {step.attachments.map((attachment) => {
+                            const pending =
+                              pendingAttachment?.approvalStepId === step.id &&
+                              pendingAttachment.attachmentId === attachment.id;
+
+                            return (
+                              <li key={attachment.id} className="rounded-xl bg-slate-50 p-3">
+                                <p className="text-sm font-medium wrap-anywhere">
+                                  {attachment.original_name}
+                                </p>
+                                <p className="mt-1 text-xs text-muted">
+                                  {formatFileSize(attachment.size_bytes)}
+                                </p>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    disabled={pendingAttachment !== null}
+                                    onClick={() => void handleAttachmentAction(attachment, step.id, "preview")}
+                                    className="min-h-10 rounded-lg border border-brand bg-white px-3 py-1.5 text-sm font-semibold text-brand hover:bg-blue-50 disabled:cursor-wait disabled:opacity-60"
+                                  >
+                                    {pending && pendingAttachment?.action === "preview" ? "Preparing…" : "Preview"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={pendingAttachment !== null}
+                                    onClick={() => void handleAttachmentAction(attachment, step.id, "download")}
+                                    className="min-h-10 rounded-lg border border-line bg-white px-3 py-1.5 text-sm font-semibold text-ink hover:bg-slate-100 disabled:cursor-wait disabled:opacity-60"
+                                  >
+                                    {pending && pendingAttachment?.action === "download" ? "Preparing…" : "Download"}
+                                  </button>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
                     )}
                   </li>
                 ))}

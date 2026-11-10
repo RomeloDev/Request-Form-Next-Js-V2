@@ -14,13 +14,14 @@ import TablePagination from "@/components/ui/table-pagination";
 import type {
   AssignedRequest,
   AssignedRequestPage,
+  AssignedRequestStep,
   RequestDecisionAction,
 } from "@/lib/requests/assigned-requests";
 import type { MyRequestStatus } from "@/lib/requests/my-requests";
 import { useAssignedRequests } from "./use-assigned-requests";
 
 type AssignedRequestsPageProps = {
-  initialStatus: "ALL" | MyRequestStatus;
+  initialAssignmentStatus: "ALL" | AssignedRequestStep["status"];
   initialPage: AssignedRequestPage | null;
 };
 
@@ -58,7 +59,7 @@ function personName(request: AssignedRequest): string {
 }
 
 export default function AssignedRequestsPage({
-  initialStatus,
+  initialAssignmentStatus,
   initialPage,
 }: AssignedRequestsPageProps) {
   const [selectedRequest, setSelectedRequest] =
@@ -69,15 +70,15 @@ export default function AssignedRequestsPage({
     meta,
     loadStatus,
     search,
-    statusFilter,
+    assignmentStatusFilter,
     page,
     pageSize,
     changeSearch,
-    changeStatusFilter,
+    changeAssignmentStatusFilter,
     changePage,
     changePageSize,
     refresh,
-  } = useAssignedRequests(initialStatus, initialPage);
+  } = useAssignedRequests(initialAssignmentStatus, initialPage);
 
   const loading = loadStatus === "loading";
   const failed =
@@ -96,6 +97,9 @@ export default function AssignedRequestsPage({
         action === "approve"
           ? "Request approved successfully."
           : "Request disapproved successfully.",
+      );
+      window.dispatchEvent(
+        new Event("assigned-requests-changed"),
       );
       refresh();
     },
@@ -254,20 +258,22 @@ export default function AssignedRequestsPage({
                 onChange={(event) => changeSearch(event.target.value)}
               />
               <FormSelect
-                id="assigned-requests-status"
-                label="Request status"
-                value={statusFilter}
+                id="assigned-requests-assignment-status"
+                label="My decision"
+                value={assignmentStatusFilter}
                 onChange={(event) =>
-                  changeStatusFilter(
-                    event.target.value as "ALL" | MyRequestStatus,
+                  changeAssignmentStatusFilter(
+                    event.target.value as
+                      | "ALL"
+                      | AssignedRequestStep["status"],
                   )
                 }
               >
-                <option value="ALL">All requests</option>
-                <option value="Pending">Pending requests</option>
-                <option value="Ongoing">Ongoing requests</option>
-                <option value="Completed">Completed requests</option>
-                <option value="Disapproved">Disapproved requests</option>
+                <option value="Pending">Pending for my decision</option>
+                <option value="ALL">All assigned requests</option>
+                <option value="Approved">Approved by me</option>
+                <option value="Disapproved">Disapproved by me</option>
+                <option value="Skipped">Skipped assignments</option>
               </FormSelect>
             </div>
           </div>
@@ -306,6 +312,7 @@ export default function AssignedRequestsPage({
         <AssignedRequestDetailsDialog
           requestId={selectedRequest.id}
           canProcess={selectedRequest.my_step.can_process}
+          stepType={selectedRequest.my_step.step_type}
           onClose={closeDetails}
           onChanged={handleChanged}
           onStale={refresh}

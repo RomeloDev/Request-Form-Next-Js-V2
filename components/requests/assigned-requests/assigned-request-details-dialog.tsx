@@ -9,9 +9,11 @@ import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
 import {
   getAssignedRequest,
+  type AssignedRequestStep,
   type RequestDecisionAction,
 } from "@/lib/requests/assigned-requests";
 import {
+  getApprovalAttachmentFile,
   getRequestAttachmentAction,
   getRequestAttachmentFile,
   type MyRequestAttachment,
@@ -24,6 +26,7 @@ import {
 type AssignedRequestDetailsDialogProps = {
   requestId: number;
   canProcess: boolean;
+  stepType: AssignedRequestStep["step_type"];
   onClose: () => void;
   onChanged: (action: RequestDecisionAction) => void;
   onStale: () => void;
@@ -38,6 +41,10 @@ type AttachmentPreviewState = {
   fileName: string;
   mimeType: string;
   objectUrl: string;
+};
+
+type PendingApprovalAttachmentAction = PendingAttachmentAction & {
+  approvalStepId: number;
 };
 
 const requestStatusStyles: Record<MyRequestDetails["status"], string> = {
@@ -130,6 +137,7 @@ function saveAttachment(blob: Blob, fileName: string): void {
 export default function AssignedRequestDetailsDialog({
   requestId,
   canProcess,
+  stepType,
   onClose,
   onChanged,
   onStale,
@@ -143,6 +151,8 @@ export default function AssignedRequestDetailsDialog({
     useState<RequestDecisionAction | null>(null);
   const [pendingAttachment, setPendingAttachment] =
     useState<PendingAttachmentAction | null>(null);
+  const [pendingApprovalAttachment, setPendingApprovalAttachment] =
+    useState<PendingApprovalAttachmentAction | null>(null);
   const [preview, setPreview] =
     useState<AttachmentPreviewState | null>(null);
   const attachmentControllerRef = useRef<AbortController | null>(null);
@@ -250,6 +260,66 @@ export default function AssignedRequestDetailsDialog({
         attachmentControllerRef.current = null;
       }
       if (!controller.signal.aborted) setPendingAttachment(null);
+    }
+  }
+
+  async function handleApprovalAttachmentAction(
+    approvalStepId: number,
+    attachment: MyRequestAttachment,
+    action: RequestAttachmentAction,
+  ): Promise<void> {
+    if (pendingApprovalAttachment) return;
+
+    const controller = new AbortController();
+    attachmentControllerRef.current?.abort();
+    attachmentControllerRef.current = controller;
+    setPendingApprovalAttachment({
+      approvalStepId,
+      attachmentId: attachment.id,
+      action,
+    });
+    setAttachmentMessage("");
+
+    try {
+      const file = await getApprovalAttachmentFile(
+        requestId,
+        approvalStepId,
+        attachment.id,
+        action,
+        controller.signal,
+      );
+      if (controller.signal.aborted) return;
+
+      if (action === "preview") {
+        setPreview({
+          fileName: attachment.original_name,
+          mimeType: attachment.mime_type,
+          objectUrl: URL.createObjectURL(file),
+        });
+      } else {
+        saveAttachment(file, attachment.original_name);
+      }
+    } catch (error: unknown) {
+      if (controller.signal.aborted) return;
+
+      if (error instanceof ApiError && (error.status === 401 || error.status === 419)) {
+        router.replace("/login");
+        onClose();
+        return;
+      }
+
+      if (error instanceof ApiError && error.status === 403) {
+        setAttachmentMessage("You don’t have permission to access this approved attachment.");
+      } else if (error instanceof ApiError && error.status === 404) {
+        setAttachmentMessage("This approved attachment is no longer available.");
+      } else {
+        setAttachmentMessage("We couldn’t retrieve this approved attachment. Please try again.");
+      }
+    } finally {
+      if (attachmentControllerRef.current === controller) {
+        attachmentControllerRef.current = null;
+      }
+      if (!controller.signal.aborted) setPendingApprovalAttachment(null);
     }
   }
 
@@ -365,6 +435,31 @@ export default function AssignedRequestDetailsDialog({
                     </div>
                     {step.comment && <p className="mt-4 whitespace-pre-wrap wrap-anywhere border-t border-line/60 pt-4 text-sm">{step.comment}</p>}
                     {step.acted_at && <p className="mt-2 text-sm text-muted">Acted {formatDate(step.acted_at)}</p>}
+                    {step.attachments.length > 0 && (
+                      <div className="mt-4 border-t border-line/60 pt-4">
+                        <p className="text-sm font-semibold text-ink">Approved attachments</p>
+                        <ul className="mt-2 space-y-2">
+                          {step.attachments.map((attachment) => {
+                            const pending = pendingApprovalAttachment?.approvalStepId === step.id && pendingApprovalAttachment.attachmentId === attachment.id;
+
+                            return (
+                              <li key={attachment.id} className="rounded-xl bg-slate-50 p-3">
+                                <p className="text-sm font-medium wrap-anywhere">{attachment.original_name}</p>
+                                <p className="mt-1 text-xs text-muted">{formatFileSize(attachment.size_bytes)}</p>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  <button type="button" disabled={pendingApprovalAttachment !== null} onClick={() => void handleApprovalAttachmentAction(step.id, attachment, "preview")} className="min-h-10 rounded-lg border border-brand bg-white px-3 py-1.5 text-sm font-semibold text-brand hover:bg-blue-50 disabled:cursor-wait disabled:opacity-60">
+                                    {pending && pendingApprovalAttachment?.action === "preview" ? "Preparing…" : "Preview"}
+                                  </button>
+                                  <button type="button" disabled={pendingApprovalAttachment !== null} onClick={() => void handleApprovalAttachmentAction(step.id, attachment, "download")} className="min-h-10 rounded-lg border border-line bg-white px-3 py-1.5 text-sm font-semibold text-ink hover:bg-slate-100 disabled:cursor-wait disabled:opacity-60">
+                                    {pending && pendingApprovalAttachment?.action === "download" ? "Preparing…" : "Download"}
+                                  </button>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ol>
@@ -413,6 +508,7 @@ export default function AssignedRequestDetailsDialog({
           requestId={details.id}
           requestCode={details.request_code}
           action={decision}
+          allowApprovedAttachments={stepType === "delegated_approval"}
           onClose={() => setDecision(null)}
           onDecided={onChanged}
           onStale={onStale}

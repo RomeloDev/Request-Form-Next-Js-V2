@@ -44,6 +44,9 @@ function queryString(filters: AssignedRequestFilters): string {
   const query = new URLSearchParams();
   if (filters.search?.trim()) query.set("search", filters.search.trim());
   if (filters.status) query.set("status", filters.status);
+  if (filters.assignmentStatus) {
+    query.set("assignment_status", filters.assignmentStatus);
+  }
   if (filters.page) query.set("page", String(filters.page));
   if (filters.perPage) query.set("per_page", String(filters.perPage));
   const value = query.toString();

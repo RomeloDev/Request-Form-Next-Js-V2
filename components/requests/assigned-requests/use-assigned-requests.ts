@@ -10,7 +10,7 @@ import {
   type AssignedRequestFilters,
   type AssignedRequestPage,
 } from "@/lib/requests/assigned-requests";
-import type { MyRequestStatus } from "@/lib/requests/my-requests";
+import type { AssignedRequestStep } from "@/lib/requests/assigned-requests";
 
 export type AssignedRequestsLoadStatus =
   | "loading"
@@ -29,7 +29,7 @@ const emptyMeta: AssignedRequestPage["meta"] = {
 };
 
 export function useAssignedRequests(
-  initialStatus: "ALL" | MyRequestStatus,
+  initialAssignmentStatus: "ALL" | AssignedRequestStep["status"],
   initialPage: AssignedRequestPage | null,
 ) {
   const router = useRouter();
@@ -44,8 +44,10 @@ export function useAssignedRequests(
       initialPage ? "ready" : "error",
     );
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] =
-    useState<"ALL" | MyRequestStatus>(initialStatus);
+  const [assignmentStatusFilter, setAssignmentStatusFilter] =
+    useState<"ALL" | AssignedRequestStep["status"]>(
+      initialAssignmentStatus,
+    );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] =
     useState<10 | 20 | 50>(10);
@@ -68,7 +70,7 @@ export function useAssignedRequests(
 
     const filters: AssignedRequestFilters = {
       search: debouncedSearch,
-      status: statusFilter,
+      assignmentStatus: assignmentStatusFilter,
       page,
       perPage: pageSize,
     };
@@ -122,7 +124,7 @@ export function useAssignedRequests(
     page,
     pageSize,
     router,
-    statusFilter,
+    assignmentStatusFilter,
   ]);
 
   function changeSearch(value: string): void {
@@ -130,10 +132,10 @@ export function useAssignedRequests(
     setPage(1);
   }
 
-  function changeStatusFilter(
-    value: "ALL" | MyRequestStatus,
+  function changeAssignmentStatusFilter(
+    value: "ALL" | AssignedRequestStep["status"],
   ): void {
-    setStatusFilter(value);
+    setAssignmentStatusFilter(value);
     setPage(1);
   }
 
@@ -157,11 +159,11 @@ export function useAssignedRequests(
     meta,
     loadStatus,
     search,
-    statusFilter,
+    assignmentStatusFilter,
     page,
     pageSize,
     changeSearch,
-    changeStatusFilter,
+    changeAssignmentStatusFilter,
     changePage,
     changePageSize,
     refresh,

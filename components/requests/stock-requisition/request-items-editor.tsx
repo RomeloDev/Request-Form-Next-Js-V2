@@ -222,7 +222,7 @@ export default function RequestItemsEditor({
 
                     <FormField
                     id={`item-${item.clientId}-unit-cost`}
-                    label="Estimated unit cost"
+                    label="Unit cost"
                     type="text"
                     inputMode="decimal"
                     placeholder="0.00"
@@ -247,7 +247,7 @@ export default function RequestItemsEditor({
 
                     <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
                     <p className="text-sm font-medium text-muted">
-                        Estimated line total
+                        Total Amount
                     </p>
 
                     <p className="mt-2 text-lg font-semibold text-ink">

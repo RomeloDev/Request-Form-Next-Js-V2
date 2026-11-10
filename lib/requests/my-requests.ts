@@ -102,6 +102,7 @@ export type MyRequestApprovalStep = {
     | "Canceled";
   comment: string | null;
   acted_at: string | null;
+  attachments: MyRequestAttachment[];
   approver: MyRequestPerson;
 };
 
@@ -241,6 +242,27 @@ export async function getRequestAttachmentFile(
   );
 }
 
+export async function getApprovalAttachmentFile(
+  requestId: number,
+  approvalStepId: number,
+  attachmentId: number,
+  action: RequestAttachmentAction,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  if (
+    !Number.isInteger(requestId) || requestId < 1 ||
+    !Number.isInteger(approvalStepId) || approvalStepId < 1 ||
+    !Number.isInteger(attachmentId) || attachmentId < 1
+  ) {
+    throw new ApiError(400, "Valid request and attachment IDs are required.");
+  }
+
+  return apiFileRequest(
+    `/request-forms/${requestId}/approval-steps/${approvalStepId}/attachments/${attachmentId}/${action}`,
+    signal,
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(
     value &&
@@ -341,6 +363,8 @@ function isApprovalStep(
     ) &&
     isNullableString(value.comment) &&
     isNullableString(value.acted_at) &&
+    Array.isArray(value.attachments) &&
+    value.attachments.every(isAttachment) &&
     isPerson(value.approver)
   );
 }
