@@ -42,8 +42,21 @@ export type MyRequest = {
   updated_at: string | null;
 };
 
+export type MyRequestListItem = Pick<
+  MyRequest,
+  | "id"
+  | "request_code"
+  | "form_type"
+  | "kind_of_request"
+  | "status"
+  | "branch"
+  | "created_at"
+> & {
+  shared_count: number;
+};
+
 export type MyRequestPage = {
-  data: MyRequest[];
+  data: MyRequestListItem[];
   summary: MyRequestSummary;
   meta: {
     current_page: number;
@@ -578,27 +591,97 @@ function myRequestQuery(filters: MyRequestFilters): string {
   return queryString ? `?${queryString}` : "";
 }
 
-function isMyRequestPage(value: unknown): value is MyRequestPage {
-  if (!value || typeof value !== "object") {
-    return false;
+function isNonNegativeInteger(value: unknown): value is number {
+  return Number.isInteger(value) && (value as number) >= 0;
+}
+
+function toMyRequestListItem(
+  value: unknown,
+): MyRequestListItem | null {
+  if (
+    !isRecord(value) ||
+    !Number.isInteger(value.id) ||
+    (value.id as number) < 1 ||
+    typeof value.request_code !== "string" ||
+    typeof value.form_type !== "string" ||
+    !isNullableString(value.kind_of_request) ||
+    !isRequestStatus(value.status) ||
+    !isBranch(value.branch) ||
+    !isNullableString(value.created_at) ||
+    !isNonNegativeInteger(value.shared_count)
+  ) {
+    return null;
   }
 
-  const response = value as Partial<MyRequestPage>;
-  const summary = response.summary;
+  return {
+    id: value.id as number,
+    request_code: value.request_code,
+    form_type: value.form_type,
+    kind_of_request: value.kind_of_request,
+    status: value.status,
+    branch: {
+      id: value.branch.id,
+      branch_code: value.branch.branch_code,
+      branch_name: value.branch.branch_name,
+      branch: value.branch.branch,
+      acronym: value.branch.acronym,
+    },
+    created_at: value.created_at,
+    shared_count: value.shared_count,
+  };
+}
 
-  return (
-    Array.isArray(response.data) &&
-    typeof summary?.total === "number" &&
-    typeof summary.pending === "number" &&
-    typeof summary.ongoing === "number" &&
-    typeof summary.completed === "number" &&
-    typeof summary.disapproved === "number" &&
-    typeof summary.canceled === "number" &&
-    typeof response.meta?.current_page === "number" &&
-    typeof response.meta.last_page === "number" &&
-    typeof response.meta.per_page === "number" &&
-    typeof response.meta.total === "number"
-  );
+function toMyRequestPage(value: unknown): MyRequestPage | null {
+  if (
+    !isRecord(value) ||
+    !Array.isArray(value.data) ||
+    !isRecord(value.summary) ||
+    !isRecord(value.meta)
+  ) {
+    return null;
+  }
+
+  const data = value.data.map(toMyRequestListItem);
+  const summary = value.summary;
+  const meta = value.meta;
+
+  if (
+    data.some((request) => request === null) ||
+    !isNonNegativeInteger(summary.total) ||
+    !isNonNegativeInteger(summary.pending) ||
+    !isNonNegativeInteger(summary.ongoing) ||
+    !isNonNegativeInteger(summary.completed) ||
+    !isNonNegativeInteger(summary.disapproved) ||
+    !isNonNegativeInteger(summary.canceled) ||
+    !Number.isInteger(meta.current_page) ||
+    !Number.isInteger(meta.last_page) ||
+    !Number.isInteger(meta.per_page) ||
+    !isNonNegativeInteger(meta.total) ||
+    !(meta.from === null || isNonNegativeInteger(meta.from)) ||
+    !(meta.to === null || isNonNegativeInteger(meta.to))
+  ) {
+    return null;
+  }
+
+  return {
+    data: data as MyRequestListItem[],
+    summary: {
+      total: summary.total,
+      pending: summary.pending,
+      ongoing: summary.ongoing,
+      completed: summary.completed,
+      disapproved: summary.disapproved,
+      canceled: summary.canceled,
+    },
+    meta: {
+      current_page: meta.current_page as number,
+      last_page: meta.last_page as number,
+      per_page: meta.per_page as number,
+      total: meta.total,
+      from: meta.from as number | null,
+      to: meta.to as number | null,
+    },
+  };
 }
 
 export async function getMyRequests(
@@ -613,12 +696,14 @@ export async function getMyRequests(
     },
   );
 
-  if (!isMyRequestPage(response)) {
+  const page = toMyRequestPage(response);
+
+  if (!page) {
     throw new ApiError(
       502,
       "The service returned an unexpected request list.",
     );
   }
 
-  return response;
+  return page;
 }

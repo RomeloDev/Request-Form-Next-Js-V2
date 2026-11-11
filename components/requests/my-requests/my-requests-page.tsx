@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import PageHeader from "@/components/layouts/page-header";
 import DeleteRequestDialog from "@/components/requests/my-requests/delete-request-dialog";
 import MyRequestDetailsDialog from "@/components/requests/my-requests/my-request-details-dialog";
+import ShareRequestDialog from "@/components/requests/my-requests/share-request-dialog";
 import FormAlert from "@/components/ui/form-alert";
 import FormField from "@/components/ui/form-field";
 import FormSelect from "@/components/ui/form-select";
@@ -17,7 +18,7 @@ import RowAction from "@/components/ui/row-action";
 import TablePagination from "@/components/ui/table-pagination";
 import {
   isEditCandidate,
-  type MyRequest,
+  type MyRequestListItem,
   type MyRequestStatus,
 } from "@/lib/requests/my-requests";
 import { useMyRequests } from "./use-my-requests";
@@ -53,7 +54,9 @@ export default function MyRequestsPage() {
   const [selectedRequestId, setSelectedRequestId] =
     useState<number | null>(null);
   const [requestToDelete, setRequestToDelete] =
-    useState<MyRequest | null>(null);
+    useState<MyRequestListItem | null>(null);
+  const [requestToShare, setRequestToShare] =
+    useState<MyRequestListItem | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const {
     records,
@@ -100,7 +103,7 @@ export default function MyRequestsPage() {
     refresh();
   }, [refresh]);
 
-  const columns: TableColumn<MyRequest>[] = [
+  const columns: TableColumn<MyRequestListItem>[] = [
     {
       key: "request_code",
       label: "Request ID",
@@ -155,6 +158,23 @@ export default function MyRequestsPage() {
       ),
     },
     {
+      key: "shared_count",
+      label: "Total Shared To Other Users",
+      render: (request) => (
+        <span
+          className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-sm font-semibold ${
+            request.shared_count > 0
+              ? "bg-emerald-100 text-emerald-800"
+              : "bg-slate-100 text-slate-700"
+          }`}
+        >
+          {request.shared_count > 0
+            ? request.shared_count.toLocaleString()
+            : "Not shared yet"}
+        </span>
+      ),
+    },
+    {
       key: "actions",
       label: "Actions",
       render: (request) => (
@@ -176,6 +196,18 @@ export default function MyRequestsPage() {
               tone="neutral"
               onClick={() => {
                 router.push(`/request/${request.id}/edit`);
+              }}
+            />
+          )}
+
+          {request.status === "Completed" && (
+            <RowAction
+              label={`Share request ${request.request_code}`}
+              icon="share"
+              tone="success"
+              onClick={() => {
+                setSuccessMessage("");
+                setRequestToShare(request);
               }}
             />
           )}
@@ -436,6 +468,20 @@ export default function MyRequestsPage() {
           onClose={() => setRequestToDelete(null)}
           onDeleted={handleDeleted}
           onStale={refresh}
+        />
+      )}
+
+      {requestToShare !== null && (
+        <ShareRequestDialog
+          key={requestToShare.id}
+          requestId={requestToShare.id}
+          requestCode={requestToShare.request_code}
+          onClose={() => setRequestToShare(null)}
+          onUnavailable={() => {
+            setRequestToShare(null);
+            refresh();
+          }}
+          onChanged={refresh}
         />
       )}
     </div>

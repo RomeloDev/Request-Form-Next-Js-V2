@@ -877,6 +877,7 @@ export default function MyRequestDetailsDialog({
           requestCode={details.request_code}
           onClose={closeShareDialog}
           onUnavailable={handleSharingUnavailable}
+          onChanged={onStale}
         />
       )}
     </>

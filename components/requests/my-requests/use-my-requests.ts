@@ -6,8 +6,8 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ApiError } from "@/lib/api";
 import {
   getMyRequests,
-  type MyRequest,
   type MyRequestFilters,
+  type MyRequestListItem,
   type MyRequestPage,
   type MyRequestSummary,
   type MyRequestStatus,
@@ -41,7 +41,7 @@ const emptySummary: MyRequestSummary = {
 export function useMyRequests() {
   const router = useRouter();
 
-  const [records, setRecords] = useState<MyRequest[]>([]);
+  const [records, setRecords] = useState<MyRequestListItem[]>([]);
   const [meta, setMeta] =
     useState<MyRequestPage["meta"]>(emptyMeta);
   const [summary, setSummary] =

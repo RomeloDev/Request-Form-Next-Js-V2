@@ -28,6 +28,8 @@ type ShareRequestDialogProps = {
   onClose: () => void;
   /** Called when the backend reports the request is unavailable (404). */
   onUnavailable: () => void;
+  /** Reconciles owner-side request summaries after a share changes. */
+  onChanged?: () => void;
 };
 
 const maxShareRecipients = 50;
@@ -57,6 +59,7 @@ export default function ShareRequestDialog({
   requestCode,
   onClose,
   onUnavailable,
+  onChanged,
 }: ShareRequestDialogProps) {
   const router = useRouter();
 
@@ -372,6 +375,7 @@ export default function ShareRequestDialog({
       setSelectionMessage("");
       refreshCandidates();
       refreshRecipients();
+      onChanged?.();
       setNotice(
         `Request shared with ${result.shared_count.toLocaleString()} ${
           result.shared_count === 1 ? "recipient" : "recipients"
@@ -445,6 +449,7 @@ export default function ShareRequestDialog({
       setRevokeTarget(null);
       refreshRecipients();
       refreshCandidates();
+      onChanged?.();
       setNotice(`Access revoked for ${revokedName}.`);
     } catch (error: unknown) {
       if (
@@ -460,6 +465,7 @@ export default function ShareRequestDialog({
         setRevokeTarget(null);
         refreshRecipients();
         refreshCandidates();
+        onChanged?.();
         setNotice(
           "That recipient no longer has access. The sharing lists are being refreshed.",
         );
