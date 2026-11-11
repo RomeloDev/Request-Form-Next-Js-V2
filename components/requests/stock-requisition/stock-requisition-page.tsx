@@ -3,13 +3,13 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/layouts/page-header";
-import ApproverSelector from "@/components/requests/stock-requisition/approver-selector";
+import ApproverSelector from "@/components/requests/common/approver-selector";
 import RequestItemsEditor, {
   createDraftRequestItem,
   type DraftRequestItem,
-} from "@/components/requests/stock-requisition/request-items-editor";
+} from "@/components/requests/common/request-items-editor";
 import StockRequisitionReviewDialog from "@/components/requests/stock-requisition/stock-requisition-review-dialog";
-import StockRequisitionSupportingDocument from "@/components/requests/stock-requisition/stock-requisition-supporting-document";
+import RequestSupportingDocuments from "@/components/requests/common/request-supporting-documents";
 import FormAlert from "@/components/ui/form-alert";
 import FormRadioGroup from "@/components/ui/form-radio-group";
 import FormSelect from "@/components/ui/form-select";
@@ -397,7 +397,7 @@ export default function StockRequisitionPage({
               : "Attach quotations or other documents that support the request."
           }
         >
-          <StockRequisitionSupportingDocument
+          <RequestSupportingDocuments
             files={attachments}
             onFilesChange={setAttachments}
             existingFiles={initialRequest?.attachments}

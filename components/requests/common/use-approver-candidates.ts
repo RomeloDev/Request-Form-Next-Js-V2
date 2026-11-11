@@ -17,7 +17,6 @@ export type ApproverCandidateStatus =
   | "forbidden"
   | "rate-limited";
 
-
 const emptyMeta: CandidatePaginationMeta = {
   current_page: 1,
   last_page: 1,
@@ -52,7 +51,7 @@ export function useApproverCandidates() {
     400,
   );
 
-    useEffect(() => {
+  useEffect(() => {
     const controller = new AbortController();
 
     /*
@@ -141,7 +140,7 @@ export function useApproverCandidates() {
     router,
   ]);
 
-    function changeSearch(value: string) {
+  function changeSearch(value: string) {
     setSearch(value);
     setPage(1);
   }
@@ -164,7 +163,7 @@ export function useApproverCandidates() {
     setAttempt((current) => current + 1);
   }
 
-    return {
+  return {
     records,
     meta,
     status,

@@ -4,7 +4,7 @@ import { useState, type ChangeEvent } from "react";
 import Icon from "@/components/ui/icon";
 import type { MyRequestAttachment } from "@/lib/requests/my-requests";
 
-type SupportingDocumentsProps = {
+export type SupportingDocumentsProps = {
   files: File[];
   onFilesChange: (files: File[]) => void;
   existingFiles?: MyRequestAttachment[];
@@ -13,11 +13,13 @@ type SupportingDocumentsProps = {
   disabled?: boolean;
 };
 
+export type RequestSupportingDocumentsProps = SupportingDocumentsProps;
+
 const MAX_FILES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const FILE_INPUT_ID = "stock-requisition-attachments";
-const FILE_HELP_ID = "stock-requisition-attachments-help";
-const FILE_ERROR_ID = "stock-requisition-attachments-error";
+const FILE_INPUT_ID = "request-attachments";
+const FILE_HELP_ID = "request-attachments-help";
+const FILE_ERROR_ID = "request-attachments-error";
 
 const ALLOWED_EXTENSIONS = [
   ".pdf",
@@ -51,7 +53,7 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function StockRequisitionSupportingDocument({
+export default function RequestSupportingDocuments({
   files,
   onFilesChange,
   existingFiles = [],

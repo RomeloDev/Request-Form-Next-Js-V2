@@ -1,31 +1,18 @@
+import {
+  REQUEST_KIND_OPTIONS,
+  type RequestKind,
+  isRequestKind,
+} from "@/lib/requests/request-kind-options";
+
 /**
  * Approved Stock Requisition categories from the reference application.
  *
  * Keep the stored values stable because existing reports and backend data may
  * compare these exact strings.
  */
-export const STOCK_REQUISITION_KIND_OPTIONS = [
-  "Office Supplies",
-  "New Registration",
-  "Utility Bills (Water, Electric, Guard Salary)",
-  "Renewal of Unit",
-  "Meal / Diesel / Gasoline Allowance",
-  "Transfer Ownership of Unit",
-  "Shipment Fee",
-  "FFE (New / Replacement)",
-  "Notarial Fee",
-  "Professional Fee",
-  "Retaineers Fee",
-  "Appliance Repair (e.g. Aircon Cleaning)",
-  "MC Service (Office / Service Used)",
-  "LTO Accreditation",
-  "DTI Accreditation",
-  "Cash Advance - Logistics",
-  "Others",
-] as const;
+export const STOCK_REQUISITION_KIND_OPTIONS = REQUEST_KIND_OPTIONS;
 
-export type StockRequisitionKind =
-  (typeof STOCK_REQUISITION_KIND_OPTIONS)[number];
+export type StockRequisitionKind = RequestKind;
 
 export const STOCK_REQUISITION_PURPOSE_OPTIONS = [
   {
@@ -52,8 +39,7 @@ export type StockRequisitionPurpose =
 export function isStockRequisitionKind(
   value: string,
 ): value is StockRequisitionKind {
-  return (STOCK_REQUISITION_KIND_OPTIONS as readonly string[])
-    .includes(value);
+  return isRequestKind(value);
 }
 
 export function isStockRequisitionPurpose(

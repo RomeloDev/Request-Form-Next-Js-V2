@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useApproverCandidates } from "@/components/requests/stock-requisition/use-approver-candidates";
+import { useApproverCandidates } from "@/components/requests/common/use-approver-candidates";
 import FormField from "@/components/ui/form-field";
 import Icon from "@/components/ui/icon";
 import Modal from "@/components/ui/modal";

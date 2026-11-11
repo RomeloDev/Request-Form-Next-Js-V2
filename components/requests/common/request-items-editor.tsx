@@ -4,10 +4,17 @@ import { useRef } from "react";
 import FormField from "@/components/ui/form-field";
 import FormTextarea from "@/components/ui/form-textarea";
 import Icon from "@/components/ui/icon";
-import type { StockRequisitionItemInput } from "@/lib/requests/stock-requisitions";
+
+export type RequestItemInput = {
+  quantity: string;
+  //unit: string;
+  description: string;
+  unitCost: string;
+  remarks: string;
+};
 
 export type DraftRequestItem =
-  StockRequisitionItemInput & {
+  RequestItemInput & {
     clientId: number;
   };
 
@@ -106,7 +113,7 @@ export default function RequestItemsEditor({
 
   function updateItem(
     clientId: number,
-    field: keyof StockRequisitionItemInput,
+    field: keyof RequestItemInput,
     value: string,
   ) {
     onItemsChange(
@@ -146,45 +153,44 @@ export default function RequestItemsEditor({
 
   const estimatedGrandTotal = calculateGrandTotal(items);
 
-
-    return (
-        <div className="space-y-5 sm:col-span-2">
-        <div className="space-y-4">
-            {items.map((item, index) => {
+  return (
+    <div className="space-y-5 sm:col-span-2">
+      <div className="space-y-4">
+        {items.map((item, index) => {
             const lineTotal = calculateLineTotal(item);
 
             return (
-                <article
+              <article
                 key={item.clientId}
                 className="rounded-2xl border border-line/70 bg-slate-50/40 p-4 sm:p-5"
-                >
+              >
                 <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                    <div>
+                  <div>
                     <h3 className="font-semibold text-ink">
-                        Item {index + 1}
+                      Item {index + 1}
                     </h3>
 
                     <p className="mt-1 text-sm text-muted">
-                        Enter the quantity, description, and estimated cost.
+                      Enter the quantity, description, and estimated cost.
                     </p>
-                    </div>
+                  </div>
 
-                    <button
+                  <button
                     type="button"
                     onClick={() => {
-                        removeItem(item.clientId);
+                      removeItem(item.clientId);
                     }}
                     disabled={disabled || items.length === 1}
                     aria-label={`Remove item ${index + 1}`}
                     className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-danger hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger disabled:cursor-not-allowed disabled:opacity-40"
-                    >
+                  >
                     <Icon name="trash" />
                     Remove
-                    </button>
+                  </button>
                 </header>
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    <FormField
+                  <FormField
                     id={`item-${item.clientId}-quantity`}
                     label="Quantity"
                     type="number"
@@ -194,15 +200,15 @@ export default function RequestItemsEditor({
                     step="1"
                     value={item.quantity}
                     onChange={(event) => {
-                        updateItem(
+                      updateItem(
                         item.clientId,
                         "quantity",
                         event.target.value,
-                        );
+                      );
                     }}
                     required
                     disabled={disabled}
-                    />
+                  />
 
                     {/* <FormField
                     id={`item-${item.clientId}-unit`}
@@ -220,7 +226,7 @@ export default function RequestItemsEditor({
                     disabled={disabled}
                     /> */}
 
-                    <FormField
+                  <FormField
                     id={`item-${item.clientId}-unit-cost`}
                     label="Unit cost"
                     type="text"
@@ -228,108 +234,108 @@ export default function RequestItemsEditor({
                     placeholder="0.00"
                     value={formatUnitCost(item.unitCost)}
                     onChange={(event) => {
-                        const value = event.currentTarget.value.replace(
+                      const value = event.currentTarget.value.replace(
                         /,/g,
                         "",
-                        );
-                        event.currentTarget.setCustomValidity(
+                      );
+                      event.currentTarget.setCustomValidity(
                         getUnitCostValidationMessage(value),
-                        );
-                        updateItem(
+                      );
+                      updateItem(
                         item.clientId,
                         "unitCost",
                         value,
-                        );
+                      );
                     }}
                     required
                     disabled={disabled}
-                    />
+                  />
 
-                    <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                  <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
                     <p className="text-sm font-medium text-muted">
-                        Total Amount
+                      Total Amount
                     </p>
 
                     <p className="mt-2 text-lg font-semibold text-ink">
-                        {lineTotal === null
+                      {lineTotal === null
                         ? "—"
                         : currencyFormatter.format(lineTotal)}
                     </p>
 
                     <p className="mt-1 text-xs text-muted">
-                        Auto calculated from quantity × estimated unit cost.
+                      Auto calculated from quantity × estimated unit cost.
                     </p>
-                    </div>
+                  </div>
 
-                    <div className="sm:col-span-2 lg:col-span-4">
+                  <div className="sm:col-span-2 lg:col-span-4">
                     <FormTextarea
-                        id={`item-${item.clientId}-description`}
-                        label="Description"
-                        placeholder="Describe the requested item."
-                        value={item.description}
-                        onChange={(event) => {
+                      id={`item-${item.clientId}-description`}
+                      label="Description"
+                      placeholder="Describe the requested item."
+                      value={item.description}
+                      onChange={(event) => {
                         updateItem(
-                            item.clientId,
-                            "description",
-                            event.target.value,
+                          item.clientId,
+                          "description",
+                          event.target.value,
                         );
-                        }}
-                        maxLength={1000}
-                        rows={3}
-                        required
-                        disabled={disabled}
+                      }}
+                      maxLength={1000}
+                      rows={3}
+                      required
+                      disabled={disabled}
                     />
-                    </div>
+                  </div>
 
-                    <div className="sm:col-span-2 lg:col-span-4">
+                  <div className="sm:col-span-2 lg:col-span-4">
                     <FormTextarea
-                        id={`item-${item.clientId}-remarks`}
-                        label="Usage or remarks"
-                        placeholder="Optional usage instructions or additional details."
-                        value={item.remarks}
-                        onChange={(event) => {
+                      id={`item-${item.clientId}-remarks`}
+                      label="Usage or remarks"
+                      placeholder="Optional usage instructions or additional details."
+                      value={item.remarks}
+                      onChange={(event) => {
                         updateItem(
-                            item.clientId,
-                            "remarks",
-                            event.target.value,
+                          item.clientId,
+                          "remarks",
+                          event.target.value,
                         );
-                        }}
-                        maxLength={2000}
-                        rows={3}
-                        disabled={disabled}
+                      }}
+                      maxLength={2000}
+                      rows={3}
+                      disabled={disabled}
                     />
-                    </div>
+                  </div>
                 </div>
-                </article>
+              </article>
             );
-            })}
-        </div>
+          })}
+      </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line/70 bg-white p-4">
-            <button
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line/70 bg-white p-4">
+        <button
             type="button"
             onClick={addItem}
             disabled={disabled || items.length >= 100}
             className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand px-4 py-3 font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
-            >
-            <Icon name="plus" />
-            Add item
-            </button>
+        >
+          <Icon name="plus" />
+          Add item
+        </button>
 
-            <div className="text-right">
-            <p className="text-sm text-muted">
-                Estimated grand total
-            </p>
+        <div className="text-right">
+          <p className="text-sm text-muted">
+            Estimated grand total
+          </p>
 
-            <p className="text-xl font-semibold text-ink">
-                {currencyFormatter.format(estimatedGrandTotal)}
-            </p>
+          <p className="text-xl font-semibold text-ink">
+            {currencyFormatter.format(estimatedGrandTotal)}
+          </p>
 
-            <p className="text-xs text-muted">
-                Final total is auto calculated.
-            </p>
-            </div>
+          <p className="text-xs text-muted">
+            Final total is auto calculated.
+          </p>
         </div>
-        </div>
+      </div>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import ApproverSelectorDialog from "@/components/requests/stock-requisition/approver-selector-dialog";
+import ApproverSelectorDialog from "@/components/requests/common/approver-selector-dialog";
 import Icon from "@/components/ui/icon";
 import type { ApproverCandidate } from "@/lib/requests/stock-requisitions";
 
