@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import RequestDecisionDialog from "@/components/requests/assigned-requests/request-decision-dialog";
-import AttachmentPreviewDialog from "@/components/requests/my-requests/attachment-preview-dialog";
+import AttachmentPreviewDialog from "@/components/requests/attachment-preview-dialog";
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";

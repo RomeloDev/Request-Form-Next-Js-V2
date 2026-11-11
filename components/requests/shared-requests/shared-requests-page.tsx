@@ -1,10 +1,13 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import PageHeader from "@/components/layouts/page-header";
+import SharedRequestDetailsDialog from "@/components/requests/shared-requests/shared-request-details-dialog";
 import DataTable, { type TableColumn } from "@/components/ui/data-table";
 import FormAlert from "@/components/ui/form-alert";
 import FormField from "@/components/ui/form-field";
 import RefreshButton from "@/components/ui/refresh-button";
+import RowAction from "@/components/ui/row-action";
 import TablePagination from "@/components/ui/table-pagination";
 import type {
   SharedRequest,
@@ -44,6 +47,9 @@ function personName(request: SharedRequest): string {
 export default function SharedRequestsPage({
   initialPage,
 }: SharedRequestsPageProps) {
+  const [selectedRequestId, setSelectedRequestId] = useState<number | null>(
+    null,
+  );
   const {
     records,
     meta,
@@ -56,6 +62,10 @@ export default function SharedRequestsPage({
     changePageSize,
     refresh,
   } = useSharedRequests(initialPage);
+
+  const closeDetails = useCallback(() => {
+    setSelectedRequestId(null);
+  }, []);
 
   const loading = loadStatus === "loading";
   const failed =
@@ -123,6 +133,20 @@ export default function SharedRequestsPage({
         <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${statusStyles[request.status]}`}>
           {request.status}
         </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (request) => (
+        <RowAction
+          label={`View request ${request.request_code}`}
+          icon="eye"
+          tone="blue"
+          onClick={() => {
+            setSelectedRequestId(request.id);
+          }}
+        />
       ),
     },
   ];
@@ -220,6 +244,15 @@ export default function SharedRequestsPage({
             ariaLabel="Shared request pagination"
           />
         </section>
+      )}
+
+      {selectedRequestId !== null && (
+        <SharedRequestDetailsDialog
+          key={selectedRequestId}
+          requestId={selectedRequestId}
+          onClose={closeDetails}
+          onStale={refresh}
+        />
       )}
     </div>
   );
