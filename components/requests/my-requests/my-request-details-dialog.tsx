@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AttachmentPreviewDialog from "@/components/requests/attachment-preview-dialog";
 import CancelRequestDialog from "@/components/requests/my-requests/cancel-request-dialog";
+import ShareRequestDialog from "@/components/requests/my-requests/share-request-dialog";
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
@@ -167,8 +168,24 @@ export default function MyRequestDetailsDialog({
     useState<AttachmentPreviewState | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] =
     useState(false);
+  const [shareDialogOpen, setShareDialogOpen] =
+    useState(false);
+  const [detailsAttempt, setDetailsAttempt] = useState(0);
   const attachmentControllerRef =
     useRef<AbortController | null>(null);
+
+  /**
+   * The Share dialog reports 404 when the request is gone: close it and
+   * re-fetch the details so their status message reflects reality.
+   */
+  const handleSharingUnavailable = useCallback(() => {
+    setShareDialogOpen(false);
+    setDetailsAttempt((current) => current + 1);
+  }, []);
+
+  const closeShareDialog = useCallback(() => {
+    setShareDialogOpen(false);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -227,7 +244,7 @@ export default function MyRequestDetailsDialog({
     return () => {
       controller.abort();
     };
-  }, [onClose, onStale, requestId, router]);
+  }, [detailsAttempt, onClose, onStale, requestId, router]);
 
   useEffect(() => {
     return () => {
@@ -390,6 +407,15 @@ export default function MyRequestDetailsDialog({
               >
                 Print
               </a>
+            )}
+            {details && details.status === "Completed" && (
+              <button
+                type="button"
+                onClick={() => setShareDialogOpen(true)}
+                className="min-h-11 rounded-xl border border-emerald-300 bg-white px-5 py-2.5 text-base font-semibold text-emerald-700 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+              >
+                Share
+              </button>
             )}
             {details?.status === "Pending" && (
               <button
@@ -842,6 +868,15 @@ export default function MyRequestDetailsDialog({
           onClose={() => setCancelDialogOpen(false)}
           onCanceled={onCanceled}
           onStale={onStale}
+        />
+      )}
+
+      {shareDialogOpen && details && (
+        <ShareRequestDialog
+          requestId={details.id}
+          requestCode={details.request_code}
+          onClose={closeShareDialog}
+          onUnavailable={handleSharingUnavailable}
         />
       )}
     </>
