@@ -4,7 +4,12 @@ import {
   apiRequest,
 } from "@/lib/api";
 import { prepareCsrfSession } from "@/lib/csrf";
+import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
 import { PURCHASE_ORDER_FORM_TYPE } from "@/lib/requests/purchase-orders";
+import {
+  isRequestCurrency,
+  type RequestCurrency,
+} from "@/lib/requests/request-currencies";
 import { STOCK_REQUISITION_FORM_TYPE } from "@/lib/requests/stock-requisitions";
 
 export type MyRequestStatus =
@@ -28,7 +33,7 @@ export type MyRequest = {
   request_code: string;
   form_type: string;
   kind_of_request: string | null;
-  currency: string;
+  currency: RequestCurrency;
   status: MyRequestStatus;
   cancellation_reason: string | null;
   form_data: Record<string, unknown> | null;
@@ -404,9 +409,12 @@ function isMyRequestDetailsResponse(
     typeof details.form_type === "string" &&
     isNullableString(details.kind_of_request) &&
     typeof details.currency === "string" &&
+    isRequestCurrency(details.currency) &&
     isRequestStatus(details.status) &&
     isNullableString(details.cancellation_reason) &&
     (details.form_data === null || isRecord(details.form_data)) &&
+    (!isCashDisbursementFormType(details.form_type) ||
+      details.form_data === null) &&
     typeof details.grand_total === "string" &&
     isPerson(details.requester) &&
     isBranch(details.branch) &&

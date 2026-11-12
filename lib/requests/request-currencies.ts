@@ -61,3 +61,37 @@ export function formatRequestMoney(
 
   return currencyFormatters[currency].format(amount);
 }
+
+/**
+ * Convert an API decimal string to a display value. Empty, malformed, or
+ * non-finite strings render as a dash instead of becoming a plausible amount.
+ */
+export function formatRequestMoneyString(
+  value: string,
+  currency: RequestCurrency,
+): string {
+  const normalizedValue = value.trim();
+
+  if (!/^\d+(?:\.\d+)?$/.test(normalizedValue)) {
+    return "—";
+  }
+
+  const amount = Number(normalizedValue);
+
+  if (!Number.isFinite(amount)) {
+    return "—";
+  }
+
+  return formatRequestMoney(amount, currency);
+}
+
+/** Readable currency display for request metadata. */
+export function requestCurrencyDisplay(
+  currency: RequestCurrency,
+): string {
+  const option = REQUEST_CURRENCY_OPTIONS.find(
+    (candidate) => candidate.value === currency,
+  );
+
+  return option ? `${currency} (${option.label})` : currency;
+}

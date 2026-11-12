@@ -7,9 +7,14 @@ import PurchaseOrderDetails from "@/components/requests/purchase-order/purchase-
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
+import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
 import {
   isPurchaseOrderFormType,
 } from "@/lib/requests/purchase-orders";
+import {
+  formatRequestMoneyString,
+  requestCurrencyDisplay,
+} from "@/lib/requests/request-currencies";
 import { getSharedRequest } from "@/lib/requests/shared-requests";
 import {
   getApprovalAttachmentFile,
@@ -93,23 +98,6 @@ function formatDate(value: string | null): string {
         dateStyle: "medium",
         timeStyle: "short",
       }).format(date);
-}
-
-function formatMoney(value: string, currency: string): string {
-  const amount = Number(value);
-
-  if (!Number.isFinite(amount)) {
-    return `${currency} ${value}`;
-  }
-
-  try {
-    return new Intl.NumberFormat("en-PH", {
-      style: "currency",
-      currency,
-    }).format(amount);
-  } catch {
-    return `${currency} ${amount.toFixed(2)}`;
-  }
 }
 
 function formatFileSize(size: number): string {
@@ -414,18 +402,27 @@ export default function SharedRequestDetailsDialog({
                   {details.kind_of_request ?? "—"}
                 </dd>
               </div>
-              {!isPurchaseOrderFormType(details.form_type) && (
+              {isCashDisbursementFormType(details.form_type) && (
                 <div>
-                  <dt className="text-sm text-muted">Purpose</dt>
+                  <dt className="text-sm text-muted">Currency</dt>
                   <dd className="mt-1 font-medium">
-                    {requestPurpose(details)}
+                    {requestCurrencyDisplay(details.currency)}
                   </dd>
                 </div>
               )}
+              {!isPurchaseOrderFormType(details.form_type) &&
+                !isCashDisbursementFormType(details.form_type) && (
+                  <div>
+                    <dt className="text-sm text-muted">Purpose</dt>
+                    <dd className="mt-1 font-medium">
+                      {requestPurpose(details)}
+                    </dd>
+                  </div>
+                )}
               <div>
                 <dt className="text-sm text-muted">Grand total</dt>
                 <dd className="mt-1 font-semibold">
-                  {formatMoney(details.grand_total, details.currency)}
+                  {formatRequestMoneyString(details.grand_total, details.currency)}
                 </dd>
               </div>
               <div>
@@ -510,10 +507,10 @@ export default function SharedRequestDetailsDialog({
                           {item.description}
                         </td>
                         <td className="px-4 py-3">
-                          {formatMoney(item.unit_cost, details.currency)}
+                          {formatRequestMoneyString(item.unit_cost, details.currency)}
                         </td>
                         <td className="px-4 py-3 font-semibold">
-                          {formatMoney(item.line_total, details.currency)}
+                          {formatRequestMoneyString(item.line_total, details.currency)}
                         </td>
                         <td className="px-4 py-3 text-muted">
                           {item.remarks ?? "—"}

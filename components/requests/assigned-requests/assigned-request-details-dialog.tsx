@@ -8,9 +8,14 @@ import PurchaseOrderDetails from "@/components/requests/purchase-order/purchase-
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
+import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
 import {
   isPurchaseOrderFormType,
 } from "@/lib/requests/purchase-orders";
+import {
+  formatRequestMoneyString,
+  requestCurrencyDisplay,
+} from "@/lib/requests/request-currencies";
 import {
   getAssignedRequest,
   type AssignedRequestStep,
@@ -100,20 +105,6 @@ function formatDate(value: string | null): string {
         dateStyle: "medium",
         timeStyle: "short",
       }).format(date);
-}
-
-function formatMoney(value: string, currency: string): string {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return `${currency} ${value}`;
-
-  try {
-    return new Intl.NumberFormat("en-PH", {
-      style: "currency",
-      currency,
-    }).format(amount);
-  } catch {
-    return `${currency} ${amount.toFixed(2)}`;
-  }
 }
 
 function formatFileSize(size: number): string {
@@ -401,10 +392,13 @@ export default function AssignedRequestDetailsDialog({
               </div>
               <dl className="mt-6 grid gap-5 border-t border-line/60 pt-5 sm:grid-cols-2 lg:grid-cols-3">
                 <div><dt className="text-sm text-muted">Kind</dt><dd className="mt-1 font-medium">{details.kind_of_request ?? "—"}</dd></div>
-                {!isPurchaseOrderFormType(details.form_type) && (
+                {isCashDisbursementFormType(details.form_type) && (
+                  <div><dt className="text-sm text-muted">Currency</dt><dd className="mt-1 font-medium">{requestCurrencyDisplay(details.currency)}</dd></div>
+                )}
+                {!isPurchaseOrderFormType(details.form_type) && !isCashDisbursementFormType(details.form_type) && (
                   <div><dt className="text-sm text-muted">Purpose</dt><dd className="mt-1 font-medium">{requestPurpose(details)}</dd></div>
                 )}
-                <div><dt className="text-sm text-muted">Grand total</dt><dd className="mt-1 font-semibold">{formatMoney(details.grand_total, details.currency)}</dd></div>
+                <div><dt className="text-sm text-muted">Grand total</dt><dd className="mt-1 font-semibold">{formatRequestMoneyString(details.grand_total, details.currency)}</dd></div>
                 <div><dt className="text-sm text-muted">Requested by</dt><dd className="mt-1 font-medium">{personName(details.requester)}</dd><dd className="mt-1 text-sm text-muted">{details.requester.position ?? "Position not provided"}</dd></div>
                 <div><dt className="text-sm text-muted">Branch</dt><dd className="mt-1 font-medium">{details.branch.branch_code} — {details.branch.branch_name}</dd><dd className="mt-1 text-sm text-muted">{details.branch.branch}</dd></div>
                 <div><dt className="text-sm text-muted">Submitted</dt><dd className="mt-1 font-medium">{formatDate(details.created_at)}</dd></div>
@@ -427,7 +421,7 @@ export default function AssignedRequestDetailsDialog({
                     {details.items.length === 0 ? (
                       <tr><td colSpan={6} className="px-4 py-10 text-center text-muted">No request items were returned.</td></tr>
                     ) : details.items.map((item) => (
-                      <tr key={item.id}><td className="px-4 py-3 text-muted">{item.line_number}</td><td className="px-4 py-3">{item.quantity}</td><td className="px-4 py-3 font-medium">{item.description}</td><td className="px-4 py-3">{formatMoney(item.unit_cost, details.currency)}</td><td className="px-4 py-3 font-semibold">{formatMoney(item.line_total, details.currency)}</td><td className="px-4 py-3 text-muted">{item.remarks ?? "—"}</td></tr>
+                      <tr key={item.id}><td className="px-4 py-3 text-muted">{item.line_number}</td><td className="px-4 py-3">{item.quantity}</td><td className="px-4 py-3 font-medium">{item.description}</td><td className="px-4 py-3">{formatRequestMoneyString(item.unit_cost, details.currency)}</td><td className="px-4 py-3 font-semibold">{formatRequestMoneyString(item.line_total, details.currency)}</td><td className="px-4 py-3 text-muted">{item.remarks ?? "—"}</td></tr>
                     ))}
                   </tbody>
                 </table>
