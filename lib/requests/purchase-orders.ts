@@ -91,6 +91,48 @@ export type CreatePurchaseOrderResponse = {
   data: CreatedPurchaseOrder;
 };
 
+/**
+ * Exact backend form_type value from RequestFormType::PurchaseOrder.
+ * Keep this literal stable; renderer selection compares it directly.
+ */
+export const PURCHASE_ORDER_FORM_TYPE = "Purchase Order Requisition Slip";
+
+/** Narrow any untrusted form_type string to the Purchase Order contract. */
+export function isPurchaseOrderFormType(
+  value: string,
+): value is typeof PURCHASE_ORDER_FORM_TYPE {
+  return value === PURCHASE_ORDER_FORM_TYPE;
+}
+
+export type PurchaseOrderFormData = {
+  supplier: string;
+  address: string;
+};
+
+/**
+ * Safely read the Purchase Order supplier fields out of the untrusted,
+ * optional form_data object returned by the details APIs. Missing or
+ * malformed fields become empty strings; the renderer shows a dash.
+ */
+export function parsePurchaseOrderFormData(
+  formData: Record<string, unknown> | null,
+): PurchaseOrderFormData {
+  if (!isRecord(formData)) {
+    return { supplier: "", address: "" };
+  }
+
+  return {
+    supplier:
+      typeof formData.supplier === "string"
+        ? formData.supplier.trim()
+        : "",
+    address:
+      typeof formData.address === "string"
+        ? formData.address.trim()
+        : "",
+  };
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import StockRequisitionPage from "@/components/requests/stock-requisition/stock-requisition-page";
+import RequestTypeNav from "@/components/requests/common/request-type-nav";
 import { APP_ROLES } from "@/lib/roles";
 import { requireRole } from "@/lib/server-auth";
 
@@ -20,5 +21,10 @@ export default async function CreateRequestPage() {
     APP_ROLES.ADMIN,
   ]);
 
-  return <StockRequisitionPage />;
+  return (
+    <div className="space-y-6">
+      <RequestTypeNav currentHref="/create-request" />
+      <StockRequisitionPage />
+    </div>
+  );
 }

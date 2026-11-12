@@ -3,9 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AttachmentPreviewDialog from "@/components/requests/attachment-preview-dialog";
+import PurchaseOrderDetails from "@/components/requests/purchase-order/purchase-order-details";
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
+import {
+  isPurchaseOrderFormType,
+} from "@/lib/requests/purchase-orders";
 import { getSharedRequest } from "@/lib/requests/shared-requests";
 import {
   getApprovalAttachmentFile,
@@ -358,7 +362,9 @@ export default function SharedRequestDetailsDialog({
         maxWidth="4xl"
         footer={
           <>
-            {details && details.status !== "Canceled" && (
+            {details &&
+              details.status !== "Canceled" &&
+              !isPurchaseOrderFormType(details.form_type) && (
               <a
                 href={`/request/${details.id}/print`}
                 target="_blank"
@@ -410,12 +416,14 @@ export default function SharedRequestDetailsDialog({
                   {details.kind_of_request ?? "—"}
                 </dd>
               </div>
-              <div>
-                <dt className="text-sm text-muted">Purpose</dt>
-                <dd className="mt-1 font-medium">
-                  {requestPurpose(details)}
-                </dd>
-              </div>
+              {!isPurchaseOrderFormType(details.form_type) && (
+                <div>
+                  <dt className="text-sm text-muted">Purpose</dt>
+                  <dd className="mt-1 font-medium">
+                    {requestPurpose(details)}
+                  </dd>
+                </div>
+              )}
               <div>
                 <dt className="text-sm text-muted">Grand total</dt>
                 <dd className="mt-1 font-semibold">
@@ -451,6 +459,10 @@ export default function SharedRequestDetailsDialog({
               </div>
             </dl>
           </section>
+
+          {isPurchaseOrderFormType(details.form_type) && (
+            <PurchaseOrderDetails formData={details.form_data} />
+          )}
 
           <section aria-labelledby="shared-items-title">
             <div className="flex items-center justify-between gap-3">

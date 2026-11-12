@@ -5,9 +5,13 @@ import { useRouter } from "next/navigation";
 import AttachmentPreviewDialog from "@/components/requests/attachment-preview-dialog";
 import CancelRequestDialog from "@/components/requests/my-requests/cancel-request-dialog";
 import ShareRequestDialog from "@/components/requests/my-requests/share-request-dialog";
+import PurchaseOrderDetails from "@/components/requests/purchase-order/purchase-order-details";
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
+import {
+  isPurchaseOrderFormType,
+} from "@/lib/requests/purchase-orders";
 import {
   canEditRequestDetails,
   getApprovalAttachmentFile,
@@ -398,7 +402,9 @@ export default function MyRequestDetailsDialog({
                 Edit request
               </button>
             )}
-            {details && details.status !== "Canceled" && (
+            {details &&
+              details.status !== "Canceled" &&
+              !isPurchaseOrderFormType(details.form_type) && (
               <a
                 href={`/request/${details.id}/print`}
                 target="_blank"
@@ -474,12 +480,14 @@ export default function MyRequestDetailsDialog({
                   {details.kind_of_request ?? "—"}
                 </dd>
               </div>
-              <div>
-                <dt className="text-sm text-muted">Purpose</dt>
-                <dd className="mt-1 font-medium text-ink">
-                  {requestPurpose(details)}
-                </dd>
-              </div>
+              {!isPurchaseOrderFormType(details.form_type) && (
+                <div>
+                  <dt className="text-sm text-muted">Purpose</dt>
+                  <dd className="mt-1 font-medium text-ink">
+                    {requestPurpose(details)}
+                  </dd>
+                </div>
+              )}
               <div>
                 <dt className="text-sm text-muted">Grand total</dt>
                 <dd className="mt-1 font-semibold text-ink">
@@ -528,6 +536,10 @@ export default function MyRequestDetailsDialog({
                 )}
             </dl>
           </section>
+
+          {isPurchaseOrderFormType(details.form_type) && (
+            <PurchaseOrderDetails formData={details.form_data} />
+          )}
 
           <section aria-labelledby="request-items-title">
             <div className="flex flex-wrap items-center justify-between gap-3">

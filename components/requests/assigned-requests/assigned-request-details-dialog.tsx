@@ -4,9 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import RequestDecisionDialog from "@/components/requests/assigned-requests/request-decision-dialog";
 import AttachmentPreviewDialog from "@/components/requests/attachment-preview-dialog";
+import PurchaseOrderDetails from "@/components/requests/purchase-order/purchase-order-details";
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
+import {
+  isPurchaseOrderFormType,
+} from "@/lib/requests/purchase-orders";
 import {
   getAssignedRequest,
   type AssignedRequestStep,
@@ -338,7 +342,8 @@ export default function AssignedRequestDetailsDialog({
         maxWidth="4xl"
         footer={
           <>
-            {details && (
+            {details &&
+              !isPurchaseOrderFormType(details.form_type) && (
               <a
                 href={`/request/${details.id}/print`}
                 target="_blank"
@@ -397,13 +402,19 @@ export default function AssignedRequestDetailsDialog({
               </div>
               <dl className="mt-6 grid gap-5 border-t border-line/60 pt-5 sm:grid-cols-2 lg:grid-cols-3">
                 <div><dt className="text-sm text-muted">Kind</dt><dd className="mt-1 font-medium">{details.kind_of_request ?? "—"}</dd></div>
-                <div><dt className="text-sm text-muted">Purpose</dt><dd className="mt-1 font-medium">{requestPurpose(details)}</dd></div>
+                {!isPurchaseOrderFormType(details.form_type) && (
+                  <div><dt className="text-sm text-muted">Purpose</dt><dd className="mt-1 font-medium">{requestPurpose(details)}</dd></div>
+                )}
                 <div><dt className="text-sm text-muted">Grand total</dt><dd className="mt-1 font-semibold">{formatMoney(details.grand_total, details.currency)}</dd></div>
                 <div><dt className="text-sm text-muted">Requested by</dt><dd className="mt-1 font-medium">{personName(details.requester)}</dd><dd className="mt-1 text-sm text-muted">{details.requester.position ?? "Position not provided"}</dd></div>
                 <div><dt className="text-sm text-muted">Branch</dt><dd className="mt-1 font-medium">{details.branch.branch_code} — {details.branch.branch_name}</dd><dd className="mt-1 text-sm text-muted">{details.branch.branch}</dd></div>
                 <div><dt className="text-sm text-muted">Submitted</dt><dd className="mt-1 font-medium">{formatDate(details.created_at)}</dd></div>
               </dl>
             </section>
+
+            {isPurchaseOrderFormType(details.form_type) && (
+              <PurchaseOrderDetails formData={details.form_data} />
+            )}
 
             <section aria-labelledby="assigned-items-title">
               <div className="flex items-center justify-between gap-3">

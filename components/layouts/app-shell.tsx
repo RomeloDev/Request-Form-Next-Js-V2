@@ -127,7 +127,10 @@ export default function AppShell({
           <ul className="space-y-1">
             {navigationFor(user).map((item) => {
               const itemPathname = item.href.split("?", 1)[0];
-              const isActive = pathname === itemPathname;
+              const isActive =
+                pathname === itemPathname ||
+                (itemPathname !== "/" &&
+                  pathname.startsWith(`${itemPathname}/`));
 
               return (
               <li key={item.label}>
