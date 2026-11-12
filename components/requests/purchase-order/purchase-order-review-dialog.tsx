@@ -13,6 +13,9 @@ type PurchaseOrderReviewDialogProps = {
   notedBy: ApproverCandidate[];
   approvedBy: ApproverCandidate[];
   attachmentCount: number;
+  newAttachmentCount: number;
+  removedAttachmentCount: number;
+  mode: "create" | "edit";
   pending: boolean;
   error: string;
   onClose: () => void;
@@ -73,15 +76,24 @@ export default function PurchaseOrderReviewDialog({
   notedBy,
   approvedBy,
   attachmentCount,
+  newAttachmentCount,
+  removedAttachmentCount,
+  mode,
   pending,
   error,
   onClose,
   onConfirm,
 }: PurchaseOrderReviewDialogProps) {
+  const editing = mode === "edit";
+
   return (
     <Modal
       open
-      title="Review Purchase Order Requisition Slip"
+      title={
+        editing
+          ? "Review Purchase Order changes"
+          : "Review Purchase Order Requisition Slip"
+      }
       onClose={onClose}
       maxWidth="3xl"
       dismissible={!pending}
@@ -102,14 +114,21 @@ export default function PurchaseOrderReviewDialog({
             aria-busy={pending}
             className="min-h-12 rounded-xl bg-brand px-5 py-3 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
           >
-            {pending ? "Submitting…" : "Confirm and submit"}
+            {pending
+              ? editing
+                ? "Updating…"
+                : "Submitting…"
+              : editing
+                ? "Confirm and update"
+                : "Confirm and submit"}
           </button>
         </>
       }
     >
       <p className="mb-5 text-sm leading-6 text-muted">
-        Check these details before submitting. Selecting Confirm and submit
-        will create the request.
+        {editing
+          ? "Check these changes before updating the request. A disapproved request will be resubmitted as Pending."
+          : "Check these details before submitting. Selecting Confirm and submit will create the request."}
       </p>
 
       {error && <FormAlert message={error} />}
@@ -127,6 +146,11 @@ export default function PurchaseOrderReviewDialog({
         <ReviewValue
           label="Supporting documents"
           value={String(attachmentCount)}
+          hint={
+            editing
+              ? `${newAttachmentCount} new and ${removedAttachmentCount} removed.`
+              : undefined
+          }
         />
       </dl>
 

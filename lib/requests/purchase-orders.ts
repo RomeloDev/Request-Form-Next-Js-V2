@@ -63,6 +63,11 @@ export type CreatePurchaseOrderInput = {
   attachments: File[];
 };
 
+export type UpdatePurchaseOrderInput = CreatePurchaseOrderInput & {
+  updatedAt: string;
+  removedAttachmentIds: number[];
+};
+
 export type PurchaseOrderApprovalStep = {
   id: number;
   level: number;
@@ -90,6 +95,8 @@ export type CreatePurchaseOrderResponse = {
   message: string;
   data: CreatedPurchaseOrder;
 };
+
+export type UpdatePurchaseOrderResponse = CreatePurchaseOrderResponse;
 
 /**
  * Exact backend form_type value from RequestFormType::PurchaseOrder.
@@ -704,6 +711,78 @@ export async function createPurchaseOrder(
 
   const response = await apiRequest<unknown>(
     "/request-forms/purchase-orders",
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "X-XSRF-TOKEN": csrfToken,
+      },
+      body,
+    },
+  );
+
+  return parseCreatePurchaseOrderResponse(response);
+}
+
+function buildUpdatePurchaseOrderFormData(
+  input: UpdatePurchaseOrderInput,
+): FormData {
+  const updatedAt = input.updatedAt.trim();
+
+  if (!updatedAt) {
+    throw new ApiError(
+      422,
+      "The request version is missing. Refresh the request and try again.",
+      {
+        updated_at: [
+          "The request version is missing. Refresh the request and try again.",
+        ],
+      },
+    );
+  }
+
+  if (
+    input.removedAttachmentIds.some((id) => !isPositiveInteger(id)) ||
+    new Set(input.removedAttachmentIds).size !==
+      input.removedAttachmentIds.length
+  ) {
+    throw new ApiError(422, "Choose valid attachments to remove.", {
+      removed_attachment_ids: ["Choose valid attachments to remove."],
+    });
+  }
+
+  const formData = buildPurchaseOrderFormData(input);
+
+  /*
+   * PHP parses multipart files from POST reliably. Laravel applies the
+   * method override after parsing and routes this request as PATCH.
+   */
+  formData.append("_method", "PATCH");
+  formData.append("updated_at", updatedAt);
+
+  input.removedAttachmentIds.forEach((id, index) => {
+    formData.append(
+      `removed_attachment_ids[${index}]`,
+      String(id),
+    );
+  });
+
+  return formData;
+}
+
+export async function updatePurchaseOrder(
+  requestId: number,
+  input: UpdatePurchaseOrderInput,
+): Promise<UpdatePurchaseOrderResponse> {
+  if (!isPositiveInteger(requestId)) {
+    throw new ApiError(400, "A valid request ID is required.");
+  }
+
+  const body = buildUpdatePurchaseOrderFormData(input);
+  const csrfToken = await prepareCsrfSession();
+
+  const response = await apiRequest<unknown>(
+    `/request-forms/${requestId}/purchase-order`,
     {
       method: "POST",
       credentials: "include",

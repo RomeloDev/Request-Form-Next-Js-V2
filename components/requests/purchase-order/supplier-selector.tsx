@@ -11,7 +11,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import FormField from "@/components/ui/form-field";
-import FormTextarea from "@/components/ui/form-textarea";
 import { ApiError } from "@/lib/api";
 import {
   getSupplierSuggestions,
@@ -21,7 +20,7 @@ import {
 const SUPPLIER_INPUT_ID = "po-supplier";
 const SUPPLIER_LISTBOX_ID = "po-supplier-listbox";
 const SUPPLIER_STATUS_ID = "po-supplier-status";
-const ADDRESS_TEXTAREA_ID = "po-supplier-address";
+const ADDRESS_INPUT_ID = "po-supplier-address";
 
 /** Bounded page size. Never fetch the complete supplier table. */
 const SUPPLIERS_PER_PAGE = 10;
@@ -59,8 +58,10 @@ export default function SupplierSelector({
   const [totalMatches, setTotalMatches] = useState(0);
   const [status, setStatus] = useState<SupplierStatus>("idle");
   const [open, setOpen] = useState(false);
+  const [searchEnabled, setSearchEnabled] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [attempt, setAttempt] = useState(0);
+  const latestSupplierRef = useRef(supplier);
 
   /*
    * After a suggestion is picked, the debounce fires once more for the
@@ -72,16 +73,16 @@ export default function SupplierSelector({
   const debouncedSearch = useDebouncedValue(supplier.trim(), 400);
 
   useEffect(() => {
+    if (!searchEnabled) {
+      return;
+    }
+
     if (justSelectedRef.current) {
       justSelectedRef.current = false;
       return;
     }
 
     const query = debouncedSearch;
-
-    if (!query) {
-      return;
-    }
 
     const controller = new AbortController();
 
@@ -103,11 +104,17 @@ export default function SupplierSelector({
     }, 0);
 
     getSupplierSuggestions(
-      { search: query, perPage: SUPPLIERS_PER_PAGE },
+      {
+        ...(query ? { search: query } : {}),
+        perPage: SUPPLIERS_PER_PAGE,
+      },
       controller.signal,
     )
       .then((page) => {
-        if (controller.signal.aborted) {
+        if (
+          controller.signal.aborted ||
+          latestSupplierRef.current.trim() !== query
+        ) {
           return;
         }
 
@@ -146,24 +153,23 @@ export default function SupplierSelector({
       window.clearTimeout(loadingTimer);
       controller.abort();
     };
-  }, [attempt, debouncedSearch, router]);
+  }, [attempt, debouncedSearch, router, searchEnabled]);
 
   function changeSupplier(value: string) {
     justSelectedRef.current = false;
-
-    if (value.trim() === "") {
-      setSuggestions([]);
-      setTotalMatches(0);
-      setStatus("idle");
-      setOpen(false);
-      setHighlightedIndex(-1);
-    }
-
+    latestSupplierRef.current = value;
+    setSuggestions([]);
+    setTotalMatches(0);
+    setStatus("loading");
+    setOpen(true);
+    setSearchEnabled(true);
+    setHighlightedIndex(-1);
     onSupplierChange(value);
   }
 
   function selectSuggestion(suggestion: SupplierSuggestion) {
     justSelectedRef.current = true;
+    latestSupplierRef.current = suggestion.name;
     onSupplierChange(suggestion.name);
     onAddressChange(suggestion.address);
     setSuggestions([]);
@@ -174,15 +180,21 @@ export default function SupplierSelector({
   }
 
   function handleFocus() {
-    if (status !== "idle") {
-      setOpen(true);
+    setOpen(true);
+
+    if (!searchEnabled) {
+      setSearchEnabled(true);
+      return;
+    }
+
+    if (status === "idle") {
+      setAttempt((current) => current + 1);
     }
   }
 
   /*
-   * Close the listbox when focus leaves the whole selector, including the
-   * "Try again" button, so keyboard users are never stranded with an open
-   * list behind them.
+   * Close the listbox when focus leaves the combobox. The address is a
+   * separate field, so moving to it should not leave suggestions open.
    */
   function handleBlur(event: FocusEvent<HTMLDivElement>) {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
@@ -272,33 +284,68 @@ export default function SupplierSelector({
   const showRetry = status === "error";
 
   return (
-    <div
-      className="space-y-5 sm:col-span-2"
-      onBlur={handleBlur}
-    >
-      <FormField
-        id={SUPPLIER_INPUT_ID}
-        label="Supplier name"
-        value={supplier}
-        onChange={(event) => changeSupplier(event.target.value)}
-        onFocus={handleFocus}
-        onKeyDown={handleKeyDown}
-        required
-        disabled={disabled}
-        role="combobox"
-        aria-expanded={open}
-        aria-controls={open ? SUPPLIER_LISTBOX_ID : undefined}
-        aria-autocomplete="list"
-        aria-activedescendant={
-          open && highlightedIndex >= 0
-            ? optionId(highlightedIndex)
-            : undefined
-        }
-        aria-describedby={SUPPLIER_STATUS_ID}
-        autoComplete="off"
-        maxLength={255}
-        hint="Search a saved supplier, or type a new one. Saved suppliers fill the address automatically."
-      />
+    <div className="space-y-5 sm:col-span-2">
+      <div className="relative" onBlur={handleBlur}>
+        <FormField
+          id={SUPPLIER_INPUT_ID}
+          label="Supplier name"
+          value={supplier}
+          onChange={(event) => changeSupplier(event.target.value)}
+          onFocus={handleFocus}
+          onClick={handleFocus}
+          onKeyDown={handleKeyDown}
+          required
+          disabled={disabled}
+          role="combobox"
+          aria-expanded={open}
+          aria-controls={
+            open && hasMatches ? SUPPLIER_LISTBOX_ID : undefined
+          }
+          aria-autocomplete="list"
+          aria-activedescendant={
+            open && highlightedIndex >= 0
+              ? optionId(highlightedIndex)
+              : undefined
+          }
+          aria-describedby={SUPPLIER_STATUS_ID}
+          autoComplete="off"
+          maxLength={255}
+        />
+
+        {open && hasMatches && (
+          <ul
+            id={SUPPLIER_LISTBOX_ID}
+            role="listbox"
+            aria-label="Supplier suggestions"
+            className="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-line/70 bg-white py-1 shadow-lg"
+          >
+            {suggestions.map((suggestion, index) => (
+              <li
+                key={suggestion.name}
+                id={optionId(index)}
+                role="option"
+                aria-selected={index === highlightedIndex}
+                tabIndex={-1}
+                onMouseDown={handleOptionMouseDown}
+                onMouseEnter={() => setHighlightedIndex(index)}
+                onClick={() => selectSuggestion(suggestion)}
+                className={`cursor-pointer px-4 py-3 ${
+                  index === highlightedIndex
+                    ? "bg-blue-50"
+                    : "hover:bg-blue-50/50"
+                }`}
+              >
+                <span className="block font-medium text-ink wrap-anywhere">
+                  {suggestion.name}
+                </span>
+                <span className="mt-0.5 block text-sm text-muted wrap-anywhere">
+                  {suggestion.address || "No saved address"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <p
         id={SUPPLIER_STATUS_ID}
@@ -319,48 +366,14 @@ export default function SupplierSelector({
         </button>
       )}
 
-      {open && hasMatches && (
-        <ul
-          id={SUPPLIER_LISTBOX_ID}
-          role="listbox"
-          aria-label="Supplier suggestions"
-          className="max-h-64 overflow-y-auto rounded-xl border border-line/70 bg-white shadow-sm"
-        >
-          {suggestions.map((suggestion, index) => (
-            <li
-              key={suggestion.name}
-              id={optionId(index)}
-              role="option"
-              aria-selected={index === highlightedIndex}
-              tabIndex={-1}
-              onMouseDown={handleOptionMouseDown}
-              onClick={() => selectSuggestion(suggestion)}
-              className={`cursor-pointer px-4 py-3 ${
-                index === highlightedIndex
-                  ? "bg-blue-50"
-                  : "hover:bg-blue-50/50"
-              }`}
-            >
-              <span className="block font-medium text-ink wrap-anywhere">
-                {suggestion.name}
-              </span>
-              <span className="mt-0.5 block text-sm text-muted wrap-anywhere">
-                {suggestion.address || "No saved address"}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <FormTextarea
-        id={ADDRESS_TEXTAREA_ID}
+      <FormField
+        id={ADDRESS_INPUT_ID}
         label="Supplier address"
         value={address}
         onChange={(event) => onAddressChange(event.target.value)}
         required
         disabled={disabled}
         maxLength={255}
-        rows={3}
         hint="Selecting a saved supplier fills this automatically, but you can always edit it."
       />
     </div>

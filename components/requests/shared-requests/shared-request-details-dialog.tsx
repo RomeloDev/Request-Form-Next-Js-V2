@@ -362,9 +362,7 @@ export default function SharedRequestDetailsDialog({
         maxWidth="4xl"
         footer={
           <>
-            {details &&
-              details.status !== "Canceled" &&
-              !isPurchaseOrderFormType(details.form_type) && (
+            {details && details.status !== "Canceled" && (
               <a
                 href={`/request/${details.id}/print`}
                 target="_blank"

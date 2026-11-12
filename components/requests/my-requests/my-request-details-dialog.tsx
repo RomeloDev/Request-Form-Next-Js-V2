@@ -402,9 +402,7 @@ export default function MyRequestDetailsDialog({
                 Edit request
               </button>
             )}
-            {details &&
-              details.status !== "Canceled" &&
-              !isPurchaseOrderFormType(details.form_type) && (
+            {details && details.status !== "Canceled" && (
               <a
                 href={`/request/${details.id}/print`}
                 target="_blank"

@@ -46,7 +46,6 @@ export type PrintableRequest = {
   items: Array<{
     line_number: number;
     quantity: number;
-    unit: string;
     description: string;
     unit_cost: string;
     line_total: string;
@@ -54,6 +53,14 @@ export type PrintableRequest = {
   }>;
   approval_steps: PrintableApprovalStep[];
   created_at: string;
+  /**
+   * Optional raw form_data projection for form-specific print fields such as
+   * the Purchase Order supplier and address. It is never trusted: the parser
+   * only accepts a plain object or null, and feature renderers must project
+   * individual fields through their own safe parser before display. The
+   * Stock Requisition print contract omits this field entirely.
+   */
+  form_data?: Record<string, unknown> | null;
 };
 
 type PrintableRequestResponse = {
@@ -171,7 +178,12 @@ function isPrintableRequestResponse(
     ) &&
     Array.isArray(data.approval_steps) &&
     data.approval_steps.every(isApprovalStep) &&
-    typeof data.created_at === "string"
+    typeof data.created_at === "string" &&
+    // form_data is optional: absent for Stock Requisition, a plain object
+    // (or null) for Purchase Order. Any other shape is unexpected data.
+    (data.form_data === undefined ||
+      data.form_data === null ||
+      isRecord(data.form_data))
   );
 }
 

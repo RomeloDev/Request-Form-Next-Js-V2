@@ -342,8 +342,7 @@ export default function AssignedRequestDetailsDialog({
         maxWidth="4xl"
         footer={
           <>
-            {details &&
-              !isPurchaseOrderFormType(details.form_type) && (
+            {details && (
               <a
                 href={`/request/${details.id}/print`}
                 target="_blank"

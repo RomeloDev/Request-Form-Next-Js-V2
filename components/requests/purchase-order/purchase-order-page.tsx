@@ -20,12 +20,18 @@ import SubmitButton from "@/components/ui/submit-button";
 import { ApiError } from "@/lib/api";
 import {
   createPurchaseOrder,
+  parsePurchaseOrderFormData,
+  updatePurchaseOrder,
 } from "@/lib/requests/purchase-orders";
 import {
   isPurchaseOrderKind,
   PURCHASE_ORDER_KIND_OPTIONS,
 } from "@/lib/requests/purchase-order-options";
 import type { ApproverCandidate } from "@/lib/requests/stock-requisitions";
+import type {
+  MyRequestDetails,
+  MyRequestPerson,
+} from "@/lib/requests/my-requests";
 
 function firstValidationMessage(error: ApiError): string | undefined {
   return Object.values(error.errors)
@@ -86,19 +92,67 @@ function hasCompleteItems(items: DraftRequestItem[]): boolean {
   });
 }
 
-export default function PurchaseOrderPage() {
+type PurchaseOrderPageProps = {
+  initialRequest?: MyRequestDetails;
+};
+
+function personToCandidate(person: MyRequestPerson): ApproverCandidate {
+  return {
+    id: person.id,
+    firstname: person.firstname,
+    lastname: person.lastname,
+    position: person.position,
+    branch_code: null,
+    branch: null,
+  };
+}
+
+function initialItems(request?: MyRequestDetails): DraftRequestItem[] {
+  if (!request || request.items.length === 0) {
+    return [createDraftRequestItem(1)];
+  }
+
+  return request.items.map((item, index) => ({
+    clientId: index + 1,
+    quantity: String(item.quantity),
+    description: item.description,
+    unitCost: item.unit_cost,
+    remarks: item.remarks ?? "",
+  }));
+}
+
+export default function PurchaseOrderPage({
+  initialRequest,
+}: PurchaseOrderPageProps) {
   const router = useRouter();
   const submissionInFlight = useRef(false);
+  const editing = initialRequest !== undefined;
+  const initialSupplier = parsePurchaseOrderFormData(
+    initialRequest?.form_data ?? null,
+  );
 
-  const [kindOfRequest, setKindOfRequest] = useState("");
-  const [supplier, setSupplier] = useState("");
-  const [address, setAddress] = useState("");
-  const [items, setItems] = useState<DraftRequestItem[]>(() => [
-    createDraftRequestItem(1),
-  ]);
-  const [notedBy, setNotedBy] = useState<ApproverCandidate[]>([]);
-  const [approvedBy, setApprovedBy] = useState<ApproverCandidate[]>([]);
+  const [kindOfRequest, setKindOfRequest] = useState(
+    initialRequest?.kind_of_request ?? "",
+  );
+  const [supplier, setSupplier] = useState(initialSupplier.supplier);
+  const [address, setAddress] = useState(initialSupplier.address);
+  const [items, setItems] = useState<DraftRequestItem[]>(() =>
+    initialItems(initialRequest),
+  );
+  const [notedBy, setNotedBy] = useState<ApproverCandidate[]>(() =>
+    initialRequest?.approval_steps
+      .filter((step) => step.step_type === "noted_by")
+      .map((step) => personToCandidate(step.approver)) ?? [],
+  );
+  const [approvedBy, setApprovedBy] = useState<ApproverCandidate[]>(() =>
+    initialRequest?.approval_steps
+      .filter((step) => step.step_type === "approved_by")
+      .map((step) => personToCandidate(step.approver)) ?? [],
+  );
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [removedAttachmentIds, setRemovedAttachmentIds] = useState<number[]>(
+    [],
+  );
   const [formError, setFormError] = useState("");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -162,7 +216,7 @@ export default function PurchaseOrderPage() {
     setSubmissionError("");
 
     try {
-      const response = await createPurchaseOrder({
+      const input = {
         kindOfRequest,
         supplier,
         address,
@@ -175,7 +229,15 @@ export default function PurchaseOrderPage() {
           remarks: item.remarks,
         })),
         attachments,
-      });
+      };
+
+      const response = initialRequest
+        ? await updatePurchaseOrder(initialRequest.id, {
+            ...input,
+            updatedAt: initialRequest.updated_at ?? "",
+            removedAttachmentIds,
+          })
+        : await createPurchaseOrder(input);
 
       setReviewOpen(false);
       setSavedRequestCode(response.data.request_code);
@@ -198,7 +260,23 @@ export default function PurchaseOrderPage() {
 
       if (error instanceof ApiError && error.status === 403) {
         setSubmissionError(
-          "You are not allowed to create this request.",
+          editing
+            ? "You are not allowed to edit this request."
+            : "You are not allowed to create this request.",
+        );
+        return;
+      }
+
+      if (error instanceof ApiError && error.status === 404) {
+        setSubmissionError(
+          "This request is no longer available. Return to My Requests and refresh the list.",
+        );
+        return;
+      }
+
+      if (error instanceof ApiError && error.status === 409) {
+        setSubmissionError(
+          "This request changed or is no longer editable. Return to My Requests, refresh, and review its latest status.",
         );
         return;
       }
@@ -212,13 +290,13 @@ export default function PurchaseOrderPage() {
 
       if (error instanceof ApiError) {
         setSubmissionError(
-          "The server could not create the request. Wait a moment and verify the request status before trying again.",
+          `The server could not ${editing ? "update" : "create"} the request. Wait a moment and verify the request status before trying again.`,
         );
         return;
       }
 
       setSubmissionError(
-        "We couldn’t confirm whether the request was created. Do not submit it again immediately. Refresh and verify the request status first.",
+        `We couldn’t confirm whether the request was ${editing ? "updated" : "created"}. Do not submit it again immediately. Refresh and verify the request status first.`,
       );
     } finally {
       submissionInFlight.current = false;
@@ -231,8 +309,8 @@ export default function PurchaseOrderPage() {
       <div className="space-y-8">
         <PageHeader
           eyebrow="REQUESTS"
-          title="Purchase Order created"
-          description="The system accepted and saved your request."
+          title={`Purchase Order ${editing ? "updated" : "created"}`}
+          description={`The system accepted and ${editing ? "updated" : "saved"} your request.`}
         />
 
         <section
@@ -245,7 +323,7 @@ export default function PurchaseOrderPage() {
             </span>
             <div>
               <h2 className="text-xl font-semibold text-ink">
-                Request submitted successfully
+                Request {editing ? "updated" : "submitted"} successfully
               </h2>
               <p className="mt-2 text-muted">
                 Your request code is
@@ -278,8 +356,12 @@ export default function PurchaseOrderPage() {
     <div className="space-y-8">
       <PageHeader
         eyebrow="REQUESTS"
-        title="Create Purchase Order Requisition Slip"
-        description="Provide the supplier, requested items, supporting documents, and required approvers."
+        title={`${editing ? "Edit" : "Create"} Purchase Order Requisition Slip`}
+        description={
+          editing
+            ? "Update the supplier, requested items, approval routing, and supporting documents."
+            : "Provide the supplier, requested items, supporting documents, and required approvers."
+        }
       />
 
       <form
@@ -354,11 +436,20 @@ export default function PurchaseOrderPage() {
         <FormSection
           number="4"
           title="Supporting documents"
-          description="Attach quotations or other documents that support the request."
+          description={
+            editing
+              ? "Keep or remove existing documents and add replacement files when needed."
+              : "Attach quotations or other documents that support the request."
+          }
         >
           <RequestSupportingDocuments
             files={attachments}
             onFilesChange={setAttachments}
+            existingFiles={initialRequest?.attachments}
+            removedExistingFileIds={removedAttachmentIds}
+            onRemovedExistingFileIdsChange={
+              editing ? setRemovedAttachmentIds : undefined
+            }
           />
         </FormSection>
 
@@ -370,7 +461,9 @@ export default function PurchaseOrderPage() {
             />
           )}
 
-          <SubmitButton>Review request</SubmitButton>
+          <SubmitButton>
+            Review {editing ? "changes" : "request"}
+          </SubmitButton>
         </div>
       </form>
 
@@ -387,7 +480,14 @@ export default function PurchaseOrderPage() {
           }
           notedBy={notedBy}
           approvedBy={approvedBy}
-          attachmentCount={attachments.length}
+          attachmentCount={
+            (initialRequest?.attachments.length ?? 0) -
+            removedAttachmentIds.length +
+            attachments.length
+          }
+          newAttachmentCount={attachments.length}
+          removedAttachmentCount={removedAttachmentIds.length}
+          mode={editing ? "edit" : "create"}
           pending={submitting}
           error={submissionError}
           onConfirm={confirmSubmission}

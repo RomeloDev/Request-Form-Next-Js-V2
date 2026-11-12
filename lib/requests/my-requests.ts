@@ -4,6 +4,8 @@ import {
   apiRequest,
 } from "@/lib/api";
 import { prepareCsrfSession } from "@/lib/csrf";
+import { PURCHASE_ORDER_FORM_TYPE } from "@/lib/requests/purchase-orders";
+import { STOCK_REQUISITION_FORM_TYPE } from "@/lib/requests/stock-requisitions";
 
 export type MyRequestStatus =
   | "Pending"
@@ -177,7 +179,8 @@ export function isEditCandidate(
   request: Pick<MyRequest, "form_type" | "status">,
 ): boolean {
   return (
-    request.form_type === "Stock Requisition Slip" &&
+    (request.form_type === STOCK_REQUISITION_FORM_TYPE ||
+      request.form_type === PURCHASE_ORDER_FORM_TYPE) &&
     (request.status === "Pending" ||
       request.status === "Disapproved")
   );

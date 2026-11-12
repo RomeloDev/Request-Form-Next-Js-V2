@@ -5,6 +5,12 @@ import type {
   StockRequisitionPurpose,
 } from "@/lib/requests/stock-requisition-options";
 
+/**
+ * Exact backend form_type value from RequestFormType::StockRequisition.
+ * Renderer selection compares it directly; never match partial text.
+ */
+export const STOCK_REQUISITION_FORM_TYPE = "Stock Requisition Slip";
+
 export type ApproverCandidate = {
   id: number;
   firstname: string;

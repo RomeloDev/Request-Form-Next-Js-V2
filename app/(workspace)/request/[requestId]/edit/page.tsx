@@ -5,6 +5,7 @@ import {
   notFound,
   redirect,
 } from "next/navigation";
+import PurchaseOrderPage from "@/components/requests/purchase-order/purchase-order-page";
 import StockRequisitionPage from "@/components/requests/stock-requisition/stock-requisition-page";
 import { ApiError } from "@/lib/api";
 import { APP_ROLES } from "@/lib/roles";
@@ -13,12 +14,14 @@ import {
   canEditRequestDetails,
   type MyRequestDetails,
 } from "@/lib/requests/my-requests";
+import { isPurchaseOrderFormType } from "@/lib/requests/purchase-orders";
+import { STOCK_REQUISITION_FORM_TYPE } from "@/lib/requests/stock-requisitions";
 import { requireRole } from "@/lib/server-auth";
 
 export const instant = false;
 
 export const metadata: Metadata = {
-  title: "Edit Stock Requisition | SMCT Request Form",
+  title: "Edit Request | SMCT Request Form",
 };
 
 export default async function EditRequestPage({
@@ -89,5 +92,28 @@ export default async function EditRequestPage({
     );
   }
 
-  return <StockRequisitionPage initialRequest={request} />;
+  if (isPurchaseOrderFormType(request.form_type)) {
+    return <PurchaseOrderPage initialRequest={request} />;
+  }
+
+  if (request.form_type === STOCK_REQUISITION_FORM_TYPE) {
+    return <StockRequisitionPage initialRequest={request} />;
+  }
+
+  return (
+    <section className="rounded-2xl border border-amber-200 bg-white p-6 shadow-sm sm:p-8">
+      <h1 className="text-2xl font-semibold text-ink">
+        Request type cannot be edited
+      </h1>
+      <p className="mt-3 max-w-2xl leading-7 text-muted">
+        Editing is not available for this request type.
+      </p>
+      <Link
+        href="/request"
+        className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-brand px-5 py-2.5 font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+      >
+        Return to My Requests
+      </Link>
+    </section>
+  );
 }
