@@ -14,6 +14,10 @@ const REQUEST_TYPES = [
     label: "Purchase Order Requisition Slip",
     href: "/create-request/purchase-order-requisition-slip",
   },
+  {
+    label: "Cash Disbursement Requisition Slip",
+    href: "/create-request/cash-disbursement-requisition-slip",
+  },
 ] as const;
 
 /**
