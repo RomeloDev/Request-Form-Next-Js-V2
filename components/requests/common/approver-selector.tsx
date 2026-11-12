@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ApproverSelectorDialog from "@/components/requests/common/approver-selector-dialog";
 import Icon from "@/components/ui/icon";
-import type { ApproverCandidate } from "@/lib/requests/stock-requisitions";
+import type { ApproverCandidate } from "@/lib/requests/request-approvers";
 
 type ApproverSelectorProps = {
   notedBy: ApproverCandidate[];

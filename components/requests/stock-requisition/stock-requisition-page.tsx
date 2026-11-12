@@ -20,8 +20,8 @@ import { ApiError } from "@/lib/api";
 import {
   createStockRequisition,
   updateStockRequisition,
-  type ApproverCandidate,
 } from "@/lib/requests/stock-requisitions";
+import type { ApproverCandidate } from "@/lib/requests/request-approvers";
 import type {
   MyRequestDetails,
   MyRequestPerson,
@@ -368,7 +368,8 @@ export default function StockRequisitionPage({
           <RequestItemsEditor
             items={items}
             onItemsChange={setItems}
-            />
+            currency="PHP"
+          />
         </FormSection>
 
         <FormSection

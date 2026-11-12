@@ -4,6 +4,10 @@ import { useRef } from "react";
 import FormField from "@/components/ui/form-field";
 import FormTextarea from "@/components/ui/form-textarea";
 import Icon from "@/components/ui/icon";
+import {
+  formatRequestMoney,
+  type RequestCurrency,
+} from "@/lib/requests/request-currencies";
 
 export type RequestItemInput = {
   quantity: string;
@@ -21,6 +25,7 @@ export type DraftRequestItem =
 type RequestItemsEditorProps = {
   items: DraftRequestItem[];
   onItemsChange: (items: DraftRequestItem[]) => void;
+  currency: RequestCurrency;
   disabled?: boolean;
 };
 
@@ -36,11 +41,6 @@ export function createDraftRequestItem(
     remarks: "",
   };
 }
-
-const currencyFormatter = new Intl.NumberFormat("en-PH", {
-  style: "currency",
-  currency: "PHP",
-});
 
 function formatUnitCost(value: string): string {
   const [integerPart, decimalPart] = value.split(".");
@@ -105,6 +105,7 @@ function calculateGrandTotal(
 export default function RequestItemsEditor({
   items,
   onItemsChange,
+  currency,
   disabled,
 }: RequestItemsEditorProps) {
   const nextClientId = useRef(
@@ -259,7 +260,7 @@ export default function RequestItemsEditor({
                     <p className="mt-2 text-lg font-semibold text-ink">
                       {lineTotal === null
                         ? "—"
-                        : currencyFormatter.format(lineTotal)}
+                        : formatRequestMoney(lineTotal, currency)}
                     </p>
 
                     <p className="mt-1 text-xs text-muted">
@@ -328,7 +329,7 @@ export default function RequestItemsEditor({
           </p>
 
           <p className="text-xl font-semibold text-ink">
-            {currencyFormatter.format(estimatedGrandTotal)}
+            {formatRequestMoney(estimatedGrandTotal, currency)}
           </p>
 
           <p className="text-xs text-muted">

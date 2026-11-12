@@ -27,7 +27,8 @@ import {
   isPurchaseOrderKind,
   PURCHASE_ORDER_KIND_OPTIONS,
 } from "@/lib/requests/purchase-order-options";
-import type { ApproverCandidate } from "@/lib/requests/stock-requisitions";
+import type { ApproverCandidate } from "@/lib/requests/request-approvers";
+import { formatRequestMoney } from "@/lib/requests/request-currencies";
 import type {
   MyRequestDetails,
   MyRequestPerson,
@@ -38,11 +39,6 @@ function firstValidationMessage(error: ApiError): string | undefined {
     .flat()
     .find((message) => message.trim() !== "");
 }
-
-const currencyFormatter = new Intl.NumberFormat("en-PH", {
-  style: "currency",
-  currency: "PHP",
-});
 
 /**
  * Preview-only estimate. The browser never sends totals; Laravel derives
@@ -413,6 +409,7 @@ export default function PurchaseOrderPage({
           <RequestItemsEditor
             items={items}
             onItemsChange={setItems}
+            currency="PHP"
           />
         </FormSection>
 
@@ -476,7 +473,7 @@ export default function PurchaseOrderPage({
           estimatedGrandTotal={
             estimatedTotal === null
               ? "—"
-              : currencyFormatter.format(estimatedTotal)
+              : formatRequestMoney(estimatedTotal, "PHP")
           }
           notedBy={notedBy}
           approvedBy={approvedBy}

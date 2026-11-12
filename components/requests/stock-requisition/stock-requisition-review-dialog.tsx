@@ -2,7 +2,7 @@
 
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
-import type { ApproverCandidate } from "@/lib/requests/stock-requisitions";
+import type { ApproverCandidate } from "@/lib/requests/request-approvers";
 
 type StockRequisitionReviewDialogProps = {
   mode?: "create" | "edit";

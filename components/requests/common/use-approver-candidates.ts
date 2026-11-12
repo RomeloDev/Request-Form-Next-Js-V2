@@ -8,7 +8,7 @@ import {
   getApproverCandidates,
   type ApproverCandidate,
   type CandidatePaginationMeta,
-} from "@/lib/requests/stock-requisitions";
+} from "@/lib/requests/request-approvers";
 
 export type ApproverCandidateStatus =
   | "loading"

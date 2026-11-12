@@ -7,7 +7,7 @@ import Icon from "@/components/ui/icon";
 import Modal from "@/components/ui/modal";
 import RefreshButton from "@/components/ui/refresh-button";
 import TablePagination from "@/components/ui/table-pagination";
-import type { ApproverCandidate } from "@/lib/requests/stock-requisitions";
+import type { ApproverCandidate } from "@/lib/requests/request-approvers";
 
 type ApproverSelectorDialogProps = {
   notedBy: ApproverCandidate[];

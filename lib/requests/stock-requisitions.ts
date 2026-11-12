@@ -11,37 +11,6 @@ import type {
  */
 export const STOCK_REQUISITION_FORM_TYPE = "Stock Requisition Slip";
 
-export type ApproverCandidate = {
-  id: number;
-  firstname: string;
-  lastname: string;
-  position: string | null;
-  branch_code: string | null;
-  branch: string | null;
-};
-
-export type CandidatePaginationMeta = {
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-  from: number | null;
-  to: number | null;
-};
-
-export type ApproverCandidatePage = {
-  data: ApproverCandidate[];
-  meta: CandidatePaginationMeta;
-};
-
-export type ApproverCandidateFilters = {
-  search?: string;
-  sort?: "firstname" | "lastname" | "position" | "branch";
-  direction?: "asc" | "desc";
-  page?: number;
-  perPage?: 10 | 20 | 50;
-};
-
 export type StockRequisitionItemInput = {
   quantity: string;
   //unit: string;
@@ -102,78 +71,6 @@ export type CreateStockRequisitionResponse = {
   message: string;
   data: CreatedStockRequisition;
 };
-
-function candidateQuery(
-  filters: ApproverCandidateFilters,
-): string {
-  const query = new URLSearchParams();
-
-  const search = filters.search?.trim();
-
-  if (search) {
-    query.set("search", search);
-  }
-
-  if (filters.sort) {
-    query.set("sort", filters.sort);
-  }
-
-  if (filters.direction) {
-    query.set("direction", filters.direction);
-  }
-
-  if (filters.page) {
-    query.set("page", String(filters.page));
-  }
-
-  if (filters.perPage) {
-    query.set("per_page", String(filters.perPage));
-  }
-
-  const queryString = query.toString();
-
-  return queryString ? `?${queryString}` : "";
-}
-
-function isCandidatePage(
-  value: unknown,
-): value is ApproverCandidatePage {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const response = value as Partial<ApproverCandidatePage>;
-
-  return (
-    Array.isArray(response.data) &&
-    typeof response.meta?.current_page === "number" &&
-    typeof response.meta.last_page === "number" &&
-    typeof response.meta.per_page === "number" &&
-    typeof response.meta.total === "number"
-  );
-}
-
-export async function getApproverCandidates(
-  filters: ApproverCandidateFilters = {},
-  signal?: AbortSignal,
-): Promise<ApproverCandidatePage> {
-  const response = await apiRequest<unknown>(
-    `/request-forms/approver-candidates${candidateQuery(filters)}`,
-    {
-      credentials: "include",
-      signal,
-    },
-  );
-
-  if (!isCandidatePage(response)) {
-    throw new ApiError(
-      502,
-      "The service returned an unexpected approver list.",
-    );
-  }
-
-  return response;
-}
 
 function buildStockRequisitionFormData(
   input: CreateStockRequisitionInput,
