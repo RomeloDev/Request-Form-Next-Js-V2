@@ -185,7 +185,8 @@ export function isEditCandidate(
 ): boolean {
   return (
     (request.form_type === STOCK_REQUISITION_FORM_TYPE ||
-      request.form_type === PURCHASE_ORDER_FORM_TYPE) &&
+      request.form_type === PURCHASE_ORDER_FORM_TYPE ||
+      isCashDisbursementFormType(request.form_type)) &&
     (request.status === "Pending" ||
       request.status === "Disapproved")
   );

@@ -17,9 +17,17 @@ import FormSection from "@/components/ui/form-section";
 import Icon from "@/components/ui/icon";
 import SubmitButton from "@/components/ui/submit-button";
 import { ApiError } from "@/lib/api";
-import { createCashDisbursement } from "@/lib/requests/cash-disbursements";
+import {
+  createCashDisbursement,
+  updateCashDisbursement,
+} from "@/lib/requests/cash-disbursements";
+import type {
+  MyRequestDetails,
+  MyRequestPerson,
+} from "@/lib/requests/my-requests";
 import type { ApproverCandidate } from "@/lib/requests/request-approvers";
 import {
+  formatRequestMoney,
   isRequestCurrency,
   REQUEST_CURRENCY_OPTIONS,
   type RequestCurrency,
@@ -35,18 +43,115 @@ function firstValidationMessage(error: ApiError): string | undefined {
     .find((message) => message.trim() !== "");
 }
 
-export default function CashDisbursementPage() {
+type CashDisbursementPageProps = {
+  initialRequest?: MyRequestDetails;
+};
+
+function personToCandidate(person: MyRequestPerson): ApproverCandidate {
+  return {
+    id: person.id,
+    firstname: person.firstname,
+    lastname: person.lastname,
+    position: person.position,
+    branch_code: null,
+    branch: null,
+  };
+}
+
+function initialItems(
+  request?: MyRequestDetails,
+): DraftRequestItem[] {
+  if (!request || request.items.length === 0) {
+    return [createDraftRequestItem(1)];
+  }
+
+  return request.items.map((item, index) => ({
+    clientId: index + 1,
+    quantity: String(item.quantity),
+    description: item.description,
+    unitCost: item.unit_cost,
+    remarks: item.remarks ?? "",
+  }));
+}
+
+/**
+ * Preview-only estimate. The browser never sends totals; Laravel derives
+ * the authoritative line and grand totals from the submitted items.
+ */
+function estimateGrandTotal(items: DraftRequestItem[]): number | null {
+  let total = 0;
+
+  for (const item of items) {
+    const quantity = Number(item.quantity);
+    const unitCost = Number(item.unitCost);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1 ||
+      quantity > 100000 ||
+      !Number.isFinite(unitCost) ||
+      unitCost < 0 ||
+      unitCost > 999999
+    ) {
+      return null;
+    }
+
+    total += quantity * unitCost;
+  }
+
+  return total;
+}
+
+function hasCompleteItems(items: DraftRequestItem[]): boolean {
+  return items.every((item) => {
+    const quantity = Number(item.quantity);
+    const unitCost = item.unitCost.trim();
+
+    return (
+      Number.isInteger(quantity) &&
+      quantity >= 1 &&
+      quantity <= 100000 &&
+      item.description.trim() !== "" &&
+      /^\d*\.?\d*$/.test(unitCost) &&
+      unitCost !== "" &&
+      unitCost !== "." &&
+      Number(unitCost) >= 0 &&
+      Number(unitCost) <= 999999 &&
+      (unitCost.split(".")[1]?.length ?? 0) <= 2
+    );
+  });
+}
+
+export default function CashDisbursementPage({
+  initialRequest,
+}: CashDisbursementPageProps) {
   const router = useRouter();
   const submissionInFlight = useRef(false);
+  const editing = initialRequest !== undefined;
 
-  const [kindOfRequest, setKindOfRequest] = useState("");
-  const [currency, setCurrency] = useState<RequestCurrency>("PHP");
-  const [items, setItems] = useState<DraftRequestItem[]>(() => [
-    createDraftRequestItem(1),
-  ]);
-  const [notedBy, setNotedBy] = useState<ApproverCandidate[]>([]);
-  const [approvedBy, setApprovedBy] = useState<ApproverCandidate[]>([]);
+  const [kindOfRequest, setKindOfRequest] = useState(
+    initialRequest?.kind_of_request ?? "",
+  );
+  const [currency, setCurrency] = useState<RequestCurrency>(
+    initialRequest?.currency ?? "PHP",
+  );
+  const [items, setItems] = useState<DraftRequestItem[]>(() =>
+    initialItems(initialRequest),
+  );
+  const [notedBy, setNotedBy] = useState<ApproverCandidate[]>(() =>
+    initialRequest?.approval_steps
+      .filter((step) => step.step_type === "noted_by")
+      .map((step) => personToCandidate(step.approver)) ?? [],
+  );
+  const [approvedBy, setApprovedBy] = useState<ApproverCandidate[]>(() =>
+    initialRequest?.approval_steps
+      .filter((step) => step.step_type === "approved_by")
+      .map((step) => personToCandidate(step.approver)) ?? [],
+  );
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [removedAttachmentIds, setRemovedAttachmentIds] = useState<number[]>(
+    [],
+  );
   const [formError, setFormError] = useState("");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -73,8 +178,23 @@ export default function CashDisbursementPage() {
       return;
     }
 
+    if (!hasCompleteItems(items)) {
+      setFormError(
+        "Complete every item's quantity, description, and unit cost.",
+      );
+      setReviewOpen(false);
+      return;
+    }
+
     if (approvedBy.length === 0) {
       setFormError("Select at least one Approved By user.");
+      setReviewOpen(false);
+      return;
+    }
+
+    const notedIds = new Set(notedBy.map((candidate) => candidate.id));
+    if (approvedBy.some((candidate) => notedIds.has(candidate.id))) {
+      setFormError("A user cannot be both Noted By and Approved By.");
       setReviewOpen(false);
       return;
     }
@@ -99,7 +219,7 @@ export default function CashDisbursementPage() {
     setSubmissionError("");
 
     try {
-      const response = await createCashDisbursement({
+      const input = {
         kindOfRequest,
         currency,
         notedByIds: notedBy.map((candidate) => candidate.id),
@@ -111,7 +231,15 @@ export default function CashDisbursementPage() {
           remarks: item.remarks,
         })),
         attachments,
-      });
+      };
+
+      const response = initialRequest
+        ? await updateCashDisbursement(initialRequest.id, {
+            ...input,
+            updatedAt: initialRequest.updated_at ?? "",
+            removedAttachmentIds,
+          })
+        : await createCashDisbursement(input);
 
       setReviewOpen(false);
       setSavedRequestCode(response.data.request_code);
@@ -134,7 +262,9 @@ export default function CashDisbursementPage() {
 
       if (error instanceof ApiError && error.status === 403) {
         setSubmissionError(
-          "You are not allowed to create this request.",
+          editing
+            ? "You are not allowed to edit this request."
+            : "You are not allowed to create this request.",
         );
         return;
       }
@@ -162,13 +292,13 @@ export default function CashDisbursementPage() {
 
       if (error instanceof ApiError) {
         setSubmissionError(
-          "The server could not create the request. Wait a moment and verify the request status before trying again.",
+          `The server could not ${editing ? "update" : "create"} the request. Wait a moment and verify the request status before trying again.`,
         );
         return;
       }
 
       setSubmissionError(
-        "We couldn’t confirm whether the request was created. Do not submit it again immediately. Refresh and verify the request status first.",
+        `We couldn’t confirm whether the request was ${editing ? "updated" : "created"}. Do not submit it again immediately. Refresh and verify the request status first.`,
       );
     } finally {
       submissionInFlight.current = false;
@@ -181,8 +311,8 @@ export default function CashDisbursementPage() {
       <div className="space-y-8">
         <PageHeader
           eyebrow="REQUESTS"
-          title="Cash Disbursement created"
-          description="The system accepted and saved your request."
+          title={`Cash Disbursement ${editing ? "updated" : "created"}`}
+          description={`The system accepted and ${editing ? "updated" : "saved"} your request.`}
         />
 
         <section
@@ -195,7 +325,7 @@ export default function CashDisbursementPage() {
             </span>
             <div>
               <h2 className="text-xl font-semibold text-ink">
-                Request submitted successfully
+                Request {editing ? "updated" : "submitted"} successfully
               </h2>
               <p className="mt-2 text-muted">
                 Your request code is
@@ -222,12 +352,18 @@ export default function CashDisbursementPage() {
     );
   }
 
+  const estimatedTotal = estimateGrandTotal(items);
+
   return (
     <div className="space-y-8">
       <PageHeader
         eyebrow="REQUESTS"
-        title="Create Cash Disbursement Requisition Slip"
-        description="Provide the request details, requested items, supporting documents, and required approvers."
+        title={`${editing ? "Edit" : "Create"} Cash Disbursement Requisition Slip`}
+        description={
+          editing
+            ? "Update the request details, items, approval routing, and supporting documents. Existing supporting documents will be retained."
+            : "Provide the request details, requested items, supporting documents, and required approvers."
+        }
       />
 
       <form
@@ -320,11 +456,20 @@ export default function CashDisbursementPage() {
         <FormSection
           number="4"
           title="Supporting documents"
-          description="Attach receipts or other documents that support the request."
+          description={
+            editing
+              ? "Keep or remove existing documents and add replacement files when needed."
+              : "Attach receipts or other documents that support the request."
+          }
         >
           <RequestSupportingDocuments
             files={attachments}
             onFilesChange={setAttachments}
+            existingFiles={initialRequest?.attachments}
+            removedExistingFileIds={removedAttachmentIds}
+            onRemovedExistingFileIdsChange={
+              editing ? setRemovedAttachmentIds : undefined
+            }
           />
         </FormSection>
 
@@ -336,16 +481,34 @@ export default function CashDisbursementPage() {
             />
           )}
 
-          <SubmitButton>Review request</SubmitButton>
+          <SubmitButton>
+            Review {editing ? "changes" : "request"}
+          </SubmitButton>
         </div>
       </form>
 
       {reviewOpen && (
         <CashDisbursementReviewDialog
+          mode={editing ? "edit" : "create"}
           kindOfRequest={kindOfRequest}
           currencyLabel={currencyLabel}
           itemCount={items.length}
-          attachmentCount={attachments.length}
+          estimatedGrandTotal={
+            estimatedTotal === null
+              ? "—"
+              : formatRequestMoney(estimatedTotal, currency)
+          }
+          attachmentCount={
+            (initialRequest?.attachments.length ?? 0) -
+            removedAttachmentIds.length +
+            attachments.length
+          }
+          retainedAttachmentCount={
+            (initialRequest?.attachments.length ?? 0) -
+            removedAttachmentIds.length
+          }
+          newAttachmentCount={attachments.length}
+          removedAttachmentCount={removedAttachmentIds.length}
           notedBy={notedBy}
           approvedBy={approvedBy}
           pending={submitting}

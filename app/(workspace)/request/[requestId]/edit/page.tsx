@@ -5,9 +5,11 @@ import {
   notFound,
   redirect,
 } from "next/navigation";
+import CashDisbursementPage from "@/components/requests/cash-disbursement/cash-disbursement-page";
 import PurchaseOrderPage from "@/components/requests/purchase-order/purchase-order-page";
 import StockRequisitionPage from "@/components/requests/stock-requisition/stock-requisition-page";
 import { ApiError } from "@/lib/api";
+import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
 import { APP_ROLES } from "@/lib/roles";
 import { getMyRequestServer } from "@/lib/requests/my-request-server";
 import {
@@ -94,6 +96,10 @@ export default async function EditRequestPage({
 
   if (isPurchaseOrderFormType(request.form_type)) {
     return <PurchaseOrderPage initialRequest={request} />;
+  }
+
+  if (isCashDisbursementFormType(request.form_type)) {
+    return <CashDisbursementPage initialRequest={request} />;
   }
 
   if (request.form_type === STOCK_REQUISITION_FORM_TYPE) {
