@@ -1,4 +1,9 @@
 import { ApiError, apiFileRequest } from "@/lib/api";
+import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
+import {
+  isRequestCurrency,
+  type RequestCurrency,
+} from "@/lib/requests/request-currencies";
 
 export type PrintableRequestStatus =
   | "Pending"
@@ -32,7 +37,7 @@ export type PrintableRequest = {
   id: number;
   request_code: string;
   form_type: string;
-  currency: string;
+  currency: RequestCurrency;
   status: PrintableRequestStatus;
   purpose: string;
   grand_total: string;
@@ -148,11 +153,16 @@ function isPrintableRequestResponse(
     return false;
   }
 
+  const cashDisbursement =
+    typeof data.form_type === "string" &&
+    isCashDisbursementFormType(data.form_type);
+
   return (
     Number.isInteger(data.id) &&
     typeof data.request_code === "string" &&
     typeof data.form_type === "string" &&
     typeof data.currency === "string" &&
+    isRequestCurrency(data.currency) &&
     typeof data.status === "string" &&
     printableStatuses.includes(
       data.status as PrintableRequestStatus,
@@ -179,11 +189,16 @@ function isPrintableRequestResponse(
     Array.isArray(data.approval_steps) &&
     data.approval_steps.every(isApprovalStep) &&
     typeof data.created_at === "string" &&
-    // form_data is optional: absent for Stock Requisition, a plain object
-    // (or null) for Purchase Order. Any other shape is unexpected data.
-    (data.form_data === undefined ||
-      data.form_data === null ||
-      isRecord(data.form_data))
+    // Cash Disbursement has no form-specific header data. Laravel's
+    // conditional resource field omits the key for Cash Disbursement (and
+    // Stock Requisition), so absent and explicit null are both valid for
+    // Cash. A plain object would be arbitrary form_data and is rejected.
+    // Purchase Order may return null or a plain object.
+    (cashDisbursement
+      ? data.form_data === undefined || data.form_data === null
+      : data.form_data === undefined ||
+        data.form_data === null ||
+        isRecord(data.form_data))
   );
 }
 
