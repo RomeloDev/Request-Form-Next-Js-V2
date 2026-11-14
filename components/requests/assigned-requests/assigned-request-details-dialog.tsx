@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import RequestDecisionDialog from "@/components/requests/assigned-requests/request-decision-dialog";
 import AttachmentPreviewDialog from "@/components/requests/attachment-preview-dialog";
+import CheckIssuanceDetails from "@/components/requests/check-issuance/check-issuance-details";
 import PurchaseOrderDetails from "@/components/requests/purchase-order/purchase-order-details";
 import FormAlert from "@/components/ui/form-alert";
 import Modal from "@/components/ui/modal";
 import { ApiError } from "@/lib/api";
 import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
+import { isCheckIssuanceFormType } from "@/lib/requests/check-issuances";
 import {
   isPurchaseOrderFormType,
 } from "@/lib/requests/purchase-orders";
@@ -395,7 +397,7 @@ export default function AssignedRequestDetailsDialog({
                 {isCashDisbursementFormType(details.form_type) && (
                   <div><dt className="text-sm text-muted">Currency</dt><dd className="mt-1 font-medium">{requestCurrencyDisplay(details.currency)}</dd></div>
                 )}
-                {!isPurchaseOrderFormType(details.form_type) && !isCashDisbursementFormType(details.form_type) && (
+                {!isPurchaseOrderFormType(details.form_type) && !isCashDisbursementFormType(details.form_type) && !isCheckIssuanceFormType(details.form_type) && (
                   <div><dt className="text-sm text-muted">Purpose</dt><dd className="mt-1 font-medium">{requestPurpose(details)}</dd></div>
                 )}
                 <div><dt className="text-sm text-muted">Grand total</dt><dd className="mt-1 font-semibold">{formatRequestMoneyString(details.grand_total, details.currency)}</dd></div>
@@ -407,6 +409,10 @@ export default function AssignedRequestDetailsDialog({
 
             {isPurchaseOrderFormType(details.form_type) && (
               <PurchaseOrderDetails formData={details.form_data} />
+            )}
+
+            {isCheckIssuanceFormType(details.form_type) && (
+              <CheckIssuanceDetails formData={details.form_data} />
             )}
 
             <section aria-labelledby="assigned-items-title">

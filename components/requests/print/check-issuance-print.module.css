@@ -1,0 +1,58 @@
+.screenToolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f1f5f9;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.printButton,
+.closeButton {
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+}
+
+.printButton {
+  color: #fff;
+  background: #2458d3;
+}
+
+.closeButton {
+  color: #192a42;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+}
+
+.loading,
+.error {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 20px;
+  }
+
+  .screenToolbar {
+    display: none;
+  }
+
+  /* Avoid splitting the signature block across pages where the browser
+     supports it, while leaving the slip border consistent with the other
+     printable documents. */
+  .signatures {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

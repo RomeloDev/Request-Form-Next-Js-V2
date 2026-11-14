@@ -1,5 +1,6 @@
 import { ApiError, apiFileRequest } from "@/lib/api";
 import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
+import { isCheckIssuanceFormType } from "@/lib/requests/check-issuances";
 import {
   isRequestCurrency,
   type RequestCurrency,
@@ -106,6 +107,16 @@ function isNullableString(value: unknown): value is string | null {
   return value === null || typeof value === "string";
 }
 
+function isCheckIssuancePrintableFormData(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value.payee === "string" &&
+    typeof value.bank === "string" &&
+    typeof value.account_no === "string" &&
+    isNullableString(value.swift_code)
+  );
+}
+
 function isPerson(value: unknown): value is PrintablePerson {
   if (!isRecord(value)) return false;
 
@@ -156,6 +167,11 @@ function isPrintableRequestResponse(
   const cashDisbursement =
     typeof data.form_type === "string" &&
     isCashDisbursementFormType(data.form_type);
+  const checkIssuance =
+    typeof data.form_type === "string" &&
+    isCheckIssuanceFormType(data.form_type);
+  const validCheckIssuanceFormData =
+    isCheckIssuancePrintableFormData(data.form_data);
 
   return (
     Number.isInteger(data.id) &&
@@ -163,6 +179,8 @@ function isPrintableRequestResponse(
     typeof data.form_type === "string" &&
     typeof data.currency === "string" &&
     isRequestCurrency(data.currency) &&
+    (!checkIssuance ||
+      (data.currency === "PHP" && validCheckIssuanceFormData)) &&
     typeof data.status === "string" &&
     printableStatuses.includes(
       data.status as PrintableRequestStatus,
@@ -193,12 +211,15 @@ function isPrintableRequestResponse(
     // conditional resource field omits the key for Cash Disbursement (and
     // Stock Requisition), so absent and explicit null are both valid for
     // Cash. A plain object would be arbitrary form_data and is rejected.
-    // Purchase Order may return null or a plain object.
+    // Check Issuance must carry its exact safe print projection. Purchase
+    // Order may return null or a plain object for backward compatibility.
     (cashDisbursement
       ? data.form_data === undefined || data.form_data === null
-      : data.form_data === undefined ||
-        data.form_data === null ||
-        isRecord(data.form_data))
+      : checkIssuance
+        ? validCheckIssuanceFormData
+        : data.form_data === undefined ||
+          data.form_data === null ||
+          isRecord(data.form_data))
   );
 }
 

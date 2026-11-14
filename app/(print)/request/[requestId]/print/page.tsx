@@ -5,10 +5,12 @@ import {
   redirect,
 } from "next/navigation";
 import CashDisbursementPrintPage from "@/components/requests/print/cash-disbursement-print-page";
+import CheckIssuancePrintPage from "@/components/requests/print/check-issuance-print-page";
 import PurchaseOrderPrintPage from "@/components/requests/print/purchase-order-print-page";
 import StockRequisitionPrintPage from "@/components/requests/print/stock-requisition-print-page";
 import { ApiError } from "@/lib/api";
 import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
+import { isCheckIssuanceFormType } from "@/lib/requests/check-issuances";
 import { isPurchaseOrderFormType } from "@/lib/requests/purchase-orders";
 import { getPrintableRequestServer } from "@/lib/requests/printable-request-server";
 import type { PrintableRequest } from "@/lib/requests/printable-requests";
@@ -86,6 +88,10 @@ export default async function PrintRequestPage({
 
   if (isCashDisbursementFormType(data.form_type)) {
     return <CashDisbursementPrintPage data={data} />;
+  }
+
+  if (isCheckIssuanceFormType(data.form_type)) {
+    return <CheckIssuancePrintPage data={data} />;
   }
 
   if (data.form_type === STOCK_REQUISITION_FORM_TYPE) {
