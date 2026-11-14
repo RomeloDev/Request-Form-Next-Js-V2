@@ -18,6 +18,10 @@ const REQUEST_TYPES = [
     label: "Cash Disbursement Requisition Slip",
     href: "/create-request/cash-disbursement-requisition-slip",
   },
+  {
+    label: "Check Issuance Requisition Slip",
+    href: "/create-request/check-issuance-requisition-slip",
+  },
 ] as const;
 
 /**

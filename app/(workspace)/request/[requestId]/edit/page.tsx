@@ -6,10 +6,12 @@ import {
   redirect,
 } from "next/navigation";
 import CashDisbursementPage from "@/components/requests/cash-disbursement/cash-disbursement-page";
+import CheckIssuancePage from "@/components/requests/check-issuance/check-issuance-page";
 import PurchaseOrderPage from "@/components/requests/purchase-order/purchase-order-page";
 import StockRequisitionPage from "@/components/requests/stock-requisition/stock-requisition-page";
 import { ApiError } from "@/lib/api";
 import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
+import { isCheckIssuanceFormType } from "@/lib/requests/check-issuances";
 import { APP_ROLES } from "@/lib/roles";
 import { getMyRequestServer } from "@/lib/requests/my-request-server";
 import {
@@ -100,6 +102,10 @@ export default async function EditRequestPage({
 
   if (isCashDisbursementFormType(request.form_type)) {
     return <CashDisbursementPage initialRequest={request} />;
+  }
+
+  if (isCheckIssuanceFormType(request.form_type)) {
+    return <CheckIssuancePage initialRequest={request} />;
   }
 
   if (request.form_type === STOCK_REQUISITION_FORM_TYPE) {

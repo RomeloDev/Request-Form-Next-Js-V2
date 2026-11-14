@@ -5,6 +5,7 @@ import {
 } from "@/lib/api";
 import { prepareCsrfSession } from "@/lib/csrf";
 import { isCashDisbursementFormType } from "@/lib/requests/cash-disbursements";
+import { isCheckIssuanceFormType } from "@/lib/requests/check-issuances";
 import { PURCHASE_ORDER_FORM_TYPE } from "@/lib/requests/purchase-orders";
 import {
   isRequestCurrency,
@@ -186,7 +187,8 @@ export function isEditCandidate(
   return (
     (request.form_type === STOCK_REQUISITION_FORM_TYPE ||
       request.form_type === PURCHASE_ORDER_FORM_TYPE ||
-      isCashDisbursementFormType(request.form_type)) &&
+      isCashDisbursementFormType(request.form_type) ||
+      isCheckIssuanceFormType(request.form_type)) &&
     (request.status === "Pending" ||
       request.status === "Disapproved")
   );
