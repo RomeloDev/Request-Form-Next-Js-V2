@@ -90,7 +90,11 @@ export default function DashboardOverview({ approvalView = false }: { approvalVi
         <div role="region" aria-label="Recent requests table" tabIndex={0} className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand">
           <table className="w-full min-w-[650px] text-left text-base">
             <caption className="sr-only">Recent requests with their request ID, type, date, branch and status</caption>
-            <thead className="bg-slate-50 text-sm text-muted"><tr>{["Request ID", "Request type", "Date", "Branch", "Status"].map((label) => <th key={label} scope="col" className="px-6 py-4 font-medium">{label}</th>)}</tr></thead>
+            <thead className="bg-slate-50 text-sm text-muted">
+              <tr>
+                {["Request ID", "Request type", "Date", "Branch", "Status"].map((label) => <th key={label} scope="col" className="px-6 py-4 font-medium">{label}</th>)}
+              </tr>
+            </thead>
             <tbody>
               {loading || data?.recent == null || !data.recent.length ? (
                 <tr><td colSpan={5} className="px-6 py-14 text-center text-base leading-7 text-muted">{loading ? "Loading your requests…" : data?.recent == null ? "Your recent requests are currently unavailable." : "No requests yet."}</td></tr>
