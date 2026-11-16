@@ -37,14 +37,14 @@ export function navigationFor(user: AuthenticatedUser): NavigationItem[] {
   );
 
   // The reference checks Audit capability before the Admin navigation branch.
-  if (isAuditor(user)) return [dashboard, ...personal, ...(user.role === APP_ROLES.APPROVER ? [process] : []), reports, shared, help];
-  if (user.role === APP_ROLES.APPROVER) return [dashboard, ...personal, process, shared, help];
+  if (isAuditor(user)) return [dashboard, ...personal, ...(user.role === APP_ROLES.APPROVER ? [process] : []), reports, shared, /*help*/];
+  if (user.role === APP_ROLES.APPROVER) return [dashboard, ...personal, process, shared, /*help*/];
   if (user.role === APP_ROLES.ADMIN) {
     return [dashboard, item("Users", "/admin/users", true), item("Positions", "/admin/positions", true),
       item("Branches", "/admin/branches", true), item("Approvers", "/admin/approvers", true),
       item("AVP Staffs", "/admin/avp-staffs", true), //item("Area Managers", "/admin/area-managers"),
       item("Branch Heads", "/admin/branch-heads", true), item("Feedbacks", "/admin/feedbacks"),
-      item("Request Access", "/admin/request-access"), reports, help];
+      /*item("Request Access", "/admin/request-access"),*/ reports, /*help*/];
   }
-  return [dashboard, ...personal, shared, help];
+  return [dashboard, ...personal, shared, /*help*/];
 }
