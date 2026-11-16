@@ -18,9 +18,13 @@ export function isAuditor(user: AuthenticatedUser) {
 /** Keep reference sidebar visibility/order; enable modules as they are delivered. */
 export function navigationFor(user: AuthenticatedUser): NavigationItem[] {
   const item = (label: string, href: string, available = false): NavigationItem => ({ label, href, available, icon: icons[label] ?? "file" });
+  // Reports access is Admin-only and comes from the authenticated
+  // application role, never from a position name. This also keeps an Admin
+  // whose position starts with "Audit" working when the auditor branch below
+  // returns early, while a non-Admin Audit-position user stays locked out.
+  const canViewReports = user.role === APP_ROLES.ADMIN;
   const dashboard = item("Dashboard", dashboardFor(user), true);
-  const reports = item("Reports", "/reports");
-  const help = item("Help", "/help");
+  const reports = item("Reports", "/reports", canViewReports);
   const personal = [
     item("My Request", "/request", true), 
     item(

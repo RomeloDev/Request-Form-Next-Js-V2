@@ -213,6 +213,7 @@ export function canEditRequestDetails(
 const previewableAttachmentTypes = new Set([
   "application/pdf",
   "image/jpeg",
+  "image/jpg",
   "image/png",
   "image/webp",
 ]);
