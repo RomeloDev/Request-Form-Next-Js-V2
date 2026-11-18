@@ -1,6 +1,8 @@
 import { ApiError, apiFileRequest, apiRequest } from "@/lib/api";
 import { prepareCsrfSession } from "@/lib/csrf";
 
+export const PROFILE_PICTURE_CHANGED_EVENT = "profile-picture-changed";
+
 export type UserProfile = {
     id: number;
     name: string;
