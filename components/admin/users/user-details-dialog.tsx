@@ -1,30 +1,32 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
+import AdminUserProtectedMedia from "@/components/admin/users/admin-user-protected-media";
 import Modal from "@/components/ui/modal";
 import StatusBadge from "@/components/ui/status-badge";
-import { branchCodeFor, publicStorageUrl, userFullName, type AdminUser } from "@/lib/admin/users";
-
-function StoredImage({ path, kind }: { path: string | null; kind: "photo" | "signature" }) {
-  const [failed, setFailed] = useState(false);
-  const src = publicStorageUrl(path);
-  if (!src || failed) {
-    return <div className={`grid place-items-center rounded-xl border border-dashed border-line bg-slate-50 p-4 text-center text-sm leading-6 text-muted ${kind === "photo" ? "size-24 shrink-0" : "min-h-32 w-full"}`}>
-      {failed ? "Image unavailable" : kind === "photo" ? "No photo" : "No signature provided"}
-    </div>;
-  }
-  return <Image src={src} unoptimized width={kind === "photo" ? 96 : 600} height={kind === "photo" ? 96 : 200} alt={kind === "photo" ? "User profile photo" : "User signature"} onError={() => setFailed(true)} className={kind === "photo" ? "size-24 shrink-0 rounded-xl border border-line object-cover" : "h-40 w-full rounded-xl border border-line bg-white p-3 object-contain"} />;
-}
+import { branchCodeFor, userFullName, type AdminUser } from "@/lib/admin/users";
 
 export default function UserDetailsDialog({ user, branchCodes, onClose }: { user: AdminUser | null; branchCodes: Record<string, string>; onClose: () => void }) {
+  const router = useRouter();
   const date = user?.email_verified_at ? new Date(user.email_verified_at) : null;
+  const handleSessionExpired = useCallback(() => {
+    onClose();
+    router.replace("/login");
+  }, [onClose, router]);
+
   return (
     <Modal open={Boolean(user)} title="User information" onClose={onClose}>
       {user && (
         <>
           <div className="flex flex-wrap items-center gap-5 border-b border-line/60 pb-6">
-            <StoredImage key={`photo-${user.id}-${user.profile_picture}`} path={user.profile_picture} kind="photo" />
+            <AdminUserProtectedMedia
+              key={`photo-${user.id}-${user.has_profile_picture}`}
+              userId={user.id}
+              available={user.has_profile_picture}
+              kind="photo"
+              onSessionExpired={handleSessionExpired}
+            />
             <div className="min-w-0 flex-1">
               <h3 className="text-2xl leading-tight font-semibold wrap-anywhere">{userFullName(user)}</h3>
               <p className="mt-1 text-base leading-7 wrap-anywhere text-muted">@{user.username}</p>
@@ -43,7 +45,13 @@ export default function UserDetailsDialog({ user, branchCodes, onClose }: { user
           </dl>
           <section aria-labelledby="user-signature-title" className="border-t border-line/60 pt-6">
             <h3 id="user-signature-title" className="mb-3 text-base font-semibold">Signature</h3>
-            <StoredImage key={`signature-${user.id}-${user.signature}`} path={user.signature} kind="signature" />
+            <AdminUserProtectedMedia
+              key={`signature-${user.id}-${user.has_signature}`}
+              userId={user.id}
+              available={user.has_signature}
+              kind="signature"
+              onSessionExpired={handleSessionExpired}
+            />
           </section>
         </>
       )}

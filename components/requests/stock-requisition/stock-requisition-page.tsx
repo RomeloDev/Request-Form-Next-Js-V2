@@ -215,7 +215,7 @@ export default function StockRequisitionPage({
 
       if (error instanceof ApiError && error.status === 409) {
         setSubmissionError(
-          "This request changed or is no longer editable. Return to My Requests, refresh, and review its latest status.",
+          error.message,
         );
         return;
       }

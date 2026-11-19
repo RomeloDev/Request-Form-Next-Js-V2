@@ -19,6 +19,7 @@ import { useUserDirectory, type UserSortKey } from "@/components/admin/users/use
 import { branchCodeFor, userFullName, type AdminUser } from "@/lib/admin/users";
 import { dashboardFor } from "@/lib/auth";
 import EditUserDialog from "@/components/admin/users/edit-user-dialog";
+import AddUserDialog from "@/components/admin/users/add-user-dialog";
 import { APP_ROLES } from "@/lib/roles";
 
 const secondaryButton = "min-h-12 rounded-xl border border-line bg-white px-4 py-3 text-base leading-6 font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-500";
@@ -34,6 +35,7 @@ export default function UsersPage() {
   const loading = state.status === "loading";
   const hasFilters = Boolean(directory.search || directory.role || directory.status);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [addingUser, setAddingUser] = useState(false);
 
   if (!canView || state.status === "forbidden") {
     return <section className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-7"><p className="text-sm font-medium text-brand">ADMINISTRATION</p><h1 className="mt-3 text-2xl font-semibold">Access restricted</h1><p className="mt-3 text-base leading-7 text-muted">You don’t have permission to view the users list.</p><div className="mt-5"><TextLink href={dashboardFor(currentUser)}>Back to dashboard</TextLink></div></section>;
@@ -63,7 +65,7 @@ export default function UsersPage() {
     <div className="space-y-7">
       <PageHeader title="Users" eyebrow="ADMINISTRATION" description="View registered accounts and their verification status. Admin accounts are excluded from this list.">
         <RefreshButton label="Refresh users" onClick={directory.refresh} loading={loading} showLabel />
-        <button type="button" disabled title="Account creation is not available yet." className="inline-flex min-h-12 cursor-not-allowed items-center gap-2 rounded-xl bg-slate-200 px-5 py-3 text-base font-semibold text-slate-600"><Icon name="plus" />Add User</button>
+        <button type="button" onClick={() => { setActionNotice(""); setAddingUser(true); }} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-700 px-5 py-3 text-base font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"><Icon name="plus" />Add User</button>
       </PageHeader>
 
       {actionNotice && <div role="status" className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-base leading-7 text-emerald-900"><Icon name="checkCircle" className="mt-1 size-5" /><p className="min-w-0 flex-1 wrap-anywhere">{actionNotice}</p><button type="button" aria-label="Dismiss account action message" onClick={() => setActionNotice("")} className="grid size-11 shrink-0 place-items-center rounded-lg hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-emerald-700"><Icon name="close" /></button></div>}
@@ -75,7 +77,13 @@ export default function UsersPage() {
       </section>
 
       {state.status === "error" ? (
-        <section role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-6"><h2 className="text-xl font-semibold text-danger">We couldn’t load users</h2><p className="mt-2 text-base leading-7 text-danger">Please check your connection and try again.</p><button type="button" onClick={directory.refresh} className={`${secondaryButton} mt-5`}>Try again</button></section>
+        <section role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-6">
+          <h2 className="text-xl font-semibold text-danger">
+            We couldn’t load users
+          </h2>
+          <p className="mt-2 text-base leading-7 text-danger">Please check your connection and try again.</p>
+          <button type="button" onClick={directory.refresh} className={`${secondaryButton} mt-5`}>Try again</button>
+        </section>
       ) : (
         <section aria-labelledby="users-list-title" className="min-w-0 overflow-hidden rounded-2xl border border-line/60 bg-white shadow-sm">
           <div className="p-5 sm:p-6">
@@ -96,6 +104,17 @@ export default function UsersPage() {
       )}
       <UserDetailsDialog user={selected} branchCodes={data?.branchCodes ?? {}} onClose={() => setSelected(null)} />
       {pendingAction && <UserActionDialog key={`${pendingAction.kind}-${pendingAction.user.id}`} action={pendingAction.kind} user={pendingAction.user} onClose={() => setPendingAction(null)} onStale={directory.refresh} onSuccess={(message) => { setPendingAction(null); setActionNotice(message); directory.refresh(); }} />}
+
+      {addingUser && (
+        <AddUserDialog
+          onClose={() => setAddingUser(false)}
+          onCreated={(message) => {
+            setAddingUser(false);
+            setActionNotice(message);
+            directory.refresh();
+          }}
+        />
+      )}
 
       {editingUser && (
         <EditUserDialog

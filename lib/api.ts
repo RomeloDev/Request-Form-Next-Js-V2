@@ -11,18 +11,24 @@ export class ApiError extends Error {
   }
 }
 
+export type ApiRequestOptions = RequestInit & {
+  /** Override only for endpoints whose documented work can exceed 20 seconds. */
+  timeoutMs?: number;
+};
+
 /** The browser calls Next.js; the configured rewrite forwards to Laravel. */
-export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const headers = new Headers(options.headers);
+export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+  const { timeoutMs = 20_000, signal, ...requestOptions } = options;
+  const headers = new Headers(requestOptions.headers);
   headers.set("Accept", "application/json");
 
   const response = await fetch(`/api/v1${path}`, {
-    ...options,
+    ...requestOptions,
     headers,
     cache: "no-store",
-    signal: options.signal
-      ? AbortSignal.any([options.signal, AbortSignal.timeout(20_000)])
-      : AbortSignal.timeout(20_000),
+    signal: signal
+      ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)])
+      : AbortSignal.timeout(timeoutMs),
   });
   if (response.status === 204) return undefined as T;
   const payload = await response.json().catch(() => null);

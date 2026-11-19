@@ -63,7 +63,7 @@ export default function DashboardOverview({
   const approval = initialData?.approval ?? null;
   const recentRequests = initialData?.personal.recent_requests ?? [];
   const name = user.firstName || user.name || "there";
-  const auditAccess = Boolean(user.position?.startsWith("Audit"));
+  // const auditAccess = Boolean(user.position?.startsWith("Audit"));
 
   const personalCards: Array<{
     label: string;
@@ -189,7 +189,7 @@ export default function DashboardOverview({
                 className="size-4"
               />
               {accessLabel}
-              {auditAccess ? " · Audit access" : ""}
+              {/*{auditAccess ? " · Audit access" : ""} */}
             </p>
             <h2
               id="welcome-title"
