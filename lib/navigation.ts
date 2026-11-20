@@ -47,7 +47,7 @@ export function navigationFor(user: AuthenticatedUser): NavigationItem[] {
     return [dashboard, item("Users", "/admin/users", true), item("Positions", "/admin/positions", true),
       item("Branches", "/admin/branches", true), item("Approvers", "/admin/approvers", true),
       item("AVP Staffs", "/admin/avp-staffs", true), //item("Area Managers", "/admin/area-managers"),
-      item("Branch Heads", "/admin/branch-heads", true), item("Feedbacks", "/admin/feedbacks"),
+      item("Branch Heads", "/admin/branch-heads", true), item("Feedbacks", "/admin/feedbacks", true),
       /*item("Request Access", "/admin/request-access"),*/ reports, /*help*/];
   }
   return [dashboard, ...personal, shared, /*help*/];
