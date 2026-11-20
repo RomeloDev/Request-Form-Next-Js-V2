@@ -174,9 +174,11 @@ export default function ProfilePage() {
 
           <ProfileIdentityOverview profile={profile} />
 
-          <ProfileSignatureSection
-            initialHasSignature={profile.has_signature}
-          />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ProfileSignatureSection
+              initialHasSignature={profile.has_signature}
+            />
+          </div>
         </>
       )}
     </div>
