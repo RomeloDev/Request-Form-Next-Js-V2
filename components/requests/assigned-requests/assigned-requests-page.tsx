@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import AssignedRequestDetailsDialog from "@/components/requests/assigned-requests/assigned-request-details-dialog";
 import PageHeader from "@/components/layouts/page-header";
 import DataTable, { type TableColumn } from "@/components/ui/data-table";
@@ -21,6 +22,8 @@ import type { MyRequestStatus } from "@/lib/requests/my-requests";
 import { useAssignedRequests } from "./use-assigned-requests";
 
 type AssignedRequestsPageProps = {
+  initialSearch: string;
+  initialSelectedRequestId: number | null;
   initialAssignmentStatus: "ALL" | AssignedRequestStep["status"];
   initialPage: AssignedRequestPage | null;
 };
@@ -59,11 +62,17 @@ function personName(request: AssignedRequest): string {
 }
 
 export default function AssignedRequestsPage({
+  initialSearch,
   initialAssignmentStatus,
   initialPage,
+  initialSelectedRequestId,
 }: AssignedRequestsPageProps) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [selectedRequest, setSelectedRequest] =
     useState<AssignedRequest | null>(null);
+  const [dismissedDeepLinkId, setDismissedDeepLinkId] =
+    useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const {
     records,
@@ -78,7 +87,11 @@ export default function AssignedRequestsPage({
     changePage,
     changePageSize,
     refresh,
-  } = useAssignedRequests(initialAssignmentStatus, initialPage);
+  } = useAssignedRequests(
+    initialSearch,
+    initialAssignmentStatus,
+    initialPage,
+  );
 
   const loading = loadStatus === "loading";
   const failed =
@@ -86,13 +99,33 @@ export default function AssignedRequestsPage({
     loadStatus === "forbidden" ||
     loadStatus === "rate-limited";
 
+  const deepLinkedRequest =
+    initialSelectedRequestId !== null &&
+    dismissedDeepLinkId !== initialSelectedRequestId
+      ? records.find(
+          (request) => request.id === initialSelectedRequestId,
+        ) ?? null
+      : null;
+  const activeRequest = selectedRequest ?? deepLinkedRequest;
+
   const closeDetails = useCallback(() => {
     setSelectedRequest(null);
-  }, []);
+    setDismissedDeepLinkId(initialSelectedRequestId);
+
+    const query = new URLSearchParams(window.location.search);
+    if (!query.has("request_id")) return;
+
+    query.delete("request_id");
+    const destination = query.size
+      ? `${pathname}?${query.toString()}`
+      : pathname;
+
+    router.replace(destination, { scroll: false });
+  }, [initialSelectedRequestId, pathname, router]);
 
   const handleChanged = useCallback(
     (action: RequestDecisionAction) => {
-      setSelectedRequest(null);
+      closeDetails();
       setSuccessMessage(
         action === "approve"
           ? "Request approved successfully."
@@ -103,7 +136,7 @@ export default function AssignedRequestsPage({
       );
       refresh();
     },
-    [refresh],
+    [closeDetails, refresh],
   );
 
   const columns: TableColumn<AssignedRequest>[] = [
@@ -308,11 +341,12 @@ export default function AssignedRequestsPage({
         </section>
       )}
 
-      {selectedRequest && (
+      {activeRequest && (
         <AssignedRequestDetailsDialog
-          requestId={selectedRequest.id}
-          canProcess={selectedRequest.my_step.can_process}
-          stepType={selectedRequest.my_step.step_type}
+          key={activeRequest.my_step.id}
+          requestId={activeRequest.id}
+          canProcess={activeRequest.my_step.can_process}
+          stepType={activeRequest.my_step.step_type}
           onClose={closeDetails}
           onChanged={handleChanged}
           onStale={refresh}

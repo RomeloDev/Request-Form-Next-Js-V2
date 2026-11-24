@@ -13,13 +13,19 @@ import AccountMenu from "@/components/layouts/account-menu";
 import { APP_ROLES } from "@/lib/roles";
 import LogoutConfirmationDialog from "@/components/auth/logout-confirmation-dialog";
 import { getAssignedRequests } from "@/lib/requests/assigned-requests";
+import NotificationBell from "@/components/notifications/notification-bell";
+import type { NotificationPage } from "@/lib/notifications";
 
 export default function AppShell({
   children,
   initialPendingApprovalCount,
+  initialNotificationPage,
+  initialUnreadNotificationCount,
 }: {
   children: ReactNode;
   initialPendingApprovalCount: number;
+  initialNotificationPage: NotificationPage;
+  initialUnreadNotificationCount: number;
 }) {
   const { user, logout } = useSession();
   const pathname = usePathname();
@@ -195,7 +201,15 @@ export default function AppShell({
             <button type="button" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!sidebarCollapsed} aria-controls="workspace-sidebar" title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((current) => !current)} className="hidden size-11 shrink-0 place-items-center rounded-xl border border-line text-muted hover:bg-slate-50 hover:text-brand focus-visible:outline-2 focus-visible:outline-brand lg:grid"><Icon name={sidebarCollapsed ? "chevronRight" : "chevronLeft"} /></button>
             <div><p className="text-sm text-muted">SMCT Request Form</p><p className="text-base font-semibold">Your workspace</p></div>
           </div>
-          <AccountMenu name={name} email={user.email} roleLabel={roleLabel} leaving={leaving} onLogout={requestLogout} />
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <NotificationBell
+              initialNotificationPage={initialNotificationPage}
+              initialUnreadNotificationCount={
+                initialUnreadNotificationCount
+              }
+            />
+            <AccountMenu name={name} email={user.email} roleLabel={roleLabel} leaving={leaving} onLogout={requestLogout} />
+          </div>
         </header>
         <main id="workspace-content" tabIndex={-1} className="mx-auto p-5 focus:outline-none sm:p-8">
           {logoutError && <FormAlert message={logoutError} onDismiss={() => setLogoutError("")} />}

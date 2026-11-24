@@ -7,6 +7,7 @@ import { getAssignedRequestsServer } from "@/lib/requests/assigned-request-serve
 import type { AssignedRequestPage } from "@/lib/requests/assigned-requests";
 import type { AssignedRequestStep } from "@/lib/requests/assigned-requests";
 import { requireRole } from "@/lib/server-auth";
+import { parseOptionalRequestId } from "@/lib/request-route-params";
 
 export const instant = false;
 
@@ -27,6 +28,8 @@ export default async function ProcessRequestsPage({
 }: {
   searchParams: Promise<{
     assignment_status?: string | string[];
+    search?: string | string[];
+    request_id?: string | string[];
   }>;
 }) {
   await requireRole(APP_ROLES.APPROVER);
@@ -39,11 +42,19 @@ export default async function ProcessRequestsPage({
     suppliedStatus && allowedStatuses.has(suppliedStatus)
       ? (suppliedStatus as "ALL" | AssignedRequestStep["status"])
       : "Pending";
+  const suppliedSearch = Array.isArray(parameters.search)
+    ? parameters.search[0]
+    : parameters.search;
+  const initialSearch = suppliedSearch?.trim().slice(0, 100) ?? "";
+  const initialSelectedRequestId = parseOptionalRequestId(
+    parameters.request_id,
+  );
 
   let initialPage: AssignedRequestPage | null = null;
 
   try {
     initialPage = await getAssignedRequestsServer({
+      search: initialSearch,
       assignmentStatus: initialAssignmentStatus,
       page: 1,
       perPage: 10,
@@ -60,6 +71,11 @@ export default async function ProcessRequestsPage({
 
   return (
     <AssignedRequestsPage
+      key={`${initialAssignmentStatus}:${initialSearch}:${
+        initialSelectedRequestId ?? "none"
+      }`}
+      initialSearch={initialSearch}
+      initialSelectedRequestId={initialSelectedRequestId}
       initialAssignmentStatus={initialAssignmentStatus}
       initialPage={initialPage}
     />

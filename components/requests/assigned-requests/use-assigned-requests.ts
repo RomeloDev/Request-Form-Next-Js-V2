@@ -29,6 +29,7 @@ const emptyMeta: AssignedRequestPage["meta"] = {
 };
 
 export function useAssignedRequests(
+  initialSearch: string,
   initialAssignmentStatus: "ALL" | AssignedRequestStep["status"],
   initialPage: AssignedRequestPage | null,
 ) {
@@ -43,7 +44,7 @@ export function useAssignedRequests(
     useState<AssignedRequestsLoadStatus>(
       initialPage ? "ready" : "error",
     );
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [assignmentStatusFilter, setAssignmentStatusFilter] =
     useState<"ALL" | AssignedRequestStep["status"]>(
       initialAssignmentStatus,

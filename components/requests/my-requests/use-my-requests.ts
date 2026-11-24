@@ -38,7 +38,7 @@ const emptySummary: MyRequestSummary = {
   canceled: 0,
 };
 
-export function useMyRequests() {
+export function useMyRequests(initialSearch = "") {
   const router = useRouter();
 
   const [records, setRecords] = useState<MyRequestListItem[]>([]);
@@ -50,7 +50,7 @@ export function useMyRequests() {
   const [loadStatus, setLoadStatus] =
     useState<MyRequestsLoadStatus>("loading");
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] =
     useState<"ALL" | MyRequestStatus>("ALL");
   const [page, setPage] = useState(1);

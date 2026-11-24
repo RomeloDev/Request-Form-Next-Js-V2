@@ -28,6 +28,7 @@ const emptyMeta: SharedRequestPage["meta"] = {
 };
 
 export function useSharedRequests(
+  initialSearch: string,
   initialPage: SharedRequestPage | null,
 ) {
   const router = useRouter();
@@ -41,7 +42,7 @@ export function useSharedRequests(
     useState<SharedRequestsLoadStatus>(
       initialPage ? "ready" : "error",
     );
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] =
     useState<10 | 20 | 50>(10);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import PageHeader from "@/components/layouts/page-header";
 import DeleteRequestDialog from "@/components/requests/my-requests/delete-request-dialog";
 import MyRequestDetailsDialog from "@/components/requests/my-requests/my-request-details-dialog";
@@ -49,10 +49,17 @@ function formatDate(value: string | null): string {
   }).format(date);
 }
 
-export default function MyRequestsPage() {
+export default function MyRequestsPage({
+  initialSearch = "",
+  initialSelectedRequestId = null,
+}: {
+  initialSearch?: string;
+  initialSelectedRequestId?: number | null;
+}) {
+  const pathname = usePathname();
   const router = useRouter();
   const [selectedRequestId, setSelectedRequestId] =
-    useState<number | null>(null);
+    useState<number | null>(initialSelectedRequestId);
   const [requestToDelete, setRequestToDelete] =
     useState<MyRequestListItem | null>(null);
   const [requestToShare, setRequestToShare] =
@@ -72,7 +79,7 @@ export default function MyRequestsPage() {
     changePage,
     changePageSize,
     refresh,
-  } = useMyRequests();
+  } = useMyRequests(initialSearch);
 
   const loading = loadStatus === "loading";
   const failed =
@@ -82,7 +89,21 @@ export default function MyRequestsPage() {
 
   const closeDetails = useCallback(() => {
     setSelectedRequestId(null);
-  }, []);
+
+    const query = new URLSearchParams(window.location.search);
+
+    if (!query.has("request_id")) {
+      return;
+    }
+
+    query.delete("request_id");
+
+    const destination = query.size
+      ? `${pathname}?${query.toString()}`
+      : pathname;
+
+    router.replace(destination, { scroll: false });
+  }, [pathname, router]);
 
   const handleDeleted = useCallback(() => {
     setSelectedRequestId(null);
@@ -98,10 +119,10 @@ export default function MyRequestsPage() {
   }, [changePage, page, records.length, refresh]);
 
   const handleCanceled = useCallback(() => {
-    setSelectedRequestId(null);
+    closeDetails();
     setSuccessMessage("Request canceled successfully.");
     refresh();
-  }, [refresh]);
+  }, [closeDetails, refresh]);
 
   const columns: TableColumn<MyRequestListItem>[] = [
     {

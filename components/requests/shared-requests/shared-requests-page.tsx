@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import PageHeader from "@/components/layouts/page-header";
 import SharedRequestDetailsDialog from "@/components/requests/shared-requests/shared-request-details-dialog";
 import DataTable, { type TableColumn } from "@/components/ui/data-table";
@@ -16,6 +17,8 @@ import type {
 import { useSharedRequests } from "./use-shared-requests";
 
 type SharedRequestsPageProps = {
+  initialSearch: string;
+  initialSelectedRequestId: number | null;
   initialPage: SharedRequestPage | null;
 };
 
@@ -45,10 +48,14 @@ function personName(request: SharedRequest): string {
 }
 
 export default function SharedRequestsPage({
+  initialSearch,
+  initialSelectedRequestId,
   initialPage,
 }: SharedRequestsPageProps) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(
-    null,
+    initialSelectedRequestId,
   );
   const {
     records,
@@ -61,11 +68,21 @@ export default function SharedRequestsPage({
     changePage,
     changePageSize,
     refresh,
-  } = useSharedRequests(initialPage);
+  } = useSharedRequests(initialSearch, initialPage);
 
   const closeDetails = useCallback(() => {
     setSelectedRequestId(null);
-  }, []);
+
+    const query = new URLSearchParams(window.location.search);
+    if (!query.has("request_id")) return;
+
+    query.delete("request_id");
+    const destination = query.size
+      ? `${pathname}?${query.toString()}`
+      : pathname;
+
+    router.replace(destination, { scroll: false });
+  }, [pathname, router]);
 
   const loading = loadStatus === "loading";
   const failed =

@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Keep a running dev server isolated from `next build`. Both commands use
+  // `.next` by default, so running them together can replace the browser's
+  // client chunks underneath the dev server and cause hydration mismatches.
+  distDir:
+    process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   async rewrites() {
     const apiServer = (process.env.API_SERVER_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
 
