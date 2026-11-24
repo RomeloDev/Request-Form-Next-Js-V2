@@ -6,9 +6,79 @@
   --foreground: #192a42;
 }
 
+/*
+ * Landing-only design tokens. Keeping them on the landing wrapper means the
+ * authenticated workspace and authentication screens keep their existing
+ * palette even though the public landing page shares the root stylesheet.
+ */
+.landing-page {
+  color-scheme: light;
+  --landing-background: #f3f7fc;
+  --landing-foreground: #13233c;
+  --landing-muted: #54657d;
+  --landing-surface: #ffffff;
+  --landing-border: #d3dfef;
+  --landing-navy: #132b57;
+  --landing-blue: #2458d3;
+  --landing-blue-soft: #e9f1ff;
+  --landing-hero-wash:
+    linear-gradient(135deg, rgba(36, 88, 211, 0.07), transparent 42%),
+    linear-gradient(to bottom, #f7f9fc, transparent);
+}
+
+.landing-page[data-theme="dark"] {
+  color-scheme: dark;
+  --landing-background: #071426;
+  --landing-foreground: #eef5ff;
+  --landing-muted: #aab9cf;
+  --landing-surface: #0e1d33;
+  --landing-border: #253957;
+  --landing-navy: #173565;
+  --landing-blue: #8bb4ff;
+  --landing-blue-soft: #172b4b;
+  --landing-hero-wash:
+    linear-gradient(135deg, rgba(86, 139, 234, 0.12), transparent 42%),
+    linear-gradient(to bottom, #071426, transparent);
+}
+
+.landing-page ::selection {
+  background: color-mix(in srgb, var(--landing-blue) 24%, transparent);
+  color: var(--landing-foreground);
+}
+
+/*
+ * "system" is the deterministic first-render theme. CSS follows the operating
+ * system preference without requiring JavaScript, then the client controller
+ * can apply a stored light or dark choice after hydration.
+ */
+@media (prefers-color-scheme: dark) {
+  .landing-page[data-theme="system"] {
+    color-scheme: dark;
+    --landing-background: #071426;
+    --landing-foreground: #eef5ff;
+    --landing-muted: #aab9cf;
+    --landing-surface: #0e1d33;
+    --landing-border: #253957;
+    --landing-navy: #173565;
+    --landing-blue: #8bb4ff;
+    --landing-blue-soft: #172b4b;
+    --landing-hero-wash:
+      linear-gradient(135deg, rgba(86, 139, 234, 0.12), transparent 42%),
+      linear-gradient(to bottom, #071426, transparent);
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-landing-background: var(--landing-background);
+  --color-landing-foreground: var(--landing-foreground);
+  --color-landing-muted: var(--landing-muted);
+  --color-landing-surface: var(--landing-surface);
+  --color-landing-border: var(--landing-border);
+  --color-landing-navy: var(--landing-navy);
+  --color-landing-blue: var(--landing-blue);
+  --color-landing-blue-soft: var(--landing-blue-soft);
   --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
