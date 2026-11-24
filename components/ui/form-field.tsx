@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ComponentProps, type ReactNode } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { formControlClassName } from "@/components/ui/form-control";
 
 type FormFieldProps = ComponentProps<"input"> & {
@@ -60,13 +61,11 @@ export default function FormField({
             aria-controls={id}
             className="absolute inset-y-1 right-1 grid w-11 place-items-center rounded-lg text-muted hover:bg-blue-50 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="size-5 stroke-current stroke-[1.6] [stroke-linecap:round] [stroke-linejoin:round]">
-              {visible ? (
-                <path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A11 11 0 0 1 12 5c6 0 9 7 9 7a15 15 0 0 1-2.6 3.8M6.3 6.3A17 17 0 0 0 3 12s3 7 9 7a10 10 0 0 0 5.1-1.4" />
-              ) : (
-                <><path d="M3 12s3-7 9-7 9 7 9 7-3 7-9 7-9-7-9-7Z" /><circle cx="12" cy="12" r="3" /></>
-              )}
-            </svg>
+            {visible ? (
+              <EyeOff aria-hidden="true" className="size-5" strokeWidth={1.75} />
+            ) : (
+              <Eye aria-hidden="true" className="size-5" strokeWidth={1.75} />
+            )}
           </button>
         )}
       </div>

@@ -1,4 +1,5 @@
 import type { ReactNode, Ref } from "react";
+import { X } from "lucide-react";
 
 type FormAlertProps = {
   ref?: Ref<HTMLDivElement>;
@@ -14,9 +15,7 @@ export default function FormAlert({ ref, message, children, onDismiss }: FormAle
         <p className="font-medium">{message}</p>
         {onDismiss && (
           <button type="button" onClick={onDismiss} aria-label="Dismiss error" className="-mt-1 -mr-1 grid size-11 shrink-0 place-items-center rounded-lg hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">
-            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className="size-5 stroke-current stroke-2 [stroke-linecap:round]">
-              <path d="m5 5 10 10M15 5 5 15" />
-            </svg>
+            <X aria-hidden="true" className="size-5" strokeWidth={2} />
           </button>
         )}
       </div>

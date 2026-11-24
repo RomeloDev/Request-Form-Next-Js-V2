@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MessageSquareText } from "lucide-react";
 import LandingFeedbackForm from "@/components/landing/landing-feedback-form";
 import Icon, { type IconName } from "@/components/ui/icon";
 
@@ -16,11 +17,11 @@ const supportedRequests: {
   },
   {
     title: "Cash Disbursement Requisition Slip",
-    icon: "checkCircle",
+    icon: "dollar",
   },
   {
     title: "Check Issuance Requisition Slip",
-    icon: "eye",
+    icon: "banknote",
   },
 ];
 
@@ -116,14 +117,11 @@ export default function LandingHero() {
               aria-hidden="true"
               className="grid size-9 shrink-0 place-items-center rounded-md bg-landing-blue-soft text-landing-blue"
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="size-5 stroke-current stroke-[1.6] [stroke-linecap:round] [stroke-linejoin:round]"
-              >
-                <path d="M20 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z" />
-                <path d="M8 8h8M8 12h5" />
-              </svg>
+              <MessageSquareText
+                aria-hidden="true"
+                className="size-5"
+                strokeWidth={1.75}
+              />
             </span>
             <div>
               <p className="text-xs font-semibold tracking-[0.18em] text-landing-muted uppercase">

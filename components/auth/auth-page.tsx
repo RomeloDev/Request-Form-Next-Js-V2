@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Sparkles } from "lucide-react";
 import TextLink from "@/components/ui/text-link";
 
 type AuthPageProps = {
@@ -30,9 +31,11 @@ export default function AuthPage({
       )}
       <header className="relative isolate overflow-hidden rounded-2xl border border-blue-100 bg-auth-header p-5 sm:p-7 after:pointer-events-none after:absolute after:-top-24 after:-right-24 after:-z-10 after:size-56 after:rounded-full after:border after:border-brand/5 after:shadow-[0_0_0_28px_#2458d304,0_0_0_56px_#2458d303]">
         <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-blue-100 bg-white/90 px-3 py-1.5 text-sm leading-6 font-medium text-brand">
-          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className="size-4 shrink-0 stroke-current stroke-[1.3] [stroke-linejoin:round]">
-            <path d="m10 2 2.1 5.9L18 10l-5.9 2.1L10 18l-2.1-5.9L2 10l5.9-2.1L10 2Z" />
-          </svg>
+          <Sparkles
+            aria-hidden="true"
+            className="size-4 shrink-0"
+            strokeWidth={1.5}
+          />
           {eyebrow}
         </span>
         <h1 id={id} className="mt-5 text-3xl leading-tight font-semibold tracking-tight text-ink sm:text-4xl">

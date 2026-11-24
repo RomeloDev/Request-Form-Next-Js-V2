@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { FileText } from "lucide-react";
 
 export default function AuthBrand() {
   return (
@@ -47,14 +48,11 @@ export default function AuthBrand() {
         >
           <div className="flex items-center gap-3">
             <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/10 text-blue-100">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="size-6 stroke-current stroke-[1.4] [stroke-linecap:round] [stroke-linejoin:round]"
-              >
-                <path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z" />
-                <path d="M14 3v5h5M8 12h8M8 16h5" />
-              </svg>
+              <FileText
+                aria-hidden="true"
+                className="size-6"
+                strokeWidth={1.5}
+              />
             </span>
             <div className="min-w-0">
               <p className="mb-1 text-xs leading-5 text-blue-100/90">A simpler workday</p>

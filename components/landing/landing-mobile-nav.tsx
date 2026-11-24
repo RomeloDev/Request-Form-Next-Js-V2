@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import LandingThemeControl from "./landing-theme-control";
 
@@ -72,18 +73,11 @@ export default function LandingMobileNav({ links }: LandingMobileNavProps) {
         onClick={() => setOpen((current) => !current)}
         className="grid size-10 place-items-center rounded-md border border-white/25 text-white transition-colors hover:bg-white/10 focus:outline-2 focus:outline-offset-2 focus:outline-white"
       >
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="size-5 stroke-current stroke-[1.8] [stroke-linecap:round] [stroke-linejoin:round]"
-        >
-          {open ? (
-            <path d="m6 6 12 12M18 6 6 18" />
-          ) : (
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          )}
-        </svg>
+        {open ? (
+          <X aria-hidden="true" className="size-5" strokeWidth={1.75} />
+        ) : (
+          <Menu aria-hidden="true" className="size-5" strokeWidth={1.75} />
+        )}
       </button>
 
       <div

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown, Monitor, Moon, Sun } from "lucide-react";
 import {
   isLandingTheme,
   useLandingTheme,
@@ -22,20 +23,17 @@ export default function LandingThemeControl({
   className,
 }: LandingThemeControlProps) {
   const { theme, setTheme } = useLandingTheme();
+  const ThemeIcon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
 
   return (
     <div
       className={`flex min-h-10 items-center gap-2 rounded-md border border-white/20 bg-white px-3 text-[#102b5c] shadow-sm focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-white ${className ?? ""}`}
     >
-      <svg
+      <ThemeIcon
         aria-hidden="true"
-        viewBox="0 0 24 24"
-        fill="none"
-        className="size-4 shrink-0 stroke-current stroke-[1.7] text-[#2458d3] [stroke-linecap:round] [stroke-linejoin:round]"
-      >
-        <path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" />
-        <circle cx="12" cy="12" r="4" />
-      </svg>
+        className="size-4 shrink-0 text-[#2458d3]"
+        strokeWidth={1.75}
+      />
       <label htmlFor={id} className="sr-only">
         Landing page theme
       </label>
@@ -57,14 +55,11 @@ export default function LandingThemeControl({
           </option>
         ))}
       </select>
-      <svg
+      <ChevronDown
         aria-hidden="true"
-        viewBox="0 0 16 16"
-        fill="none"
-        className="pointer-events-none size-3 shrink-0 stroke-current stroke-[1.8] text-slate-500 [stroke-linecap:round] [stroke-linejoin:round]"
-      >
-        <path d="m4 6 4 4 4-4" />
-      </svg>
+        className="pointer-events-none size-3 shrink-0 text-slate-500"
+        strokeWidth={2}
+      />
     </div>
   );
 }
