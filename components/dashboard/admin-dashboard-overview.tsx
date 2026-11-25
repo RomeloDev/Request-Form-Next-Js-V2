@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AdminOrganizationChart from "@/components/dashboard/admin-organization-chart";
 import PageHeader from "@/components/layouts/page-header";
 import DashboardRefreshButton from "@/components/dashboard/dashboard-refresh-button";
 import Icon, { type IconName } from "@/components/ui/icon";
@@ -20,6 +21,14 @@ type MetricDefinition = {
   icon: IconName;
   tone: MetricTone;
   note: string;
+};
+
+type LifecycleMetric = {
+  label: string;
+  value: number | null;
+  note: string;
+  style: string;
+  dot: string;
 };
 
 const statusStyles: Record<DashboardRequestStatus, string> = {
@@ -112,117 +121,72 @@ export default function AdminDashboardOverview({
   const administration = initialData?.administration ?? null;
   const name = user.firstName || user.name || "there";
 
-  const userCards: MetricDefinition[] = [
+  const primaryCards: MetricDefinition[] = [
     {
       label: "Total users",
       value: administration?.summary.total_users ?? null,
       icon: "users",
       tone: "blue",
-      note: "All registered accounts",
+      note: "Registered non-admin accounts",
     },
-    {
-      label: "Verified users",
-      value: administration?.summary.verified_users ?? null,
-      icon: "userCheck",
-      tone: "emerald",
-      note: "Accounts with verified access",
-    },
-    {
-      label: "Unverified users",
-      value: administration?.summary.unverified_users ?? null,
-      icon: "profile",
-      tone: "amber",
-      note: "Accounts awaiting verification",
-    },
-  ];
-
-  const requestCards: MetricDefinition[] = [
     {
       label: "Total requests",
       value: administration?.request_summary.total ?? null,
       icon: "file",
-      tone: "blue",
-      note: "All requests in the system",
+      tone: "cyan",
+      note: "Requests across the system",
     },
     {
-      label: "Pending",
+      label: "Pending requests",
       value: administration?.request_summary.pending ?? null,
       icon: "clock",
       tone: "amber",
       note: "Awaiting review",
     },
     {
-      label: "Ongoing",
-      value: administration?.request_summary.ongoing ?? null,
-      icon: "progress",
-      tone: "cyan",
-      note: "In progress",
-    },
-    {
-      label: "Completed",
+      label: "Completed requests",
       value: administration?.request_summary.completed ?? null,
       icon: "checkCircle",
       tone: "emerald",
       note: "Completed successfully",
     },
+  ];
+
+  const lifecycleMetrics: LifecycleMetric[] = [
+    {
+      label: "Pending",
+      value: administration?.request_summary.pending ?? null,
+      note: "Awaiting review",
+      style: "border-amber-200 bg-amber-50/70",
+      dot: "bg-amber-500",
+    },
+    {
+      label: "Ongoing",
+      value: administration?.request_summary.ongoing ?? null,
+      note: "Currently in progress",
+      style: "border-blue-200 bg-blue-50/70",
+      dot: "bg-blue-500",
+    },
+    {
+      label: "Completed",
+      value: administration?.request_summary.completed ?? null,
+      note: "Successfully closed",
+      style: "border-emerald-200 bg-emerald-50/70",
+      dot: "bg-emerald-500",
+    },
     {
       label: "Disapproved",
       value: administration?.request_summary.disapproved ?? null,
-      icon: "xCircle",
-      tone: "rose",
       note: "Not approved",
+      style: "border-rose-200 bg-rose-50/70",
+      dot: "bg-rose-500",
     },
     {
       label: "Canceled",
       value: administration?.request_summary.canceled ?? null,
-      icon: "close",
-      tone: "cyan",
       note: "Canceled or withdrawn",
-    },
-  ];
-
-  const organizationCards: MetricDefinition[] = [
-    {
-      label: "Branches",
-      value: administration?.summary.branches ?? null,
-      icon: "building",
-      tone: "blue",
-      note: "Branch records",
-    },
-    {
-      label: "Positions",
-      value: administration?.summary.positions ?? null,
-      icon: "briefcase",
-      tone: "cyan",
-      note: "Configured positions",
-    },
-    {
-      label: "Approvers",
-      value: administration?.summary.approvers ?? null,
-      icon: "userCheck",
-      tone: "emerald",
-      note: "Accounts with approval access",
-    },
-    {
-      label: "AVP Staff assignments",
-      value: administration?.summary.avp_staff_assignments ?? null,
-      icon: "team",
-      tone: "blue",
-      note: "Current AVP Staff assignments",
-    },
-    {
-      label: "Branch Head assignments",
-      value: administration?.summary.branch_head_assignments ?? null,
-      icon: "contact",
-      tone: "cyan",
-      note: "Current Branch Head assignments",
-    },
-    {
-      label: "Feedback submissions",
-      value: administration?.summary.feedbacks ?? null,
-      icon: "feedback",
-      tone: "amber",
-      note: "Feedback received from users",
+      style: "border-slate-200 bg-slate-50",
+      dot: "bg-slate-500",
     },
   ];
 
@@ -282,12 +246,17 @@ export default function AdminDashboardOverview({
         </p>
       )}
 
-      <section aria-labelledby="admin-user-summary">
-        <h2 id="admin-user-summary" className="mb-4 text-lg font-semibold">
-          User summary
-        </h2>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-4">
-          {userCards.map((card) => (
+      <section aria-labelledby="admin-primary-summary">
+        <div className="mb-4">
+          <h2 id="admin-primary-summary" className="text-lg font-semibold">
+            At a glance
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted">
+            The most important workspace totals and request signals.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {primaryCards.map((card) => (
             <MetricCard
               key={card.label}
               label={card.label}
@@ -300,180 +269,262 @@ export default function AdminDashboardOverview({
         </div>
       </section>
 
-      <section aria-labelledby="admin-request-summary">
-        <h2 id="admin-request-summary" className="mb-4 text-lg font-semibold">
-          Request lifecycle summary
-        </h2>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-4">
-          {requestCards.map((card) => (
-            <MetricCard
-              key={card.label}
-              label={card.label}
-              value={card.value}
-              icon={card.icon}
-              tone={card.tone}
-              note={card.note}
-            />
-          ))}
-        </div>
-      </section>
+      <div className="grid items-start gap-6 xl:grid-cols-12">
+        <div className="min-w-0 space-y-6 xl:col-span-8">
+          <section
+            aria-labelledby="admin-request-summary"
+            className="rounded-2xl border border-line/60 bg-white p-5 shadow-sm"
+          >
+            <h2 id="admin-request-summary" className="text-lg font-semibold">
+              Request lifecycle
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              Current request volume grouped by workflow status.
+            </p>
+            <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-3">
+              {lifecycleMetrics.map((metric) => (
+                <article
+                  key={metric.label}
+                  className={`min-w-0 rounded-xl border p-4 ${metric.style}`}
+                >
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted">
+                    <span
+                      aria-hidden="true"
+                      className={`size-2 shrink-0 rounded-full ${metric.dot}`}
+                    />
+                    <h3>{metric.label}</h3>
+                  </div>
+                  <p
+                    className="mt-3 text-2xl font-semibold text-ink tabular-nums"
+                    aria-label={
+                      metric.value === null
+                        ? `${metric.label}: unavailable`
+                        : undefined
+                    }
+                  >
+                    {metric.value?.toLocaleString() ?? "—"}
+                  </p>
+                  <p className="mt-1 text-sm leading-5 text-muted">
+                    {metric.value === null ? "Unavailable" : metric.note}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
 
-      <section aria-labelledby="admin-organization-summary">
-        <h2
-          id="admin-organization-summary"
-          className="mb-4 text-lg font-semibold"
-        >
-          Organization overview
-        </h2>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-4">
-          {organizationCards.map((card) => (
-            <MetricCard
-              key={card.label}
-              label={card.label}
-              value={card.value}
-              icon={card.icon}
-              tone={card.tone}
-              note={card.note}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section aria-labelledby="admin-quick-links">
-        <h2 id="admin-quick-links" className="mb-4 text-lg font-semibold">
-          Administrative quick links
-        </h2>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,14rem),1fr))] gap-3">
-          {quickLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="group flex min-h-24 min-w-0 items-start gap-3 rounded-2xl border border-line/60 bg-white p-4 shadow-sm transition-colors hover:border-brand/40 hover:bg-blue-50/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
+          <section
+            aria-labelledby="admin-recent-title"
+            className="overflow-hidden rounded-2xl border border-line/60 bg-white shadow-sm"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line/60 p-4 sm:px-5">
+              <div>
+                <h2 id="admin-recent-title" className="text-lg font-semibold">
+                  Recent system requests
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  The five latest requests across the organization.
+                </p>
+              </div>
+              <Link
+                href="/reports"
+                className="inline-flex min-h-11 items-center rounded-xl border border-line bg-white px-4 text-sm font-medium text-ink hover:border-brand hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                View reports
+              </Link>
+            </div>
+            <div
+              role="region"
+              aria-label="Recent system requests table, scroll horizontally for all columns"
+              tabIndex={0}
+              className="overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
             >
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50 text-blue-700">
-                <Icon name={link.icon} className="size-5" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-ink">
-                    {link.label}
+              <table className="w-full min-w-[650px] text-left text-sm">
+                <caption className="sr-only">
+                  Recent system requests with their request ID, type, date,
+                  branch and status
+                </caption>
+                <thead className="bg-slate-50 text-sm text-muted">
+                  <tr>
+                    {["Request ID", "Request type", "Date", "Branch", "Status"].map(
+                      (label) => (
+                        <th
+                          key={label}
+                          scope="col"
+                          className="px-4 py-3 font-medium"
+                        >
+                          {label}
+                        </th>
+                      ),
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {administration === null ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-5 py-12 text-center text-sm leading-6 text-muted"
+                      >
+                        Recent system requests are currently unavailable.
+                      </td>
+                    </tr>
+                  ) : recentRequests.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-5 py-12 text-center text-sm leading-6 text-muted"
+                      >
+                        No system requests yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    recentRequests.slice(0, 5).map((request) => (
+                      <tr key={request.id} className="border-t border-line/50">
+                        <th
+                          scope="row"
+                          className="px-4 py-3 font-medium text-brand"
+                        >
+                          {request.request_code}
+                        </th>
+                        <td className="px-4 py-3">{request.form_type}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-muted">
+                          {formatDate(request.created_at)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="min-w-40">
+                            <p className="font-medium">
+                              {request.branch.branch_name}
+                            </p>
+                            <p className="mt-1 text-sm text-muted">
+                              {request.branch.branch_code}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${statusStyles[request.status]}`}
+                          >
+                            {request.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <aside
+          aria-label="Administrative dashboard supporting information"
+          className="min-w-0 space-y-6 xl:col-span-4"
+        >
+          <section
+            aria-labelledby="admin-organization-summary"
+            className="rounded-2xl border border-line/60 bg-white p-5 shadow-sm"
+          >
+            <h2
+              id="admin-organization-summary"
+              className="text-lg font-semibold"
+            >
+              Organization overview
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              Account verification and the mix of tracked organization records.
+            </p>
+
+            {administration ? (
+              <>
+                <dl className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+                    <dt className="text-sm text-emerald-800">Verified users</dt>
+                    <dd className="mt-2 text-2xl font-semibold text-emerald-950 tabular-nums">
+                      {administration.summary.verified_users.toLocaleString()}
+                    </dd>
+                  </div>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+                    <dt className="text-sm text-amber-800">Unverified users</dt>
+                    <dd className="mt-2 text-2xl font-semibold text-amber-950 tabular-nums">
+                      {administration.summary.unverified_users.toLocaleString()}
+                    </dd>
+                  </div>
+                </dl>
+
+                <AdminOrganizationChart
+                  metrics={{
+                    branches: administration.summary.branches,
+                    positions: administration.summary.positions,
+                    approvers: administration.summary.approvers,
+                    avpStaffAssignments:
+                      administration.summary.avp_staff_assignments,
+                    branchHeadAssignments:
+                      administration.summary.branch_head_assignments,
+                  }}
+                />
+
+                <div className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50/70 p-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-amber-900">
+                      Feedback submissions
+                    </p>
+                    <p className="mt-1 text-sm text-amber-800">
+                      Feedback received from users
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-2xl font-semibold text-amber-950 tabular-nums">
+                    {administration.summary.feedbacks.toLocaleString()}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <p
+                role="status"
+                className="mt-4 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-muted"
+              >
+                Organization metrics are currently unavailable.
+              </p>
+            )}
+          </section>
+
+          <section
+            aria-labelledby="admin-quick-links"
+            className="rounded-2xl border border-line/60 bg-white p-5 shadow-sm"
+          >
+            <h2 id="admin-quick-links" className="text-lg font-semibold">
+              Administrative quick links
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              Open common administration tools.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              {quickLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="group flex min-h-16 min-w-0 items-center gap-3 rounded-xl border border-line/60 bg-slate-50/60 p-3 transition-colors hover:border-brand/40 hover:bg-blue-50/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
+                >
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-blue-100 bg-white text-blue-700">
+                    <Icon name={link.icon} className="size-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold text-ink">
+                      {link.label}
+                    </span>
+                    <span className="mt-0.5 block text-sm leading-5 text-muted">
+                      {link.description}
+                    </span>
                   </span>
                   <Icon
                     name="chevronRight"
-                    className="size-4 text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
+                    className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
                   />
-                </span>
-                <span className="mt-1 block text-sm leading-5 text-muted">
-                  {link.description}
-                </span>
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section
-        aria-labelledby="admin-recent-title"
-        className="overflow-hidden rounded-2xl border border-line/60 bg-white shadow-sm"
-      >
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line/60 p-4 sm:px-5">
-          <div>
-            <h2 id="admin-recent-title" className="text-lg font-semibold">
-              Recent system requests
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-muted">
-              The five latest requests across the organization.
-            </p>
-          </div>
-          <Link
-            href="/reports"
-            className="inline-flex min-h-11 items-center rounded-xl border border-line bg-white px-4 text-sm font-medium text-ink hover:border-brand hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-          >
-            View reports
-          </Link>
-        </div>
-        <div
-          role="region"
-          aria-label="Recent system requests table, scroll horizontally for all columns"
-          tabIndex={0}
-          className="overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
-        >
-          <table className="w-full min-w-[650px] text-left text-sm">
-            <caption className="sr-only">
-              Recent system requests with their request ID, type, date, branch
-              and status
-            </caption>
-            <thead className="bg-slate-50 text-sm text-muted">
-              <tr>
-                {["Request ID", "Request type", "Date", "Branch", "Status"].map(
-                  (label) => (
-                    <th
-                      key={label}
-                      scope="col"
-                      className="px-4 py-3 font-medium"
-                    >
-                      {label}
-                    </th>
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {administration === null ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-5 py-12 text-center text-sm leading-6 text-muted"
-                  >
-                    Recent system requests are currently unavailable.
-                  </td>
-                </tr>
-              ) : recentRequests.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-5 py-12 text-center text-sm leading-6 text-muted"
-                  >
-                    No system requests yet.
-                  </td>
-                </tr>
-              ) : (
-                recentRequests.slice(0, 5).map((request) => (
-                  <tr key={request.id} className="border-t border-line/50">
-                    <th
-                      scope="row"
-                      className="px-4 py-3 font-medium text-brand"
-                    >
-                      {request.request_code}
-                    </th>
-                    <td className="px-4 py-3">{request.form_type}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-muted">
-                      {formatDate(request.created_at)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="min-w-40">
-                        <p className="font-medium">
-                          {request.branch.branch_name}
-                        </p>
-                        <p className="mt-1 text-sm text-muted">
-                          {request.branch.branch_code}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${statusStyles[request.status]}`}
-                      >
-                        {request.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }

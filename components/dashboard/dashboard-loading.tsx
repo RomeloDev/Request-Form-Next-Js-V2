@@ -93,13 +93,13 @@ function AccountSkeleton() {
 
 function QuickLinksSkeleton() {
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 rounded-2xl border border-line/60 bg-white p-5">
       <div className="h-7 w-56 rounded bg-slate-200" />
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,14rem),1fr))] gap-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
         {Array.from({ length: 8 }, (_, index) => (
           <div
             key={index}
-            className="flex min-h-24 items-start gap-3 rounded-2xl border border-line/60 bg-white p-4"
+            className="flex min-h-16 items-center gap-3 rounded-xl border border-line/60 bg-slate-50 p-3"
           >
             <div className="size-10 shrink-0 rounded-xl bg-blue-100" />
             <div className="min-w-0 flex-1">
@@ -109,6 +109,42 @@ function QuickLinksSkeleton() {
           </div>
         ))}
       </div>
+    </section>
+  );
+}
+
+function AdminLifecycleSkeleton() {
+  return (
+    <section className="rounded-2xl border border-line/60 bg-white p-5">
+      <div className="h-7 w-44 rounded bg-slate-200" />
+      <div className="mt-2 h-4 w-full max-w-sm rounded bg-slate-100" />
+      <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-3">
+        {Array.from({ length: 5 }, (_, index) => (
+          <div
+            key={index}
+            className="h-32 rounded-xl border border-slate-200 bg-slate-50 p-4"
+          >
+            <div className="h-4 w-20 rounded bg-slate-200" />
+            <div className="mt-4 h-8 w-16 rounded bg-slate-200" />
+            <div className="mt-3 h-4 w-24 max-w-full rounded bg-slate-100" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AdminOrganizationSkeleton() {
+  return (
+    <section className="rounded-2xl border border-line/60 bg-white p-5">
+      <div className="h-7 w-48 rounded bg-slate-200" />
+      <div className="mt-2 h-4 w-full rounded bg-slate-100" />
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="h-24 rounded-xl bg-emerald-50" />
+        <div className="h-24 rounded-xl bg-amber-50" />
+      </div>
+      <div className="mt-4 h-72 rounded-xl border border-slate-100 bg-slate-50" />
+      <div className="mt-4 h-20 rounded-xl bg-amber-50" />
     </section>
   );
 }
@@ -170,11 +206,17 @@ export default function DashboardLoading({
 
         {administration ? (
           <>
-            <SummarySkeleton cards={3} headingWidth="w-32" />
-            <SummarySkeleton cards={6} headingWidth="w-56" />
-            <SummarySkeleton cards={6} headingWidth="w-52" />
-            <QuickLinksSkeleton />
-            <RecentRequestsSkeleton />
+            <SummarySkeleton cards={4} headingWidth="w-32" />
+            <div className="grid items-start gap-6 xl:grid-cols-12">
+              <div className="space-y-6 xl:col-span-8">
+                <AdminLifecycleSkeleton />
+                <RecentRequestsSkeleton />
+              </div>
+              <div className="space-y-6 xl:col-span-4">
+                <AdminOrganizationSkeleton />
+                <QuickLinksSkeleton />
+              </div>
+            </div>
           </>
         ) : (
           <>
