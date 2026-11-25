@@ -197,7 +197,7 @@ export default function DashboardOverview({
             >
               Welcome back, <span className="text-blue-800">{name}.</span>
             </h2>
-            <p className="mt-2 max-w2xl text-sm leading-6 text-slate-600">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
               {mode === "approval"
                 ? "Your personal requests and approval activity in one place."
                 : accessLabel === "Administrator"
@@ -338,7 +338,7 @@ export default function DashboardOverview({
         </div>
         <div
           role="region"
-          aria-label="Recent requests table"
+          aria-label="Recent requests table, scroll horizontally for all columns"
           tabIndex={0}
           className="overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
         >

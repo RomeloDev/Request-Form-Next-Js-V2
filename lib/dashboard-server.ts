@@ -4,8 +4,8 @@ import { cookies, headers } from "next/headers";
 import { ApiError } from "@/lib/api";
 import {
   parseDashboardResponse,
-  type DashboardApprovalRequirement,
   type DashboardData,
+  type DashboardView,
 } from "@/lib/dashboard";
 
 function apiServerUrl(): string {
@@ -117,7 +117,7 @@ function toApiError(
  * The response is parsed by the same runtime validator used in the browser.
  */
 export async function getDashboardServer(
-  approvalRequirement: DashboardApprovalRequirement,
+  view: DashboardView,
 ): Promise<DashboardData> {
   const cookieHeader = (await cookies()).toString();
   const origin = await requestOrigin();
@@ -145,5 +145,5 @@ export async function getDashboardServer(
     );
   }
 
-  return parseDashboardResponse(payload, approvalRequirement);
+  return parseDashboardResponse(payload, view);
 }

@@ -189,12 +189,12 @@ export default function AppShell({
   return (
     <div className={`min-h-svh bg-background text-ink lg:grid ${sidebarCollapsed ? "lg:grid-cols-[5rem_minmax(0,1fr)]" : "lg:grid-cols-[16rem_minmax(0,1fr)]"} lg:transition-[grid-template-columns] lg:duration-200 lg:ease-out motion-reduce:transition-none`}>
       <a href="#workspace-content" className="fixed top-3 left-3 z-50 -translate-y-[160%] rounded-lg bg-white px-4 py-3 text-brand focus:translate-y-0 focus:outline-2 focus:outline-brand">Skip to main content</a>
-      <aside id="workspace-sidebar" aria-label="Workspace sidebar" className="sticky top-0 hidden h-svh min-w-0 overflow-hidden bg-auth-brand text-white lg:block">{sidebar(sidebarCollapsed)}</aside>
+      <aside id="workspace-sidebar" aria-label="Workspace sidebar" className={`fixed inset-y-0 left-0 z-30 hidden min-w-0 overflow-hidden bg-auth-brand text-white lg:block lg:transition-[width] lg:duration-200 lg:ease-out motion-reduce:transition-none ${sidebarCollapsed ? "lg:w-20" : "lg:w-64"}`}>{sidebar(sidebarCollapsed)}</aside>
       <dialog ref={dialog} onClose={() => setMobileOpen(false)} aria-label="Workspace navigation" className="fixed inset-y-0 left-0 m-0 h-svh max-h-none w-68 max-w-[90vw] border-0 bg-auth-brand p-0 text-white backdrop:bg-slate-950/50">
         <button type="button" onClick={() => dialog.current?.close()} aria-label="Close navigation" className="absolute top-2 right-2 grid size-11 place-items-center rounded-lg bg-slate-900 text-white focus-visible:outline-2 focus-visible:outline-white"><Icon name="close" /></button>
         {sidebar()}
       </dialog>
-      <div className="min-w-0">
+      <div className="min-w-0 lg:col-start-2">
         <header className="sticky top-0 z-20 flex min-h-20 flex-wrap items-center justify-between gap-3 border-b border-line/60 bg-white px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button type="button" aria-label="Open navigation" aria-expanded={mobileOpen} onClick={() => { dialog.current?.showModal(); setMobileOpen(true); }} className="grid size-11 shrink-0 place-items-center rounded-xl border border-line focus-visible:outline-2 focus-visible:outline-brand lg:hidden"><Icon name="menu" /></button>

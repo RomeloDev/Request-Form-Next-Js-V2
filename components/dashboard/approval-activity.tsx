@@ -1,6 +1,12 @@
+import {
+  MonthlyDecisionsChart,
+  WeeklyAssignmentsChart,
+} from "@/components/dashboard/approval-activity-charts";
 import type {
   DashboardApprovalData,
+  DashboardMonthlyDecision,
   DashboardWeekdayLabel,
+  DashboardWeeklyAssignment,
 } from "@/lib/dashboard";
 
 type ApprovalActivityProps = {
@@ -17,8 +23,68 @@ const weekdays: Record<DashboardWeekdayLabel, string> = {
   Sun: "Sunday",
 };
 
-function percentage(value: number, maximum: number): string {
-  return maximum === 0 ? "0%" : `${(value / maximum) * 100}%`;
+function MonthlyDecisionsTable({
+  decisions,
+}: {
+  decisions: DashboardMonthlyDecision[];
+}) {
+  return (
+    <table className="sr-only">
+      <caption>
+        Complete monthly approval decision data for the current year: each
+        month with its approved and disapproved totals
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Month</th>
+          <th scope="col">Approved</th>
+          <th scope="col">Disapproved</th>
+        </tr>
+      </thead>
+      <tbody>
+        {decisions.map((decision) => (
+          <tr key={decision.month}>
+            <th scope="row">
+              {decision.label} ({decision.month})
+            </th>
+            <td>{decision.approved}</td>
+            <td>{decision.disapproved}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function WeeklyAssignmentsTable({
+  assignments,
+}: {
+  assignments: DashboardWeeklyAssignment[];
+}) {
+  return (
+    <table className="sr-only">
+      <caption>
+        Complete daily assignment data for this week: each weekday with its
+        date and assignment total
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Day</th>
+          <th scope="col">Date</th>
+          <th scope="col">Assignments</th>
+        </tr>
+      </thead>
+      <tbody>
+        {assignments.map((assignment) => (
+          <tr key={assignment.date}>
+            <th scope="row">{weekdays[assignment.label]}</th>
+            <td>{assignment.date}</td>
+            <td>{assignment.total}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 export default function ApprovalActivity({
@@ -47,19 +113,12 @@ export default function ApprovalActivity({
     );
   }
 
-  const monthlyMaximum = Math.max(
-    0,
-    ...activity.monthly_decisions.flatMap(({ approved, disapproved }) => [
-      approved,
-      disapproved,
-    ]),
+  const hasDecisions = activity.monthly_decisions.some(
+    (decision) => decision.approved > 0 || decision.disapproved > 0,
   );
-  const weeklyMaximum = Math.max(
-    0,
-    ...activity.weekly_assignments.map(({ total }) => total),
+  const hasAssignments = activity.weekly_assignments.some(
+    (assignment) => assignment.total > 0,
   );
-  const hasDecisions = monthlyMaximum > 0;
-  const hasAssignments = weeklyMaximum > 0;
 
   return (
     <section
@@ -80,99 +139,20 @@ export default function ApprovalActivity({
           >
             Monthly decisions
           </h3>
-          <ul
-            aria-label="Monthly approval decisions"
-            className="mt-4 space-y-3"
-          >
-            {!hasDecisions && (
-              <li
-                role="status"
-                className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-muted"
-              >
-                No decisions have been recorded this year.
-              </li>
-            )}
-            {activity.monthly_decisions.map((decision) => (
-              <li
-                key={decision.month}
-                className="rounded-lg border border-slate-100 p-3"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <span className="font-medium">{decision.label}</span>
-                  <time
-                    dateTime={`${decision.month}-01`}
-                    className="text-sm text-muted"
-                  >
-                    {decision.month}
-                  </time>
-                </div>
-                <div className="mt-2 space-y-2">
-                  {[
-                    {
-                      label: "Approved",
-                      value: decision.approved,
-                      color: "bg-emerald-600",
-                    },
-                    {
-                      label: "Disapproved",
-                      value: decision.disapproved,
-                      color: "bg-rose-600",
-                    },
-                  ].map((decisionValue) => (
-                    <div
-                      key={decisionValue.label}
-                      className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)_3rem] items-center gap-2 text-sm"
-                    >
-                      <span>{decisionValue.label}</span>
-                      <span
-                        aria-hidden="true"
-                        className="h-3 overflow-hidden rounded-full bg-slate-100"
-                      >
-                        <span
-                          className={`block h-full rounded-full ${decisionValue.color}`}
-                          style={{
-                            width: percentage(
-                              decisionValue.value,
-                              monthlyMaximum,
-                            ),
-                          }}
-                        />
-                      </span>
-                      <span className="text-right tabular-nums">
-                        {decisionValue.value.toLocaleString()}
-                        <span className="sr-only">
-                          {" "}
-                          {decisionValue.label.toLowerCase()}
-                        </span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div
-            aria-label="Monthly decision legend"
-            className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm"
-          >
-            <span className="inline-flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className="size-3 rounded-sm bg-emerald-600"
-              />
-              Approved
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className="size-3 rounded-sm bg-rose-600"
-              />
-              Disapproved
-            </span>
-          </div>
-          <p className="mt-2 text-sm text-muted">
-            Bar lengths are scaled to the highest count in this period.
-          </p>
+          {!hasDecisions && (
+            <p
+              role="status"
+              className="mt-3 rounded-lg bg-slate-50 p-3 text-sm leading-6 text-muted"
+            >
+              No decisions have been recorded this year.
+            </p>
+          )}
+          {hasDecisions && (
+            <MonthlyDecisionsChart
+              monthlyDecisions={activity.monthly_decisions}
+            />
+          )}
+          <MonthlyDecisionsTable decisions={activity.monthly_decisions} />
         </section>
 
         <section aria-labelledby="weekly-assignments-title" className="min-w-0">
@@ -182,69 +162,20 @@ export default function ApprovalActivity({
           >
             Weekly assignments
           </h3>
-          <ul
-            aria-label="Assignments received each day this week"
-            className="mt-4 space-y-3"
-          >
-            {!hasAssignments && (
-              <li
-                role="status"
-                className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-muted"
-              >
-                No assignments were received this week.
-              </li>
-            )}
-            {activity.weekly_assignments.map((assignment) => {
-              return (
-                <li
-                  key={assignment.date}
-                  className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)_3rem] items-center gap-3 rounded-lg border border-slate-100 p-3"
-                >
-                  <span>
-                    <span className="block font-medium">
-                      {weekdays[assignment.label]}
-                    </span>
-                    <time
-                      dateTime={assignment.date}
-                      className="text-sm text-muted"
-                    >
-                      {assignment.date}
-                    </time>
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    className="h-3 overflow-hidden rounded-full bg-slate-100"
-                  >
-                    <span
-                      className="block h-full rounded-full bg-blue-700"
-                      style={{
-                        width: percentage(assignment.total, weeklyMaximum),
-                      }}
-                    />
-                  </span>
-                  <span className="text-right tabular-nums">
-                    {assignment.total.toLocaleString()}
-                    <span className="sr-only"> assignments</span>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-          <div
-            aria-label="Weekly assignment legend"
-            className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm"
-          >
-            <span className="inline-flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className="size-3 rounded-sm bg-blue-700"
-              />
-              Total assignments
-            </span>
-          </div>
-          <p className="mt-2 text-sm text-muted">
-            Bar lengths are scaled to the highest count in this period.
-          </p>
+          {!hasAssignments && (
+            <p
+              role="status"
+              className="mt-3 rounded-lg bg-slate-50 p-3 text-sm leading-6 text-muted"
+            >
+              No assignments were received this week.
+            </p>
+          )}
+          {hasAssignments && (
+            <WeeklyAssignmentsChart
+              weeklyAssignments={activity.weekly_assignments}
+            />
+          )}
+          <WeeklyAssignmentsTable assignments={activity.weekly_assignments} />
         </section>
       </div>
     </section>

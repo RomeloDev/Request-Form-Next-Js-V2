@@ -17,7 +17,7 @@ export default async function ApproverDashboardPage() {
   let initialData: DashboardData | null = null;
 
   try {
-    initialData = await getDashboardServer("required");
+    initialData = await getDashboardServer("approval");
   } catch (error: unknown) {
     if (error instanceof ApiError) {
       if (error.status === 401 || error.status === 419) {

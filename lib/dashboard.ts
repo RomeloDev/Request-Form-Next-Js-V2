@@ -66,12 +66,31 @@ export type DashboardApprovalData = {
   };
 };
 
+export type DashboardAdministrationSummary = {
+  total_users: number;
+  verified_users: number;
+  unverified_users: number;
+  branches: number;
+  positions: number;
+  approvers: number;
+  avp_staff_assignments: number;
+  branch_head_assignments: number;
+  feedbacks: number;
+};
+
+export type DashboardAdministrationData = {
+  summary: DashboardAdministrationSummary;
+  request_summary: DashboardPersonalSummary;
+  recent_requests: DashboardRecentRequest[];
+};
+
 export type DashboardData = {
   personal: {
     summary: DashboardPersonalSummary;
     recent_requests: DashboardRecentRequest[];
   };
   approval: DashboardApprovalData | null;
+  administration: DashboardAdministrationData | null;
 };
 
 const dashboardRequestStatuses: readonly DashboardRequestStatus[] = [
@@ -96,7 +115,10 @@ const WEEKDAY_LABELS: readonly DashboardWeekdayLabel[] = [
   "Sun",
 ];
 
-export type DashboardApprovalRequirement = "none" | "required";
+export type DashboardView =
+  | "personal"
+  | "approval"
+  | "administration";
 
 function isRecord(
   value: unknown,
@@ -297,6 +319,28 @@ function toDashboardRecentRequest(
   };
 }
 
+function toDashboardRecentRequests(
+  value: unknown,
+): DashboardRecentRequest[] | null {
+  if (!Array.isArray(value) || value.length > 5) {
+    return null;
+  }
+
+  const recentRequests: DashboardRecentRequest[] = [];
+
+  for (const entry of value) {
+    const request = toDashboardRecentRequest(entry);
+
+    if (!request) {
+      return null;
+    }
+
+    recentRequests.push(request);
+  }
+
+  return recentRequests;
+}
+
 function toDashboardApprovalSummary(
   value: unknown,
 ): DashboardApprovalSummary | null {
@@ -431,13 +475,73 @@ function toDashboardApprovalData(
   };
 }
 
+function toDashboardAdministrationSummary(
+  value: unknown,
+): DashboardAdministrationSummary | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (
+    !isNonNegativeInteger(value.total_users) ||
+    !isNonNegativeInteger(value.verified_users) ||
+    !isNonNegativeInteger(value.unverified_users) ||
+    !isNonNegativeInteger(value.branches) ||
+    !isNonNegativeInteger(value.positions) ||
+    !isNonNegativeInteger(value.approvers) ||
+    !isNonNegativeInteger(value.avp_staff_assignments) ||
+    !isNonNegativeInteger(value.branch_head_assignments) ||
+    !isNonNegativeInteger(value.feedbacks)
+  ) {
+    return null;
+  }
+
+  return {
+    total_users: value.total_users,
+    verified_users: value.verified_users,
+    unverified_users: value.unverified_users,
+    branches: value.branches,
+    positions: value.positions,
+    approvers: value.approvers,
+    avp_staff_assignments: value.avp_staff_assignments,
+    branch_head_assignments: value.branch_head_assignments,
+    feedbacks: value.feedbacks,
+  };
+}
+
+function toDashboardAdministrationData(
+  value: unknown,
+): DashboardAdministrationData | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const summary = toDashboardAdministrationSummary(value.summary);
+  const requestSummary = toDashboardPersonalSummary(
+    value.request_summary,
+  );
+  const recentRequests = toDashboardRecentRequests(
+    value.recent_requests,
+  );
+
+  if (!summary || !requestSummary || !recentRequests) {
+    return null;
+  }
+
+  return {
+    summary,
+    request_summary: requestSummary,
+    recent_requests: recentRequests,
+  };
+}
+
 /**
  * Validate the untrusted dashboard response and rebuild only the fields the
  * UI is allowed to render. Unknown extra fields are dropped, never returned.
  */
 export function parseDashboardResponse(
   value: unknown,
-  approvalRequirement: DashboardApprovalRequirement,
+  view: DashboardView,
 ): DashboardData {
   const unexpectedResponse = () =>
     new ApiError(
@@ -457,37 +561,36 @@ export function parseDashboardResponse(
   const summary = toDashboardPersonalSummary(
     value.data.personal.summary,
   );
+  const recentRequests = toDashboardRecentRequests(
+    value.data.personal.recent_requests,
+  );
 
-  if (
-    !summary ||
-    !Array.isArray(value.data.personal.recent_requests) ||
-    value.data.personal.recent_requests.length > 5
-  ) {
+  if (!summary || !recentRequests) {
     throw unexpectedResponse();
   }
 
-  const recentRequests: DashboardRecentRequest[] = [];
+  let approval: DashboardApprovalData | null = null;
+  let administration: DashboardAdministrationData | null = null;
 
-  for (const entry of value.data.personal.recent_requests) {
-    const request = toDashboardRecentRequest(entry);
-
-    if (!request) {
+  if (view === "personal") {
+    if (
+      value.data.approval !== null ||
+      value.data.administration !== null
+    ) {
       throw unexpectedResponse();
     }
+  } else if (view === "approval") {
+    approval = toDashboardApprovalData(value.data.approval);
 
-    recentRequests.push(request);
-  }
-
-  let approval: DashboardApprovalData | null = null;
-
-  if (approvalRequirement === "none") {
-    if (value.data.approval !== null) {
+    if (!approval || value.data.administration !== null) {
       throw unexpectedResponse();
     }
   } else {
-    approval = toDashboardApprovalData(value.data.approval);
+    administration = toDashboardAdministrationData(
+      value.data.administration,
+    );
 
-    if (!approval) {
+    if (!administration || value.data.approval !== null) {
       throw unexpectedResponse();
     }
   }
@@ -498,5 +601,6 @@ export function parseDashboardResponse(
       recent_requests: recentRequests,
     },
     approval,
+    administration,
   };
 }
