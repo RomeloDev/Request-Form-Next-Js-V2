@@ -158,7 +158,7 @@ export default function DashboardOverview({
     : [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="WORKSPACE OVERVIEW"
         title={mode === "approval" ? "Approver dashboard" : "Dashboard"}
@@ -175,7 +175,7 @@ export default function DashboardOverview({
 
       <section
         aria-labelledby="welcome-title"
-        className="relative isolate overflow-hidden rounded-3xl border border-blue-200 bg-linear-to-br from-blue-100 via-blue-100/80 to-indigo-100 p-6 shadow-[0_2px_12px_#0f172a04] sm:p-9"
+        className="relative isolate overflow-hidden rounded-2xl border border-blue-200 bg-linear-to-br from-blue-100 via-blue-100/80 to-indigo-100 p-5 shadow-[0_2px_12px_#0f172a04] sm:p-6"
       >
         <div
           aria-hidden="true"
@@ -197,7 +197,7 @@ export default function DashboardOverview({
             >
               Welcome back, <span className="text-blue-800">{name}.</span>
             </h2>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+            <p className="mt-2 max-w2xl text-sm leading-6 text-slate-600">
               {mode === "approval"
                 ? "Your personal requests and approval activity in one place."
                 : accessLabel === "Administrator"
@@ -209,7 +209,7 @@ export default function DashboardOverview({
                 {canCreateRequest && (
                   <Link
                     href="/create-request"
-                    className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand px-5 py-3 text-base font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                   >
                     <Icon name="plus" />
                     Create a Request
@@ -218,7 +218,7 @@ export default function DashboardOverview({
                 {mode === "approval" && (
                   <Link
                     href="/approver/request?assignment_status=Pending"
-                    className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-blue-800 bg-white px-5 py-3 text-base font-semibold text-blue-800 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-800 bg-white px-4 py-2.5 text-sm font-semibold text-blue-800 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                   >
                     <Icon name="clipboard" />
                     Process Request
@@ -242,7 +242,7 @@ export default function DashboardOverview({
       {initialData === null && (
         <p
           role="status"
-          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-base leading-7 text-amber-950"
+          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"
         >
           We couldn&apos;t load your dashboard data. Use the refresh button to try
           again.
@@ -251,7 +251,7 @@ export default function DashboardOverview({
 
       {mode === "approval" && (
         <section aria-labelledby="approval-summary">
-          <h2 id="approval-summary" className="mb-4 text-xl font-semibold">
+          <h2 id="approval-summary" className="mb-4 text-lg font-semibold">
             Approval Requests
           </h2>
           {approval ? (
@@ -268,7 +268,7 @@ export default function DashboardOverview({
               ))}
             </div>
           ) : (
-            <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-base leading-7 text-amber-950">
+            <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
               Your approval summary is currently unavailable. Use the refresh
               button to try again.
             </p>
@@ -277,7 +277,7 @@ export default function DashboardOverview({
       )}
 
       <section aria-labelledby="my-summary">
-        <h2 id="my-summary" className="mb-4 text-xl font-semibold">
+        <h2 id="my-summary" className="mb-4 text-lg font-semibold">
           My Requests
         </h2>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-4">
@@ -296,7 +296,7 @@ export default function DashboardOverview({
         {summary?.total === 0 && (
           <div
             role="status"
-            className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-base leading-7 text-blue-950"
+            className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-950"
           >
             <p className="font-medium">No requests yet.</p>
             <p className="mt-1 text-sm text-blue-900">
@@ -320,9 +320,9 @@ export default function DashboardOverview({
         aria-labelledby="recent-title"
         className="overflow-hidden rounded-2xl border border-line/60 bg-white shadow-sm"
       >
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line/60 p-5 sm:px-6">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line/60 p-4 sm:px-5">
           <div>
-            <h2 id="recent-title" className="text-xl font-semibold">
+            <h2 id="recent-title" className="text-lg font-semibold">
               Recent requests
             </h2>
             <p className="mt-1 text-sm leading-6 text-muted">
@@ -331,7 +331,7 @@ export default function DashboardOverview({
           </div>
           <Link
             href="/request"
-            className="inline-flex min-h-11 items-center rounded-xl border border-line bg-white px-4 text-base font-medium text-ink hover:border-brand hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            className="inline-flex min-h-11 items-center rounded-xl border border-line bg-white px-4 text-sm font-medium text-ink hover:border-brand hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             See all
           </Link>
@@ -340,9 +340,9 @@ export default function DashboardOverview({
           role="region"
           aria-label="Recent requests table"
           tabIndex={0}
-          className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
+          className="overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
         >
-          <table className="w-full min-w-[650px] text-left text-base">
+          <table className="w-full min-w-[650px] text-left text-sm">
             <caption className="sr-only">
               Recent requests with their request ID, type, date, branch and
               status
@@ -354,7 +354,7 @@ export default function DashboardOverview({
                     <th
                       key={label}
                       scope="col"
-                      className="px-6 py-4 font-medium"
+                      className="px-4 py-3 font-medium"
                     >
                       {label}
                     </th>
@@ -367,7 +367,7 @@ export default function DashboardOverview({
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-6 py-14 text-center text-base leading-7 text-muted"
+                    className="px-5 py-12 text-center text-sm leading-6 text-muted"
                   >
                     Your recent requests are currently unavailable.
                   </td>
@@ -376,7 +376,7 @@ export default function DashboardOverview({
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-6 py-14 text-center text-base leading-7 text-muted"
+                    className="px-5 py-12 text-center text-sm leading-6 text-muted"
                   >
                     No requests yet.
                   </td>
@@ -386,15 +386,15 @@ export default function DashboardOverview({
                   <tr key={request.id} className="border-t border-line/50">
                     <th
                       scope="row"
-                      className="px-6 py-4 font-medium text-brand"
+                      className="px-4 py-3 font-medium text-brand"
                     >
                       {request.request_code}
                     </th>
-                    <td className="px-6 py-4">{request.form_type}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-muted">
+                    <td className="px-4 py-3">{request.form_type}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-muted">
                       {formatDate(request.created_at)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="min-w-40">
                         <p className="font-medium">
                           {request.branch.branch_name}
@@ -404,7 +404,7 @@ export default function DashboardOverview({
                         </p>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${statusStyles[request.status]}`}
                       >
@@ -425,12 +425,12 @@ export default function DashboardOverview({
 
       <section
         aria-labelledby="account-title"
-        className="rounded-2xl border border-line/60 bg-white p-6"
+        className="rounded-2xl border border-line/60 bg-white p-5"
       >
-        <h2 id="account-title" className="text-xl font-semibold">
+        <h2 id="account-title" className="text-lg font-semibold">
           Your account
         </h2>
-        <dl className="mt-5 grid grid-cols-1 gap-5 text-base sm:grid-cols-2 xl:grid-cols-4">
+        <dl className="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
           {[
             ["Name", user.name],
             ["Email", user.email],

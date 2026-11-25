@@ -390,7 +390,7 @@ export default function RequestReportDetailsDialog({
                 href={`/request/${details.id}/print`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center rounded-xl border border-brand bg-white px-5 py-2.5 text-base font-semibold text-brand hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                className="inline-flex min-h-11 items-center rounded-xl border border-brand bg-white px-4 py-2.5 text-sm font-semibold text-brand hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
                 Print
               </a>
@@ -398,7 +398,7 @@ export default function RequestReportDetailsDialog({
             <button
               type="button"
               onClick={handleClose}
-              className="min-h-11 rounded-xl border border-line bg-white px-5 py-2.5 text-base font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Close
             </button>
@@ -412,7 +412,7 @@ export default function RequestReportDetailsDialog({
         ) : message ? (
           <FormAlert message={message} />
         ) : details ? (
-          <div className="space-y-7">
+          <div className="space-y-6">
             <section className="rounded-2xl border border-line/60 bg-slate-50 p-5 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>

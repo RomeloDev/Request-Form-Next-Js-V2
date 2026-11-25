@@ -14,6 +14,7 @@ export default function RegistrationPage() {
       eyebrow="Let’s get you started"
       title="Create your"
       accent="account"
+      backLink={{ href: "/", label: "Back to home" }}
       description="Welcome to SMCT Request Form. Start with a few details about you."
     >
       <p className="mt-6 text-sm leading-6 text-muted sm:text-right">

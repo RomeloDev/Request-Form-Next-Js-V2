@@ -97,7 +97,7 @@ export default function DeletePositionDialog({
             type="button"
             disabled={deleting}
             onClick={onClose}
-            className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
           >
             {blocked ? "Close" : "Cancel"}
           </button>
@@ -108,7 +108,7 @@ export default function DeletePositionDialog({
               disabled={deleting}
               onClick={handleDelete}
               aria-busy={deleting}
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-700 px-5 py-3 text-base font-semibold text-white enabled:hover:bg-rose-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-wait disabled:opacity-50"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rose-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-rose-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-wait disabled:opacity-50"
             >
               <Icon name="trash" />
               {deleting ? "Deleting…" : "Delete position"}
@@ -117,11 +117,11 @@ export default function DeletePositionDialog({
         </>
       }
     >
-      <p className="text-lg font-semibold wrap-anywhere">
+      <p className="text-base font-semibold wrap-anywhere">
         Delete “{position.label}”?
       </p>
 
-      <p className="mt-3 text-base leading-7 text-muted">
+      <p className="mt-2 text-sm leading-6 text-muted">
         This permanently removes the position. Positions assigned
         to users cannot be deleted.
       </p>

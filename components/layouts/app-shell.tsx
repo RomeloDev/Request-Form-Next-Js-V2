@@ -123,12 +123,12 @@ export default function AppShell({
           href={dashboardFor(user)}
           onClick={() => dialog.current?.close()}
           title={collapsed ? "SMCT Request Form" : undefined}
-          className={`flex min-h-24 shrink-0 items-center border-b border-white/10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-white ${collapsed ? "justify-center px-3" : "gap-3 px-6"}`}
+          className={`flex min-h-20 shrink-0 items-center border-b border-white/10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-white ${collapsed ? "justify-center px-3" : "gap-3 px-5"}`}
         >
-          <span className={`rounded-lg bg-white p-1.5 ${collapsed ? "w-14" : "w-20"}`}><Image src="/brand/smct-logo.png" alt="SMCT Group of Companies" width={504} height={228} className="h-auto w-full" /></span>
+          <span className={`rounded-lg bg-white p-1.5 ${collapsed ? "w-12" : "w-16"}`}><Image src="/brand/smct-logo.png" alt="SMCT Group of Companies" width={504} height={228} className="h-auto w-full" /></span>
           <span className={collapsed ? "sr-only" : "text-sm font-semibold tracking-widest text-blue-100"}>REQUEST<br />FORM</span>
         </Link>
-        <nav aria-label="Main navigation" className={`flex-1 overflow-y-auto py-6 ${collapsed ? "px-2" : "px-4"}`}>
+        <nav aria-label="Main navigation" className={`flex-1 overflow-y-auto py-4 ${collapsed ? "px-2" : "px-3"}`}>
           <p className={collapsed ? "sr-only" : "mb-3 px-3 text-xs font-semibold tracking-widest text-blue-100/80"}>WORKSPACE</p>
           <ul className="space-y-1">
             {navigationFor(user).map((item) => {
@@ -146,7 +146,7 @@ export default function AppShell({
                     onClick={() => dialog.current?.close()}
                     aria-current={isActive ? "page" : undefined}
                     title={collapsed ? item.label : undefined}
-                    className={`relative flex min-h-12 items-center rounded-xl px-3 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${collapsed ? "justify-center" : "gap-3"} ${isActive ? "bg-white text-brand shadow-sm" : "text-blue-50 hover:bg-white/10"}`}
+                    className={`relative flex min-h-11 items-center rounded-xl px-3 py-2.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${collapsed ? "justify-center" : "gap-3"} ${isActive ? "bg-white text-brand shadow-sm" : "text-blue-50 hover:bg-white/10"}`}
                   >
                     <Icon name={item.icon} />
                     <span className={collapsed ? "sr-only" : undefined}>{item.label}</span>
@@ -167,7 +167,7 @@ export default function AppShell({
                       )}
                   </Link>
                 ) : (
-                  <button type="button" disabled title={`${item.label} is not available yet.`} className={`flex min-h-12 w-full cursor-not-allowed items-center rounded-xl px-3 py-3 text-left text-base text-blue-100/70 ${collapsed ? "justify-center" : "gap-3"}`}>
+                  <button type="button" disabled title={`${item.label} is not available yet.`} className={`flex min-h-11 w-full cursor-not-allowed items-center rounded-xl px-3 py-2.5 text-left text-sm text-blue-100/70 ${collapsed ? "justify-center" : "gap-3"}`}>
                     <Icon name={item.icon} />
                     <span className={collapsed ? "sr-only" : undefined}>{item.label}</span>
                   </button>
@@ -178,28 +178,28 @@ export default function AppShell({
           </ul>
         </nav>
         <div className={`shrink-0 border-t border-white/10 ${collapsed ? "p-2" : "p-4"}`}>
-          <p className={collapsed ? "sr-only" : "truncate px-3 text-base font-medium"}>{name}</p>
+          <p className={collapsed ? "sr-only" : "truncate px-3 text-sm font-medium"}>{name}</p>
           <p className={collapsed ? "sr-only" : "mt-1 px-3 text-sm text-blue-100/80"}>{roleLabel}{isAuditor(user) ? " · Audit access" : ""}</p>
-          <button type="button" disabled={leaving} onClick={requestLogout} title={collapsed ? (leaving ? "Signing out…" : "Sign out") : undefined} className={`flex min-h-12 w-full items-center rounded-xl border border-white/20 px-3 py-3 text-left text-base font-medium hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-60 ${collapsed ? "justify-center" : "mt-3 gap-3"}`}><Icon name="logout" /><span className={collapsed ? "sr-only" : undefined}>{leaving ? "Signing out…" : "Sign out"}</span></button>
+          <button type="button" disabled={leaving} onClick={requestLogout} title={collapsed ? (leaving ? "Signing out…" : "Sign out") : undefined} className={`flex min-h-11 w-full items-center rounded-xl border border-white/20 px-3 py-2.5 text-left text-sm font-medium hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-60 ${collapsed ? "justify-center" : "mt-3 gap-3"}`}><Icon name="logout" /><span className={collapsed ? "sr-only" : undefined}>{leaving ? "Signing out…" : "Sign out"}</span></button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-svh bg-background text-ink lg:grid ${sidebarCollapsed ? "lg:grid-cols-[5.5rem_minmax(0,1fr)]" : "lg:grid-cols-[17rem_minmax(0,1fr)]"} lg:transition-[grid-template-columns] lg:duration-200 lg:ease-out motion-reduce:transition-none`}>
+    <div className={`min-h-svh bg-background text-ink lg:grid ${sidebarCollapsed ? "lg:grid-cols-[5rem_minmax(0,1fr)]" : "lg:grid-cols-[16rem_minmax(0,1fr)]"} lg:transition-[grid-template-columns] lg:duration-200 lg:ease-out motion-reduce:transition-none`}>
       <a href="#workspace-content" className="fixed top-3 left-3 z-50 -translate-y-[160%] rounded-lg bg-white px-4 py-3 text-brand focus:translate-y-0 focus:outline-2 focus:outline-brand">Skip to main content</a>
       <aside id="workspace-sidebar" aria-label="Workspace sidebar" className="sticky top-0 hidden h-svh min-w-0 overflow-hidden bg-auth-brand text-white lg:block">{sidebar(sidebarCollapsed)}</aside>
-      <dialog ref={dialog} onClose={() => setMobileOpen(false)} aria-label="Workspace navigation" className="fixed inset-y-0 left-0 m-0 h-svh max-h-none w-72 max-w-[90vw] border-0 bg-auth-brand p-0 text-white backdrop:bg-slate-950/50">
+      <dialog ref={dialog} onClose={() => setMobileOpen(false)} aria-label="Workspace navigation" className="fixed inset-y-0 left-0 m-0 h-svh max-h-none w-68 max-w-[90vw] border-0 bg-auth-brand p-0 text-white backdrop:bg-slate-950/50">
         <button type="button" onClick={() => dialog.current?.close()} aria-label="Close navigation" className="absolute top-2 right-2 grid size-11 place-items-center rounded-lg bg-slate-900 text-white focus-visible:outline-2 focus-visible:outline-white"><Icon name="close" /></button>
         {sidebar()}
       </dialog>
       <div className="min-w-0">
-        <header className="sticky top-0 z-20 flex min-h-24 flex-wrap items-center justify-between gap-4 border-b border-line/60 bg-white px-5 py-4 sm:px-8">
+        <header className="sticky top-0 z-20 flex min-h-20 flex-wrap items-center justify-between gap-3 border-b border-line/60 bg-white px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button type="button" aria-label="Open navigation" aria-expanded={mobileOpen} onClick={() => { dialog.current?.showModal(); setMobileOpen(true); }} className="grid size-11 shrink-0 place-items-center rounded-xl border border-line focus-visible:outline-2 focus-visible:outline-brand lg:hidden"><Icon name="menu" /></button>
             <button type="button" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!sidebarCollapsed} aria-controls="workspace-sidebar" title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((current) => !current)} className="hidden size-11 shrink-0 place-items-center rounded-xl border border-line text-muted hover:bg-slate-50 hover:text-brand focus-visible:outline-2 focus-visible:outline-brand lg:grid"><Icon name={sidebarCollapsed ? "chevronRight" : "chevronLeft"} /></button>
-            <div><p className="text-sm text-muted">SMCT Request Form</p><p className="text-base font-semibold">Your workspace</p></div>
+            <div className="hidden min-w-0 sm:block"><p className="text-xs text-muted">SMCT Request Form</p><p className="truncate text-sm font-semibold">Your workspace</p></div>
           </div>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <NotificationBell
@@ -211,11 +211,11 @@ export default function AppShell({
             <AccountMenu name={name} email={user.email} roleLabel={roleLabel} leaving={leaving} onLogout={requestLogout} />
           </div>
         </header>
-        <main id="workspace-content" tabIndex={-1} className="mx-auto p-5 focus:outline-none sm:p-8">
+        <main id="workspace-content" tabIndex={-1} className="mx-auto w-full px-4 py-6 focus:outline-none sm:px-6 sm:py-8 lg:px-8">
           {logoutError && <FormAlert message={logoutError} onDismiss={() => setLogoutError("")} />}
           {children}
         </main>
-        <footer className="mx-auto px-5 pb-6 text-sm text-muted sm:px-8">SMCT Group of Companies · One connected workplace.</footer>
+        <footer className="mx-auto w-full px-4 pb-6 text-sm text-muted sm:px-6 lg:px-8">SMCT Group of Companies · One connected workplace.</footer>
       </div>
       <LogoutConfirmationDialog open={logoutConfirmationOpen} accountName={name} pending={leaving} onCancel={cancelLogout} onConfirm={handleLogout} />
     </div>

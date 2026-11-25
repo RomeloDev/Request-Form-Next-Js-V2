@@ -72,12 +72,12 @@ export default function ProfileIdentityOverview({
   return (
     <section
       aria-labelledby="profile-identity-title"
-      className="rounded-2xl border border-line/60 bg-white p-5 shadow-sm sm:p-6"
+      className="rounded-2xl border border-line/60 bg-white p-4 shadow-sm sm:p-5"
     >
       <div>
         <h2
           id="profile-identity-title"
-          className="text-xl font-semibold text-ink"
+          className="text-lg font-semibold text-ink"
         >
           Identity details
         </h2>
@@ -96,7 +96,7 @@ export default function ProfileIdentityOverview({
             <dt className="text-sm leading-6 font-medium text-muted">
               {field.label}
             </dt>
-            <dd className="mt-1 text-base leading-7 font-medium wrap-anywhere text-ink">
+            <dd className="mt-1 text-sm leading-6 font-medium wrap-anywhere text-ink">
               {field.value}
             </dd>
           </div>

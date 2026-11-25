@@ -282,7 +282,7 @@ export default function ProfilePictureSection({
       <div>
         <h2
           id="profile-picture-title"
-          className="text-xl font-semibold text-ink"
+          className="text-lg font-semibold text-ink"
         >
           Profile picture
         </h2>
@@ -347,7 +347,7 @@ export default function ProfilePictureSection({
         <div>
           <label
             htmlFor="profile-picture-file"
-            className="block text-base leading-6 font-medium text-ink"
+            className="block text-sm leading-6 font-medium text-ink"
           >
             Choose a new picture
           </label>
@@ -363,7 +363,7 @@ export default function ProfilePictureSection({
               fileError ? " profile-picture-file-error" : ""
             }`}
             onChange={chooseFile}
-            className="mt-2 block min-h-12 w-full min-w-0 cursor-pointer rounded-xl border border-line bg-slate-50/50 p-2 text-sm text-ink file:mr-3 file:min-h-9 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand hover:file:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+            className="mt-2 block min-h-11 w-full min-w-0 cursor-pointer rounded-xl border border-line bg-slate-50/50 p-2 text-sm text-ink file:mr-3 file:min-h-9 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand hover:file:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
           />
           <p
             id="profile-picture-hint"
@@ -388,7 +388,7 @@ export default function ProfilePictureSection({
             onClick={uploadPicture}
             disabled={selected === null || busy}
             aria-busy={uploading}
-            className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand px-5 py-3 text-base font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700"
           >
             {uploading ? "Uploading…" : "Upload picture"}
           </button>
@@ -397,7 +397,7 @@ export default function ProfilePictureSection({
             type="button"
             onClick={cancelSelection}
             disabled={selected === null || busy}
-            className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium text-ink enabled:hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400"
+            className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink enabled:hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400"
           >
             Cancel
           </button>
@@ -407,7 +407,7 @@ export default function ProfilePictureSection({
               type="button"
               onClick={openRemovalConfirmation}
               disabled={busy}
-              className="min-h-12 rounded-xl border border-rose-200 bg-white px-5 py-3 text-base font-medium text-rose-700 enabled:hover:bg-rose-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-not-allowed disabled:text-slate-400"
+              className="min-h-11 rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-medium text-rose-700 enabled:hover:bg-rose-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-not-allowed disabled:text-slate-400"
             >
               Remove picture
             </button>
@@ -445,7 +445,7 @@ export default function ProfilePictureSection({
                 type="button"
                 disabled={removing}
                 onClick={closeRemovalConfirmation}
-                className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
+                className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
               >
                 Keep picture
               </button>
@@ -454,14 +454,14 @@ export default function ProfilePictureSection({
                 disabled={removing}
                 onClick={confirmRemoval}
                 aria-busy={removing}
-                className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-700 px-5 py-3 text-base font-semibold text-white enabled:hover:bg-rose-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-wait disabled:opacity-60"
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rose-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-rose-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-wait disabled:opacity-60"
               >
                 {removing ? "Removing…" : "Remove picture"}
               </button>
             </>
           }
         >
-          <p className="text-base leading-7 text-ink">
+          <p className="text-sm leading-6 text-ink">
             Remove your current profile picture?
           </p>
           <p className="mt-2 text-sm leading-6 text-muted">

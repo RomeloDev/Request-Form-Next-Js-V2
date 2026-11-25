@@ -36,7 +36,7 @@ export default function FormField({
   return (
     <div className="min-w-0">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-        <label htmlFor={id} className="block text-base leading-6 font-medium text-ink">
+        <label htmlFor={id} className="block text-sm leading-6 font-medium text-ink">
           {label}{required && <span className="ml-1 text-danger" aria-hidden="true">*</span>}
         </label>
         {labelAction}

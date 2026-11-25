@@ -194,9 +194,9 @@ export default function AddBranchHeadDialog({ onClose, onCreated }: AddBranchHea
       maxWidth="5xl"
       footer={
         <>
-          <button type="button" disabled={submitting} onClick={stage === 1 || blocked ? onClose : () => setStage(1)} className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50">{stage === 1 || blocked ? "Close" : "Back"}</button>
-          {!blocked && stage === 1 && <button type="button" disabled={!selectedCandidate} onClick={() => setStage(2)} className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50">Continue</button>}
-          {!blocked && stage === 2 && <button type="button" disabled={submitting || selectedBranches.size === 0} aria-busy={submitting} onClick={submit} className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50">{submitting ? "Saving…" : "Create assignment"}</button>}
+          <button type="button" disabled={submitting} onClick={stage === 1 || blocked ? onClose : () => setStage(1)} className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50">{stage === 1 || blocked ? "Close" : "Back"}</button>
+          {!blocked && stage === 1 && <button type="button" disabled={!selectedCandidate} onClick={() => setStage(2)} className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50">Continue</button>}
+          {!blocked && stage === 2 && <button type="button" disabled={submitting || selectedBranches.size === 0} aria-busy={submitting} onClick={submit} className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50">{submitting ? "Saving…" : "Create assignment"}</button>}
         </>
       }
     >
@@ -215,7 +215,7 @@ export default function AddBranchHeadDialog({ onClose, onCreated }: AddBranchHea
         <div className="space-y-5">
           <div className="rounded-xl bg-slate-50 p-4">
             <p className="text-sm text-muted">Selected Branch Head</p>
-            <p className="mt-1 text-base font-semibold">{branchHeadName(selectedCandidate)}</p>
+            <p className="mt-1 text-sm font-semibold">{branchHeadName(selectedCandidate)}</p>
             <p className="mt-1 text-sm text-muted">{selectedCandidate.position}</p>
           </div>
           <BranchSelector branches={branchRecords} meta={branchMeta} loading={branchStatus === "loading"} error={branchStatus === "error" ? branchError : ""} search={branchSearch} selected={selectedBranches} page={branchPage} pageSize={branchPageSize} onSearchChange={(value) => { setBranchSearch(value); setBranchPage(1); }} onToggle={toggleBranch} onPageChange={setBranchPage} onPageSizeChange={(size) => { setBranchPageSize(size); setBranchPage(1); }} onRetry={() => setBranchAttempt((value) => value + 1)} />

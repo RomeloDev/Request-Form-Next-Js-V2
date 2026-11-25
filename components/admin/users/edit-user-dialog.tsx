@@ -239,7 +239,7 @@ export default function EditUserDialog({
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="min-h-12 rounded-xl border border-line px-5 py-3 font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-line px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50"
           >
             Cancel
           </button>
@@ -248,7 +248,7 @@ export default function EditUserDialog({
             type="button"
             disabled
             title="The signature reset endpoint is not built yet."
-            className="min-h-12 cursor-not-allowed rounded-xl border border-rose-200 bg-rose-50 px-5 py-3 font-medium text-rose-400"
+            className="min-h-11 cursor-not-allowed rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-400"
           >
             Reset Signature
           </button>
@@ -258,7 +258,7 @@ export default function EditUserDialog({
             form={formId}
             disabled={saving || blocked || lookupState !== "ready"}
             aria-busy={saving}
-            className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save changes"}
           </button>
@@ -266,7 +266,7 @@ export default function EditUserDialog({
       }
     >
       {lookupState === "loading" && (
-        <p role="status" className="mb-5 text-base text-muted">
+        <p role="status" className="mb-5 text-sm leading-6 text-muted">
           Loading branch and position options…
         </p>
       )}
@@ -288,7 +288,7 @@ export default function EditUserDialog({
       )}
 
       <form id={formId} onSubmit={handleSubmit} className="mt-5">
-        <fieldset disabled={saving} className="space-y-7">
+        <fieldset disabled={saving} className="space-y-6">
           <legend className="sr-only">User account details</legend>
 
           <fieldset className={sectionClass}>

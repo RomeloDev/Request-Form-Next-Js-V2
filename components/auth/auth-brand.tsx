@@ -38,7 +38,7 @@ export default function AuthBrand() {
           <br />
           A step forward.
         </h2>
-        <p className="mt-6 max-w-xs text-base leading-7 text-blue-100/90">
+        <p className="mt-5 max-w-xs text-sm leading-6 text-blue-100/90">
           Bring your requests, approvals, and team together in one familiar place.
         </p>
 

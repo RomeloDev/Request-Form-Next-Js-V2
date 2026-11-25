@@ -220,7 +220,7 @@ export default function BranchFormDialog({
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
             >
             {blocked ? "Close" : "Cancel"}
             </button>
@@ -230,7 +230,7 @@ export default function BranchFormDialog({
             form={formId}
             disabled={saving || blocked}
             aria-busy={saving}
-            className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 text-base font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
             {saving
                 ? "Saving…"

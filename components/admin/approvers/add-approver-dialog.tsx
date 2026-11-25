@@ -300,7 +300,7 @@ export default function AddApproverDialog({
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
           >
             {blocked ? "Close" : "Cancel"}
           </button>
@@ -315,7 +315,7 @@ export default function AddApproverDialog({
             }
             onClick={handleAssign}
             aria-busy={saving}
-            className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 text-base font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving
               ? "Assigning…"
@@ -392,7 +392,7 @@ export default function AddApproverDialog({
                       ? "No matching eligible users"
                       : "No eligible users"}
                   </p>
-                  <p className="mt-2 text-base text-muted">
+                  <p className="mt-2 text-sm leading-6 text-muted">
                     {debouncedSearch
                       ? "Try another search."
                       : "All ordinary users may already be approvers."}

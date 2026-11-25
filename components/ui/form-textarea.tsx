@@ -37,7 +37,7 @@ export default function FormTextarea({
       <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <label
           htmlFor={id}
-          className="block text-base leading-6 font-medium text-ink"
+          className="block text-sm leading-6 font-medium text-ink"
         >
           {label}
 

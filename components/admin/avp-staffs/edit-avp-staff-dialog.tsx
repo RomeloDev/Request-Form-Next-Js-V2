@@ -130,14 +130,14 @@ export default function EditAvpStaffDialog({ assignment, onClose, onUpdated, onS
       maxWidth="5xl"
       footer={
         <>
-          <button type="button" disabled={saving} onClick={onClose} className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50">{blocked ? "Close" : "Cancel"}</button>
-          {!blocked && <button type="button" disabled={saving || selected.size === 0} onClick={submit} aria-busy={saving} className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50">{saving ? "Saving…" : "Save branches"}</button>}
+          <button type="button" disabled={saving} onClick={onClose} className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50">{blocked ? "Close" : "Cancel"}</button>
+          {!blocked && <button type="button" disabled={saving || selected.size === 0} onClick={submit} aria-busy={saving} className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50">{saving ? "Saving…" : "Save branches"}</button>}
         </>
       }
     >
       <div className="mb-6 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
-        <p className="text-sm text-muted">AVP Finance<br /><strong className="text-base text-ink">{avpStaffPersonName(assignment.avp)}</strong></p>
-        <p className="text-sm text-muted">Delegated staff<br /><strong className="text-base text-ink">{avpStaffPersonName(assignment.staff)}</strong></p>
+        <p className="text-sm text-muted">AVP Finance<br /><strong className="text-sm text-ink">{avpStaffPersonName(assignment.avp)}</strong></p>
+        <p className="text-sm text-muted">Delegated staff<br /><strong className="text-sm text-ink">{avpStaffPersonName(assignment.staff)}</strong></p>
       </div>
       <p className="mb-5 text-sm leading-6 text-muted">AVP and staff identities cannot be changed here. Saving sends the complete selected branch set.</p>
       {message && <FormAlert ref={alertRef} message={message} />}

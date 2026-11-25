@@ -160,14 +160,14 @@ export default function FeedbacksPage({
 
   if (loadStatus === "forbidden") {
     return (
-      <section className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-7">
+      <section className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-5 sm:p-6">
         <p className="text-sm font-medium text-brand">
           ADMINISTRATION
         </p>
         <h1 className="mt-3 text-2xl font-semibold">
           Access restricted
         </h1>
-        <p className="mt-3 text-base leading-7 text-muted">
+        <p className="mt-2 text-sm leading-6 text-muted">
           You don’t have permission to view feedbacks.
         </p>
       </section>
@@ -180,7 +180,7 @@ export default function FeedbacksPage({
       : "We couldn’t load feedbacks. Check your connection and try again.";
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="ADMINISTRATION"
         title="Feedbacks"
@@ -210,10 +210,10 @@ export default function FeedbacksPage({
           aria-busy={busy}
           className="min-w-0 overflow-hidden rounded-2xl border border-line/60 bg-white shadow-sm"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 p-5 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
             <h2
               id="feedbacks-list-title"
-              className="text-xl font-semibold text-ink"
+              className="text-lg font-semibold text-ink"
             >
               Submitted feedback
             </h2>
@@ -246,7 +246,7 @@ export default function FeedbacksPage({
                 <p className="text-md font-medium text-ink">
                   No feedback yet
                 </p>
-                <p className="mt-2 text-base leading-7 text-muted">
+                <p className="mt-2 text-sm leading-6 text-muted">
                   Submitted feedback will appear here.
                 </p>
               </div>

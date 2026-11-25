@@ -229,7 +229,7 @@ export default function AddUserDialog({ onClose, onCreated }: AddUserDialogProps
             <button
               type="button"
               onClick={() => onCreated(bulkUploadState.message)}
-              className="min-h-12 rounded-xl bg-emerald-700 px-5 py-3 text-base font-semibold text-white hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+              className="min-h-11 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
             >
               Done
             </button>
@@ -237,7 +237,7 @@ export default function AddUserDialog({ onClose, onCreated }: AddUserDialogProps
             <button
               type="button"
               onClick={onClose}
-              className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Close
             </button>
@@ -247,7 +247,7 @@ export default function AddUserDialog({ onClose, onCreated }: AddUserDialogProps
                 type="button"
                 disabled={bulkBusy || bulkBlocked}
                 onClick={() => setMode("single")}
-                className="min-h-12 rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 text-base font-semibold text-blue-800 enabled:hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50"
+                className="min-h-11 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-800 enabled:hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50"
               >
                 Single user form
               </button>
@@ -255,7 +255,7 @@ export default function AddUserDialog({ onClose, onCreated }: AddUserDialogProps
                 type="button"
                 disabled={bulkBusy}
                 onClick={onClose}
-                className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium text-ink enabled:hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
+                className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink enabled:hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
               >
                 Close
               </button>
@@ -285,7 +285,7 @@ export default function AddUserDialog({ onClose, onCreated }: AddUserDialogProps
             type="button"
             disabled={saving}
             onClick={() => setMode("bulk")}
-            className="min-h-12 rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 text-base font-semibold text-blue-800 enabled:hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-800 enabled:hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50"
           >
             Bulk upload
           </button>
@@ -294,7 +294,7 @@ export default function AddUserDialog({ onClose, onCreated }: AddUserDialogProps
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
           >
             {blocked ? "Close" : "Cancel"}
           </button>
@@ -304,7 +304,7 @@ export default function AddUserDialog({ onClose, onCreated }: AddUserDialogProps
             form={formId}
             disabled={saving || blocked || lookupState !== "ready"}
             aria-busy={saving}
-            className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 text-base font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50"
+            className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50"
           >
             {saving ? "Creating…" : "Create user"}
           </button>
@@ -322,7 +322,7 @@ export default function AddUserDialog({ onClose, onCreated }: AddUserDialogProps
       </div> */}
 
       {lookupState === "loading" && (
-        <p role="status" className="mt-5 text-base text-muted">
+        <p role="status" className="mt-5 text-sm leading-6 text-muted">
           Loading branch and position options…
         </p>
       )}
@@ -342,7 +342,7 @@ export default function AddUserDialog({ onClose, onCreated }: AddUserDialogProps
       {message && <FormAlert ref={alertRef} message={message} />}
 
       <form id={formId} onSubmit={handleSubmit}>
-        <fieldset disabled={saving} className="space-y-7">
+        <fieldset disabled={saving} className="space-y-6">
           <legend className="sr-only">New user account details</legend>
 
           <fieldset className={sectionClass}>

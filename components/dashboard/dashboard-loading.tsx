@@ -25,14 +25,14 @@ export default function DashboardLoading({
   approval = false,
 }: DashboardLoadingProps) {
   return (
-    <div aria-busy="true" className="space-y-8">
+    <div aria-busy="true" className="space-y-6">
       <p role="status" className="sr-only">
         Loading {title.toLowerCase()}.
       </p>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-muted">WORKSPACE OVERVIEW</p>
-          <h1 className="mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
+          <h1 className="mt-2 text-2xl leading-tight font-semibold tracking-tight sm:text-3xl">
             {title}
           </h1>
         </div>

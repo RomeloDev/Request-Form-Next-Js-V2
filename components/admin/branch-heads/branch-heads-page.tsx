@@ -122,24 +122,24 @@ export default function BranchHeadsPage() {
   ];
 
   if (!canView) {
-    return <section className="rounded-2xl border border-line bg-white p-6"><h1 className="text-2xl font-semibold">Access restricted</h1><p className="mt-3 text-muted">This screen is available to administrators.</p><div className="mt-5"><TextLink href={dashboardFor(user)}>Back to dashboard</TextLink></div></section>;
+    return <section className="rounded-2xl border border-line bg-white p-5 sm:p-6"><h1 className="text-2xl font-semibold">Access restricted</h1><p className="mt-2 text-sm leading-6 text-muted">This screen is available to administrators.</p><div className="mt-5"><TextLink href={dashboardFor(user)}>Back to dashboard</TextLink></div></section>;
   }
 
   const loading = status === "loading";
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <PageHeader title="Branch Heads" eyebrow="ADMINISTRATION" description="Assign eligible branch leaders to the branches whose requests they will route and review.">
         <RefreshButton label="Refresh Branch Heads" showLabel loading={loading} onClick={refresh} />
-        <button type="button" onClick={() => { setNotice(""); setAddOpen(true); }} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700"><Icon name="plus" />Add Branch Head</button>
+        <button type="button" onClick={() => { setNotice(""); setAddOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700"><Icon name="plus" />Add Branch Head</button>
       </PageHeader>
 
-      {notice && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 leading-7 text-emerald-900">{notice}</p>}
+      {notice && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">{notice}</p>}
 
       {status === "error" ? <FormAlert message={errorMessage} /> : (
         <section aria-labelledby="branch-head-list-title" className="min-w-0 overflow-hidden rounded-2xl border border-line/60 bg-white shadow-sm">
-          <div className="space-y-5 p-5 sm:p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="branch-head-list-title" className="text-xl font-semibold">Branch Head directory</h2><p className="text-sm text-muted">{loading ? "Loading assignments…" : `${meta.total} assignments`}</p></div>
+          <div className="space-y-4 p-4 sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="branch-head-list-title" className="text-lg font-semibold">Branch Head directory</h2><p className="text-sm text-muted">{loading ? "Loading assignments…" : `${meta.total} assignments`}</p></div>
             <div className="max-w-2xl"><FormField id="branch-head-search" label="Search assignments" type="search" placeholder="Branch Head, position, company, or branch" autoComplete="off" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} /></div>
           </div>
           <DataTable caption="Branch Head assignments" columns={columns} rows={records} rowKey={(assignment) => assignment.id} loading={loading} loadingLabel="Loading Branch Head assignments…" sort={sort} onSort={changeSort} empty={<div><p className="text-lg font-medium">{debouncedSearch ? "No matching assignments" : "No Branch Head assignments yet"}</p><p className="mt-2 text-muted">{debouncedSearch ? "Try another search or clear your search." : "Created assignments will appear here."}</p></div>} />

@@ -362,7 +362,7 @@ export default function BulkUserUpload({
               : uploadState.title}
         </h3>
 
-        <p className="mt-3 max-w-xl text-base leading-7 text-muted">
+        <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
           {isSubmitting
             ? "Server is validating the complete batch and securely hashing every password. Keep this tab open; a large workbook can take several minutes."
             : uploadState.message}
@@ -376,7 +376,7 @@ export default function BulkUserUpload({
               setServerIssues([]);
               changeUploadState({ status: "form" });
             }}
-            className="mt-7 min-h-12 rounded-xl border border-line bg-white px-5 py-3"
+            className="mt-6 min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm"
           >
             Back to workbook
           </button>
@@ -387,7 +387,7 @@ export default function BulkUserUpload({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div role="note" className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-base leading-7 text-blue-950">
+      <div role="note" className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-950">
         <p className="font-semibold">The workbook stays in this browser</p>
         <p className="mt-1">
           We read the first sheet and send only the approved user fields as
@@ -446,7 +446,7 @@ export default function BulkUserUpload({
           onDrop={handleDrop}
           className="mt-4 rounded-xl border-2 border-dashed border-blue-300 bg-blue-50/40 p-5"
         >
-          <label htmlFor="bulk-user-file" className="block text-base font-medium">
+          <label htmlFor="bulk-user-file" className="block text-sm font-medium">
             Select an Excel workbook
           </label>
           <input
@@ -456,7 +456,7 @@ export default function BulkUserUpload({
             accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             disabled={busy || blocked}
             onChange={handleFileChange}
-            className="mt-3 block min-h-12 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-base file:mr-4 file:rounded-lg file:border-0 file:bg-blue-100 file:px-4 file:py-2 file:font-semibold file:text-blue-800 hover:file:bg-blue-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50"
+            className="mt-3 block min-h-11 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-base file:mr-4 file:rounded-lg file:border-0 file:bg-blue-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-800 hover:file:bg-blue-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50 sm:text-sm"
           />
           <p className="mt-2 text-sm text-muted">You can also drag and drop one .xlsx file here.</p>
         </div>
@@ -536,7 +536,7 @@ export default function BulkUserUpload({
       )}
 
       {result && result.errors.length === 0 && result.rows.length > 0 && (
-        <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-base leading-7 text-emerald-950">
+        <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-950">
           <p className="font-semibold">
             {result.rows.length} {result.rows.length === 1 ? "user is" : "users are"} ready to upload
           </p>
@@ -551,7 +551,7 @@ export default function BulkUserUpload({
         type="submit"
         disabled={!canSubmit}
         aria-busy={submitting}
-        className="min-h-12 w-full rounded-xl bg-blue-700 px-5 py-3 text-base font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-h-11 w-full rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting
           ? "Uploading users…"

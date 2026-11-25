@@ -10,7 +10,7 @@ type FormAlertProps = {
 
 export default function FormAlert({ ref, message, children, onDismiss }: FormAlertProps) {
   return (
-    <div ref={ref} role="alert" tabIndex={-1} className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-base leading-7 text-danger focus:outline-2 focus:outline-offset-2 focus:outline-danger">
+    <div ref={ref} role="alert" tabIndex={-1} className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-danger focus:outline-2 focus:outline-offset-2 focus:outline-danger">
       <div className="flex items-start justify-between gap-3">
         <p className="font-medium">{message}</p>
         {onDismiss && (

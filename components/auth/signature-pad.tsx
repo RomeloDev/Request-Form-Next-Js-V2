@@ -122,7 +122,7 @@ export default function SignaturePad({ ref, disabled, error, onChange }: Signatu
 
   return (
     <div className="sm:col-span-2">
-      <p id="signature-label" className="mb-2 text-base leading-6 font-medium text-ink">
+      <p id="signature-label" className="mb-2 text-sm leading-6 font-medium text-ink">
         Your signature <span aria-hidden="true" className="text-danger">*</span>
       </p>
       <div className={`relative overflow-hidden rounded-xl border-2 border-dashed bg-white focus-within:ring-3 focus-within:ring-blue-100 ${error ? "border-danger" : "border-line"}`}>
@@ -143,7 +143,7 @@ export default function SignaturePad({ ref, disabled, error, onChange }: Signatu
           Your browser does not support a signature canvas.
         </canvas>
         {!hasSignature && (
-          <span aria-hidden="true" className="pointer-events-none absolute inset-0 grid place-items-center text-base text-slate-500">
+          <span aria-hidden="true" className="pointer-events-none absolute inset-0 grid place-items-center px-4 text-center text-sm text-slate-500">
             Draw your signature here
           </span>
         )}

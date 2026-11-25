@@ -40,7 +40,7 @@ export default function ProfileAvatar({
     <div
       role={showImage ? undefined : "img"}
       aria-label={showImage ? undefined : `Initials avatar for ${name}`}
-      className="relative grid size-28 shrink-0 place-items-center overflow-hidden rounded-full border border-blue-100 bg-blue-50 text-3xl font-semibold text-brand sm:size-32"
+      className="relative grid size-24 shrink-0 place-items-center overflow-hidden rounded-full border border-blue-100 bg-blue-50 text-2xl font-semibold text-brand sm:size-28"
     >
       {showImage ? (
         <Image

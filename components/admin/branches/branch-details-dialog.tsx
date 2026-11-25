@@ -28,7 +28,7 @@ export default function BranchDetailsDialog({ branch, onClose, }: BranchDetailsD
           {branch.branch_name}
         </h3>
 
-        <p className="mt-2 text-base leading-7 text-muted wrap-anywhere">
+        <p className="mt-2 text-sm leading-6 text-muted wrap-anywhere">
           {branch.branch_code} · {branch.acronym}
         </p>
       </div>
@@ -39,7 +39,7 @@ export default function BranchDetailsDialog({ branch, onClose, }: BranchDetailsD
             <dt className="text-sm leading-6 text-muted">
               {label}
             </dt>
-            <dd className="mt-1 text-base leading-7 font-medium wrap-anywhere">
+            <dd className="mt-1 text-sm leading-6 font-medium wrap-anywhere">
               {value}
             </dd>
           </div>

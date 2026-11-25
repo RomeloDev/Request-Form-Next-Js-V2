@@ -251,7 +251,7 @@ export default function ProfileSignatureSection({
       <div>
         <h2
           id="profile-signature-title"
-          className="text-xl font-semibold text-ink"
+          className="text-lg font-semibold text-ink"
         >
           Signature
         </h2>
@@ -317,7 +317,7 @@ export default function ProfileSignatureSection({
               type="button"
               onClick={startEditing}
               disabled={busy}
-              className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium text-ink enabled:hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400"
+              className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink enabled:hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400"
             >
               Draw replacement
             </button>
@@ -325,7 +325,7 @@ export default function ProfileSignatureSection({
               type="button"
               onClick={openRemovalConfirmation}
               disabled={busy}
-              className="min-h-12 rounded-xl border border-rose-200 bg-white px-5 py-3 text-base font-medium text-rose-700 enabled:hover:bg-rose-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-not-allowed disabled:text-slate-400"
+              className="min-h-11 rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-medium text-rose-700 enabled:hover:bg-rose-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-not-allowed disabled:text-slate-400"
             >
               Remove signature
             </button>
@@ -362,7 +362,7 @@ export default function ProfileSignatureSection({
               onClick={saveSignature}
               disabled={busy}
               aria-busy={saving}
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand px-5 py-3 text-base font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700"
             >
               {saving ? "Saving…" : "Save signature"}
             </button>
@@ -372,7 +372,7 @@ export default function ProfileSignatureSection({
                 type="button"
                 onClick={stopEditing}
                 disabled={busy}
-                className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium text-ink enabled:hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400"
+                className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink enabled:hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400"
               >
                 Cancel
               </button>
@@ -411,7 +411,7 @@ export default function ProfileSignatureSection({
                 type="button"
                 disabled={removing}
                 onClick={closeRemovalConfirmation}
-                className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 text-base font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
+                className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50"
               >
                 Keep signature
               </button>
@@ -420,14 +420,14 @@ export default function ProfileSignatureSection({
                 disabled={removing}
                 onClick={confirmRemoval}
                 aria-busy={removing}
-                className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-700 px-5 py-3 text-base font-semibold text-white enabled:hover:bg-rose-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-wait disabled:opacity-60"
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rose-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-rose-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-wait disabled:opacity-60"
               >
                 {removing ? "Removing…" : "Remove signature"}
               </button>
             </>
           }
         >
-          <p className="text-base leading-7 text-ink">
+          <p className="text-sm leading-6 text-ink">
             Remove your saved signature?
           </p>
           <p className="mt-2 text-sm leading-6 text-muted">

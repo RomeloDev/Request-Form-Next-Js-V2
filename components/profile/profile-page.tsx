@@ -40,7 +40,7 @@ function ProfileLoadingState() {
       <h2 id="profile-loading-title" className="sr-only">
         Loading your profile
       </h2>
-      <p role="status" className="text-base leading-7 text-muted">
+      <p role="status" className="text-sm leading-6 text-muted">
         Loading your profile…
       </p>
       <div
@@ -118,7 +118,7 @@ export default function ProfilePage() {
         "Your account";
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="MY ACCOUNT"
         title="Profile"
@@ -142,7 +142,7 @@ export default function ProfilePage() {
       {state === "denied" && (
         <section
           aria-labelledby="profile-denied-title"
-          className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-7"
+          className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-5 sm:p-6"
         >
           <p className="text-sm font-medium text-brand">ACCESS RESTRICTED</p>
           <h2
@@ -151,7 +151,7 @@ export default function ProfilePage() {
           >
             Profile access is not available
           </h2>
-          <p className="mt-3 text-base leading-7 text-muted">
+          <p className="mt-2 text-sm leading-6 text-muted">
             Your account doesn’t have permission to view this profile. If you
             believe this is a mistake, contact an administrator.
           </p>
@@ -164,7 +164,7 @@ export default function ProfilePage() {
             Your profile has loaded.
           </p>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-5 lg:grid-cols-2">
             <ProfilePictureSection
               name={displayName}
               initialHasProfilePicture={profile.has_profile_picture}
@@ -174,7 +174,7 @@ export default function ProfilePage() {
 
           <ProfileIdentityOverview profile={profile} />
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-5 lg:grid-cols-2">
             <ProfileSignatureSection
               initialHasSignature={profile.has_signature}
             />

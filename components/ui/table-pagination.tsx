@@ -29,12 +29,12 @@ export default function TablePagination({ page, pageSize, totalItems, onPageChan
     { label: "Last page", icon: "lastPage", target: totalPages, disabled: currentPage === totalPages },
   ];
 
-  return <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-line/60 bg-slate-50/40 px-5 py-4 sm:px-6">
+  return <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-line/60 bg-slate-50/40 px-4 py-3 sm:px-5">
     <p role="status" aria-atomic="true" className="text-sm leading-6 text-muted">{loading ? "Loading…" : `Showing ${firstItem.toLocaleString()}–${lastItem.toLocaleString()} of ${totalItems.toLocaleString()} ${itemLabel}`}</p>
     <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor={selectId} className="text-sm leading-6 font-medium text-muted">Rows per page</label>
-        <select id={selectId} value={pageSize} disabled={loading} onChange={(event) => onPageSizeChange(Number(event.target.value))} className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-medium text-ink shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:text-slate-500">
+        <select id={selectId} value={pageSize} disabled={loading} onChange={(event) => onPageSizeChange(Number(event.target.value))} className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-medium text-ink shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:text-slate-500 sm:text-sm">
           {pageSizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}
         </select>
       </div>

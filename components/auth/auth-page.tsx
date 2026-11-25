@@ -29,7 +29,7 @@ export default function AuthPage({
           </TextLink>
         </div>
       )}
-      <header className="relative isolate overflow-hidden rounded-2xl border border-blue-100 bg-auth-header p-5 sm:p-7 after:pointer-events-none after:absolute after:-top-24 after:-right-24 after:-z-10 after:size-56 after:rounded-full after:border after:border-brand/5 after:shadow-[0_0_0_28px_#2458d304,0_0_0_56px_#2458d303]">
+      <header className="relative isolate overflow-hidden rounded-2xl border border-blue-100 bg-auth-header p-5 sm:p-6 after:pointer-events-none after:absolute after:-top-24 after:-right-24 after:-z-10 after:size-56 after:rounded-full after:border after:border-brand/5 after:shadow-[0_0_0_28px_#2458d304,0_0_0_56px_#2458d303]">
         <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-blue-100 bg-white/90 px-3 py-1.5 text-sm leading-6 font-medium text-brand">
           <Sparkles
             aria-hidden="true"
@@ -38,10 +38,10 @@ export default function AuthPage({
           />
           {eyebrow}
         </span>
-        <h1 id={id} className="mt-5 text-3xl leading-tight font-semibold tracking-tight text-ink sm:text-4xl">
+        <h1 id={id} className="mt-4 text-2xl leading-tight font-semibold tracking-tight text-ink sm:text-3xl">
           {title} <span className="text-brand">{accent}</span>
         </h1>
-        <p className="mt-4 max-w-lg text-base leading-7 text-muted">{description}</p>
+        <p className="mt-3 max-w-lg text-sm leading-6 text-muted">{description}</p>
       </header>
       {children}
     </section>

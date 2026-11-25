@@ -32,13 +32,13 @@ export default function ApprovalActivity({
       >
         <h2
           id="approval-activity-title"
-          className="text-xl font-semibold"
+          className="text-lg font-semibold"
         >
           Approval Activity
         </h2>
         <p
           role="status"
-          className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-base leading-7 text-amber-950"
+          className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"
         >
           Approval activity is currently unavailable. Use the refresh button to
           try again.
@@ -68,7 +68,7 @@ export default function ApprovalActivity({
     >
       <h2
         id="approval-activity-title"
-        className="text-xl font-semibold"
+        className="text-lg font-semibold"
       >
         Approval Activity
       </h2>
@@ -76,7 +76,7 @@ export default function ApprovalActivity({
         <section aria-labelledby="monthly-decisions-title" className="min-w-0">
           <h3
             id="monthly-decisions-title"
-            className="text-base font-semibold"
+            className="text-sm font-semibold"
           >
             Monthly decisions
           </h3>
@@ -178,7 +178,7 @@ export default function ApprovalActivity({
         <section aria-labelledby="weekly-assignments-title" className="min-w-0">
           <h3
             id="weekly-assignments-title"
-            className="text-base font-semibold"
+            className="text-sm font-semibold"
           >
             Weekly assignments
           </h3>

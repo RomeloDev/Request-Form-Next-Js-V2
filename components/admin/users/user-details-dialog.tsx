@@ -29,7 +29,7 @@ export default function UserDetailsDialog({ user, branchCodes, onClose }: { user
             />
             <div className="min-w-0 flex-1">
               <h3 className="text-2xl leading-tight font-semibold wrap-anywhere">{userFullName(user)}</h3>
-              <p className="mt-1 text-base leading-7 wrap-anywhere text-muted">@{user.username}</p>
+              <p className="mt-1 text-sm leading-6 wrap-anywhere text-muted">@{user.username}</p>
               <div className="mt-3"><StatusBadge status={user.verification_status} /></div>
             </div>
           </div>
@@ -41,7 +41,7 @@ export default function UserDetailsDialog({ user, branchCodes, onClose }: { user
               ["Role", user.role], ["Position", user.position],
               ["Branch code", branchCodeFor(user, branchCodes)], ["Branch / company", user.branch],
               ["Verification date", date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) : "Not Verified"],
-            ].map(([label, value]) => <div key={label}><dt className="text-sm leading-6 text-muted">{label}</dt><dd className="mt-1 text-base leading-7 font-medium wrap-anywhere">{value || "Not provided"}</dd></div>)}
+            ].map(([label, value]) => <div key={label}><dt className="text-sm leading-6 text-muted">{label}</dt><dd className="mt-1 text-sm leading-6 font-medium wrap-anywhere">{value || "Not provided"}</dd></div>)}
           </dl>
           <section aria-labelledby="user-signature-title" className="border-t border-line/60 pt-6">
             <h3 id="user-signature-title" className="mb-3 text-base font-semibold">Signature</h3>

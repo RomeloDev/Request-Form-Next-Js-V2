@@ -68,7 +68,7 @@ export default function BranchHeadDetailsDialog({ assignmentId, onClose, onStale
         <div className="space-y-6">
           <section className="rounded-2xl border border-line/60 bg-slate-50 p-5">
             <p className="text-sm font-medium text-muted">BRANCH HEAD</p>
-            <h3 className="mt-2 text-xl font-semibold wrap-anywhere">{branchHeadName(assignment.user)}</h3>
+            <h3 className="mt-2 text-lg font-semibold wrap-anywhere">{branchHeadName(assignment.user)}</h3>
             <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
               <div><dt className="text-muted">Position</dt><dd className="mt-1 font-medium wrap-anywhere">{assignment.user.position || "Not provided"}</dd></div>
               <div><dt className="text-muted">Home branch / company</dt><dd className="mt-1 font-medium wrap-anywhere">{assignment.user.branch ?? assignment.user.branch_code ?? "Not assigned"}</dd></div>

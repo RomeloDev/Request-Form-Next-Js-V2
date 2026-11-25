@@ -69,7 +69,7 @@ export default function LoginForm() {
         id="login-form"
         aria-label="Sign in to your account"
         aria-busy={pending}
-        className="mt-8 space-y-6"
+        className="mt-6 space-y-5"
         onSubmit={submit}
         onChange={(event) => {
           const target = event.target;
@@ -77,7 +77,7 @@ export default function LoginForm() {
           setErrors((current) => ({ ...current, [target.name]: "" }));
         }}
       >
-        <fieldset disabled={pending || signedIn} className="min-w-0 space-y-6">
+        <fieldset disabled={pending || signedIn} className="min-w-0 space-y-5">
           <legend className="sr-only">Sign-in details</legend>
           <FormField
             id="login-email"
@@ -110,9 +110,9 @@ export default function LoginForm() {
             {signedIn ? "Opening your dashboard…" : "Sign In"}
           </SubmitButton>
         </fieldset>
-        {signedIn && <p role="status" className="text-center text-base leading-7 text-muted">Signed in. Opening your dashboard…</p>}
+        {signedIn && <p role="status" className="text-center text-sm leading-6 text-muted">Signed in. Opening your dashboard…</p>}
       </form>
-      <p className="mt-6 text-center text-base leading-7 text-muted">
+      <p className="mt-5 text-center text-sm leading-6 text-muted">
         Don’t have an account? <TextLink href="/registration">Create one</TextLink>
       </p>
       <p className="mt-4 text-center text-sm leading-6 text-muted">

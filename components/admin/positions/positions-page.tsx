@@ -143,9 +143,9 @@ export default function PositionsPage() {
 
   if (!canView) {
     return (
-      <section className="rounded-2xl border border-line bg-white p-6">
+      <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
         <h1 className="text-2xl font-semibold">Access restricted</h1>
-        <p className="mt-3 text-base text-muted">
+        <p className="mt-2 text-sm leading-6 text-muted">
           This screen is available to administrators.
         </p>
         <div className="mt-5">
@@ -205,7 +205,7 @@ export default function PositionsPage() {
     ];
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <PageHeader
         title="Positions"
         eyebrow="ADMINISTRATION"
@@ -225,7 +225,7 @@ export default function PositionsPage() {
                 setNotice("");
                 setForm({ mode: "create" });
             }}
-            className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-700 px-5 py-3 text-base font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-50"
             >
             <Icon name="plus" />
             Add Position
@@ -235,7 +235,7 @@ export default function PositionsPage() {
         {notice && (
             <p
                 role="status"
-                className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-base leading-7 text-emerald-900"
+                className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900"
             >
                 {notice}
             </p>
@@ -248,11 +248,11 @@ export default function PositionsPage() {
           aria-labelledby="positions-list-title"
           className="min-w-0 overflow-hidden rounded-2xl border border-line/60 bg-white shadow-sm"
         >
-          <div className="space-y-5 p-5 sm:p-6">
+          <div className="space-y-4 p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2
                 id="positions-list-title"
-                className="text-xl font-semibold"
+                className="text-lg font-semibold"
               >
                 Position directory
               </h2>
@@ -302,7 +302,7 @@ export default function PositionsPage() {
                 <p className="text-lg font-medium">
                   {query ? "No matching positions" : "No positions yet"}
                 </p>
-                <p className="mt-2 text-base text-muted">
+                <p className="mt-2 text-sm leading-6 text-muted">
                   {query
                     ? "Try another search or clear your search."
                     : "Positions will appear here after they are added."}

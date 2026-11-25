@@ -50,8 +50,8 @@ export default function SessionProvider({
         <div className="max-w-md text-center">
           <p className="mb-4 text-sm font-semibold tracking-widest text-brand">SMCT REQUEST FORM</p>
           <h1 className="text-2xl font-semibold">{failed ? "We couldn’t open your workspace" : "Checking your session…"}</h1>
-          <p role="status" className="mt-3 text-base leading-7 text-muted">{failed ? "Please check your connection and try again." : "Please wait while we securely load your account."}</p>
-          {failed && <button type="button" onClick={() => { setFailed(false); setAttempt((value) => value + 1); }} className="mt-6 min-h-12 rounded-xl bg-brand px-6 py-3 font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand">Try again</button>}
+          <p role="status" className="mt-2 text-sm leading-6 text-muted">{failed ? "Please check your connection and try again." : "Please wait while we securely load your account."}</p>
+          {failed && <button type="button" onClick={() => { setFailed(false); setAttempt((value) => value + 1); }} className="mt-5 min-h-11 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand">Try again</button>}
         </div>
       </main>
     );

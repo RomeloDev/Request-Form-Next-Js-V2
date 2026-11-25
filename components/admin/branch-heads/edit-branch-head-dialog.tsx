@@ -130,14 +130,14 @@ export default function EditBranchHeadDialog({ assignment, onClose, onUpdated, o
       maxWidth="5xl"
       footer={
         <>
-          <button type="button" disabled={saving} onClick={onClose} className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50">{blocked ? "Close" : "Cancel"}</button>
-          {!blocked && <button type="button" disabled={saving || selected.size === 0} onClick={submit} aria-busy={saving} className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50">{saving ? "Saving…" : "Save branches"}</button>}
+          <button type="button" disabled={saving} onClick={onClose} className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50">{blocked ? "Close" : "Cancel"}</button>
+          {!blocked && <button type="button" disabled={saving || selected.size === 0} onClick={submit} aria-busy={saving} className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50">{saving ? "Saving…" : "Save branches"}</button>}
         </>
       }
     >
       <div className="mb-5 rounded-xl bg-slate-50 p-4">
         <p className="text-sm text-muted">Branch Head</p>
-        <p className="mt-1 text-base font-semibold">{branchHeadName(assignment.user)}</p>
+        <p className="mt-1 text-sm font-semibold">{branchHeadName(assignment.user)}</p>
         <p className="mt-1 text-sm text-muted">{assignment.user.position}</p>
       </div>
       <p className="mb-5 text-sm leading-6 text-muted">The Branch Head identity cannot be changed here. Saving sends the complete selected branch set.</p>

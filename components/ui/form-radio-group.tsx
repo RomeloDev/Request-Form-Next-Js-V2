@@ -46,7 +46,7 @@ export default function FormRadioGroup<Value extends string>({
       aria-describedby={describedBy || undefined}
       className="m-0 min-w-0 border-0 p-0"
     >
-      <legend className="mb-2 text-base leading-6 font-medium text-ink">
+      <legend className="mb-2 text-sm leading-6 font-medium text-ink">
         {label}
         {required && (
           <span className="ml-1 text-danger" aria-hidden="true">

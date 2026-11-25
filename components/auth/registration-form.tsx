@@ -272,16 +272,16 @@ export default function RegistrationForm() {
 
         <FormSection number="03" title="Work information" description="Choose your position and the branch you belong to." disabled={locked}>
           {lookup.status === "loading" && (
-            <p role="status" className="text-base leading-7 text-muted sm:col-span-2">Loading positions and branches…</p>
+            <p role="status" className="text-sm leading-6 text-muted sm:col-span-2">Loading positions and branches…</p>
           )}
           {lookup.status === "error" && (
-            <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-base leading-7 text-amber-950 sm:col-span-2">
+            <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950 sm:col-span-2">
               <p>We couldn’t load positions and branches. Please try again.</p>
               <button type="button" onClick={retryLookups} className="mt-2 min-h-11 rounded-lg px-1 font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">Try again</button>
             </div>
           )}
           {options && !hasOptions && (
-            <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-base leading-7 text-amber-950 sm:col-span-2">
+            <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950 sm:col-span-2">
               {!options.positions.length ? "No positions are available. " : ""}
               {!options.branches.length ? "No branches are available. " : ""}
               Please contact your administrator before registering.
@@ -337,16 +337,16 @@ export default function RegistrationForm() {
           <SignaturePad ref={signatureRef} disabled={locked} error={errors.signature} onChange={() => clearError("signature")} />
         </FormSection>
 
-        <div className="mt-8 border-t border-line/70 pt-8">
+        <div className="mt-6 border-t border-line/70 pt-6">
           {succeeded && (
-            <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-base leading-7 text-emerald-900">
+            <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
               Account created successfully. Redirecting you to sign in…
             </p>
           )}
           <SubmitButton pending={busy} pendingLabel="Creating account…" disabled={locked || !hasOptions}>
             {succeeded ? "Account created" : "Create Account"}
           </SubmitButton>
-          <p className="mt-5 text-center text-base leading-7 text-muted">
+          <p className="mt-5 text-center text-sm leading-6 text-muted">
             Already have an account?{" "}
             <TextLink href="/login">Sign In</TextLink>
           </p>

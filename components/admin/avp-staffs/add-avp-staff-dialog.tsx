@@ -238,14 +238,14 @@ export default function AddAvpStaffDialog({ onClose, onCreated }: AddAvpStaffDia
       maxWidth="5xl"
       footer={
         <>
-          <button type="button" disabled={submitting} onClick={stage === 1 || blocked ? onClose : () => setStage((stage - 1) as 1 | 2)} className="min-h-12 rounded-xl border border-line bg-white px-5 py-3 font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50">
+          <button type="button" disabled={submitting} onClick={stage === 1 || blocked ? onClose : () => setStage((stage - 1) as 1 | 2)} className="min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-50">
             {stage === 1 || blocked ? "Close" : "Back"}
           </button>
           {!blocked && stage < 3 && (
-            <button type="button" disabled={nextDisabled} onClick={() => setStage((stage + 1) as 2 | 3)} className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50">Continue</button>
+            <button type="button" disabled={nextDisabled} onClick={() => setStage((stage + 1) as 2 | 3)} className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50">Continue</button>
           )}
           {!blocked && stage === 3 && (
-            <button type="button" disabled={submitting || nextDisabled} aria-busy={submitting} onClick={submit} className="min-h-12 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50">{submitting ? "Saving…" : "Create assignment"}</button>
+            <button type="button" disabled={submitting || nextDisabled} aria-busy={submitting} onClick={submit} className="min-h-11 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white enabled:hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-50">{submitting ? "Saving…" : "Create assignment"}</button>
           )}
         </>
       }
@@ -273,8 +273,8 @@ export default function AddAvpStaffDialog({ onClose, onCreated }: AddAvpStaffDia
       {stage === 3 && selectedAvp && selectedStaff && (
         <div className="space-y-5">
           <div className="grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
-            <p className="text-sm text-muted">AVP Finance<br /><strong className="text-base text-ink">{avpStaffPersonName(selectedAvp)}</strong></p>
-            <p className="text-sm text-muted">Delegated staff<br /><strong className="text-base text-ink">{avpStaffPersonName(selectedStaff)}</strong></p>
+            <p className="text-sm text-muted">AVP Finance<br /><strong className="text-sm text-ink">{avpStaffPersonName(selectedAvp)}</strong></p>
+            <p className="text-sm text-muted">Delegated staff<br /><strong className="text-sm text-ink">{avpStaffPersonName(selectedStaff)}</strong></p>
           </div>
           <BranchSelector id="add-branches" branches={branchRecords} meta={branchMeta} loading={branchStatus === "loading"} error={branchStatus === "error" ? branchError : ""} search={branchSearch} selected={selectedBranches} page={branchPage} pageSize={branchPageSize} onSearchChange={(value) => { setBranchSearch(value); setBranchPage(1); }} onToggle={toggleBranch} onPageChange={setBranchPage} onPageSizeChange={(size) => { setBranchPageSize(size); setBranchPage(1); }} onRetry={() => setBranchAttempt((value) => value + 1)} />
         </div>

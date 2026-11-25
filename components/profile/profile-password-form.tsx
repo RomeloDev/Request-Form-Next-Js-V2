@@ -164,12 +164,12 @@ export default function ProfilePasswordForm() {
   return (
     <section
       aria-labelledby="profile-password-title"
-      className="max-w-3xl rounded-2xl border border-line/60 bg-white p-5 shadow-sm sm:p-6"
+      className="max-w-3xl rounded-2xl border border-line/60 bg-white p-4 shadow-sm sm:p-5"
     >
       <div>
         <h2
           id="profile-password-title"
-          className="text-xl font-semibold text-ink"
+          className="text-lg font-semibold text-ink"
         >
           Change password
         </h2>
@@ -180,12 +180,12 @@ export default function ProfilePasswordForm() {
       </div>
 
       <form
-        className="mt-5 space-y-5"
+        className="mt-4 space-y-4"
         aria-busy={pending}
         onSubmit={handleSubmit}
         noValidate
       >
-        <fieldset disabled={pending} className="min-w-0 space-y-5">
+        <fieldset disabled={pending} className="min-w-0 space-y-4">
           <legend className="sr-only">Password change details</legend>
 
           <FormField
@@ -253,7 +253,7 @@ export default function ProfilePasswordForm() {
         {success && (
           <p
             role="status"
-            className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-base leading-7 text-emerald-900"
+            className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900"
           >
             {success} Use your new password the next time you sign in.
           </p>

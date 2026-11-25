@@ -213,14 +213,14 @@ export default function ReportsPage({
 
   if (loadStatus === "forbidden") {
     return (
-      <section className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-7">
+      <section className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-5 sm:p-6">
         <p className="text-sm font-medium text-brand">
           ADMINISTRATION
         </p>
         <h1 className="mt-3 text-2xl font-semibold">
           Access restricted
         </h1>
-        <p className="mt-3 text-base leading-7 text-muted">
+        <p className="mt-2 text-sm leading-6 text-muted">
           You don’t have permission to view request reports.
         </p>
       </section>
@@ -233,7 +233,7 @@ export default function ReportsPage({
       : "We couldn’t load request reports. Check your connection and try again.";
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="ADMINISTRATION"
         title="Request Reports"
@@ -263,11 +263,11 @@ export default function ReportsPage({
           aria-busy={busy}
           className="min-w-0 overflow-hidden rounded-2xl border border-line/60 bg-white shadow-sm"
         >
-          <div className="space-y-5 p-5 sm:p-6">
+          <div className="space-y-4 p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2
                 id="reports-list-title"
-                className="text-xl font-semibold text-ink"
+                className="text-lg font-semibold text-ink"
               >
                 Organization request ledger
               </h2>
@@ -409,7 +409,7 @@ export default function ReportsPage({
                   type="button"
                   onClick={clearFilters}
                   disabled={!isFiltered}
-                  className="min-h-12 w-full rounded-xl border border-line bg-white px-4 py-3 text-base leading-6 font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400"
+                  className="min-h-11 w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm leading-6 font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400"
                 >
                   Clear filters
                 </button>
@@ -455,7 +455,7 @@ export default function ReportsPage({
                     ? "No matching reports"
                     : "No reports yet"}
                 </p>
-                <p className="mt-2 text-base leading-7 text-muted">
+                <p className="mt-2 text-sm leading-6 text-muted">
                   {isFiltered
                     ? "Try another search or clear your filters."
                     : "Submitted requests will appear here."}

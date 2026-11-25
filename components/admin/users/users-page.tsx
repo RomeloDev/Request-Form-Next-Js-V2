@@ -22,7 +22,7 @@ import EditUserDialog from "@/components/admin/users/edit-user-dialog";
 import AddUserDialog from "@/components/admin/users/add-user-dialog";
 import { APP_ROLES } from "@/lib/roles";
 
-const secondaryButton = "min-h-12 rounded-xl border border-line bg-white px-4 py-3 text-base leading-6 font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-500";
+const secondaryButton = "min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-sm leading-6 font-medium text-ink hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-500";
 
 export default function UsersPage() {
   const { user: currentUser } = useSession();
@@ -38,7 +38,7 @@ export default function UsersPage() {
   const [addingUser, setAddingUser] = useState(false);
 
   if (!canView || state.status === "forbidden") {
-    return <section className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-7"><p className="text-sm font-medium text-brand">ADMINISTRATION</p><h1 className="mt-3 text-2xl font-semibold">Access restricted</h1><p className="mt-3 text-base leading-7 text-muted">You don’t have permission to view the users list.</p><div className="mt-5"><TextLink href={dashboardFor(currentUser)}>Back to dashboard</TextLink></div></section>;
+    return <section className="mx-auto max-w-xl rounded-2xl border border-line bg-white p-5 sm:p-6"><p className="text-xs font-semibold tracking-[0.16em] text-muted uppercase">ADMINISTRATION</p><h1 className="mt-2 text-2xl font-semibold">Access restricted</h1><p className="mt-2 text-sm leading-6 text-muted">You don’t have permission to view the users list.</p><div className="mt-5"><TextLink href={dashboardFor(currentUser)}>Back to dashboard</TextLink></div></section>;
   }
 
   const columns: TableColumn<AdminUser>[] = [
@@ -62,13 +62,13 @@ export default function UsersPage() {
   ];
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <PageHeader title="Users" eyebrow="ADMINISTRATION" description="View registered accounts and their verification status. Admin accounts are excluded from this list.">
         <RefreshButton label="Refresh users" onClick={directory.refresh} loading={loading} showLabel />
-        <button type="button" onClick={() => { setActionNotice(""); setAddingUser(true); }} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-700 px-5 py-3 text-base font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"><Icon name="plus" />Add User</button>
+        <button type="button" onClick={() => { setActionNotice(""); setAddingUser(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"><Icon name="plus" />Add User</button>
       </PageHeader>
 
-      {actionNotice && <div role="status" className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-base leading-7 text-emerald-900"><Icon name="checkCircle" className="mt-1 size-5" /><p className="min-w-0 flex-1 wrap-anywhere">{actionNotice}</p><button type="button" aria-label="Dismiss account action message" onClick={() => setActionNotice("")} className="grid size-11 shrink-0 place-items-center rounded-lg hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-emerald-700"><Icon name="close" /></button></div>}
+      {actionNotice && <div role="status" className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900"><Icon name="checkCircle" className="mt-0.5 size-5" /><p className="min-w-0 flex-1 wrap-anywhere">{actionNotice}</p><button type="button" aria-label="Dismiss account action message" onClick={() => setActionNotice("")} className="grid size-11 shrink-0 place-items-center rounded-lg hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-emerald-700"><Icon name="close" /></button></div>}
 
       <section aria-label="User summary" className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4">
         <MetricCard headingLevel={2} label="All users" value={data?.users.length} icon="users" tone="blue" loading={loading} note="Registered accounts" />
@@ -77,17 +77,17 @@ export default function UsersPage() {
       </section>
 
       {state.status === "error" ? (
-        <section role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-6">
-          <h2 className="text-xl font-semibold text-danger">
+        <section role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
+          <h2 className="text-lg font-semibold text-danger">
             We couldn’t load users
           </h2>
-          <p className="mt-2 text-base leading-7 text-danger">Please check your connection and try again.</p>
+          <p className="mt-2 text-sm leading-6 text-danger">Please check your connection and try again.</p>
           <button type="button" onClick={directory.refresh} className={`${secondaryButton} mt-5`}>Try again</button>
         </section>
       ) : (
         <section aria-labelledby="users-list-title" className="min-w-0 overflow-hidden rounded-2xl border border-line/60 bg-white shadow-sm">
-          <div className="p-5 sm:p-6">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-2"><h2 id="users-list-title" className="text-xl font-semibold">User directory</h2><p className="text-sm leading-6 text-muted">{loading ? "Loading accounts…" : `${directory.filteredCount} matching ${directory.filteredCount === 1 ? "account" : "accounts"}`}</p></div>
+          <div className="p-4 sm:p-5">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 id="users-list-title" className="text-lg font-semibold">User directory</h2><p className="text-sm leading-6 text-muted">{loading ? "Loading accounts…" : `${directory.filteredCount} matching ${directory.filteredCount === 1 ? "account" : "accounts"}`}</p></div>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,14rem),1fr))] items-start gap-4">
               <FormField id="users-search" type="search" label="Search users" placeholder="Name, email, employee ID, branch…" value={directory.search} onChange={(event) => directory.changeSearch(event.target.value)} autoComplete="off" />
               <FormSelect id="users-role" label="Role" value={directory.role} onChange={(event) => directory.changeRole(event.target.value)}><option value="">All roles</option>{directory.roles.map((role) => <option key={role} value={role}>{role}</option>)}</FormSelect>
@@ -97,7 +97,7 @@ export default function UsersPage() {
             {data?.branchLabelsUnavailable && <p role="status" className="mt-4 text-sm leading-6 text-muted">Branch codes couldn’t be loaded. Branch IDs are shown instead.</p>}
           </div>
 
-          <DataTable caption="Registered non-Admin users" columns={columns} rows={directory.rows} rowKey={(user) => user.id} loading={loading} loadingLabel="Loading users…" sort={directory.sort} onSort={(key) => directory.changeSort(key as UserSortKey)} empty={<div><p className="text-lg font-medium text-ink">{hasFilters ? "No matching users" : "No users to display"}</p><p className="mt-2 text-base leading-7 text-muted">{hasFilters ? "Try another search or clear your filters." : "Registered non-Admin accounts will appear here."}</p>{hasFilters && <button type="button" onClick={directory.clearFilters} className="mt-3 min-h-11 rounded px-2 font-semibold text-brand underline hover:no-underline focus-visible:outline-2 focus-visible:outline-brand">Clear filters</button>}</div>} />
+          <DataTable caption="Registered non-Admin users" columns={columns} rows={directory.rows} rowKey={(user) => user.id} loading={loading} loadingLabel="Loading users…" sort={directory.sort} onSort={(key) => directory.changeSort(key as UserSortKey)} empty={<div><p className="text-base font-medium text-ink">{hasFilters ? "No matching users" : "No users to display"}</p><p className="mt-2 text-sm leading-6 text-muted">{hasFilters ? "Try another search or clear your filters." : "Registered non-Admin accounts will appear here."}</p>{hasFilters && <button type="button" onClick={directory.clearFilters} className="mt-3 min-h-11 rounded px-2 text-sm font-semibold text-brand underline hover:no-underline focus-visible:outline-2 focus-visible:outline-brand">Clear filters</button>}</div>} />
 
           <TablePagination page={directory.currentPage} pageSize={directory.pageSize} totalItems={directory.filteredCount} onPageChange={directory.changePage} onPageSizeChange={directory.changePageSize} loading={loading} itemLabel="users" ariaLabel="Users table pagination" />
         </section>

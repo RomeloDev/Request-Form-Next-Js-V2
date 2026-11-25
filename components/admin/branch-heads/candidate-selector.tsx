@@ -61,7 +61,7 @@ export default function CandidateSelector({
       </div>
 
       <div className="overflow-x-auto border-t border-line/60">
-        <table className="w-full min-w-[620px] text-left text-base">
+        <table className="w-full min-w-[620px] text-left text-sm">
           <thead className="bg-slate-50 text-sm text-muted">
             <tr>
               <th className="px-4 py-3 font-semibold">Select</th>
