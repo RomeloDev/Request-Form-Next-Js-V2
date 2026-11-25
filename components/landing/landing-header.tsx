@@ -54,7 +54,7 @@ export default function LandingHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <LandingThemeControl id="landing-theme-desktop" />
+          {/* <LandingThemeControl id="landing-theme-desktop" /> */}
           <Link
             href="/login"
             className="inline-flex min-h-10 items-center rounded-md border border-white/25 px-4 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus:outline-2 focus:outline-offset-2 focus:outline-white"
