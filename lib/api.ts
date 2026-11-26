@@ -22,6 +22,11 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const headers = new Headers(requestOptions.headers);
   headers.set("Accept", "application/json");
 
+  // Uncomment this header to skip the ngrok browser warning in development. It is not needed in production.
+  // if (process.env.NODE_ENV === "development") {
+  //   headers.set("ngrok-skip-browser-warning", "true");
+  // }
+
   const response = await fetch(`/api/v1${path}`, {
     ...requestOptions,
     headers,
@@ -58,6 +63,8 @@ export async function apiFileRequest(
     cache: "no-store",
     headers: {
       Accept: "*/*",
+      // Uncomment this header to skip the ngrok browser warning in development. It is not needed in production.
+      // "ngrok-skip-browser-warning": "true",
     },
     signal: signal
       ? AbortSignal.any([

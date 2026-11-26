@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
       { source: "/storage/:path*", destination: `${apiServer}/storage/:path*` },
     ];
   },
+  // Uncomment this to allow the dev server to be accessed from other devices on the network.
+  // allowedDevOrigins: [
+  //   "10.50.2.11",
+  // ],
   /* config options here */
   experimental: {
     agentFeedback: true,

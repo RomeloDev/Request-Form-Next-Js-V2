@@ -4,7 +4,9 @@ import { ApiError } from "@/lib/api";
 export async function prepareCsrfSession(): Promise<string> {
   const response = await fetch("/sanctum/csrf-cookie", {
     credentials: "include",
-    headers: { Accept: "application/json" },
+    // Uncomment this header to skip the ngrok browser warning in development. It is not needed in production.
+    // headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+    headers: { Accept: "application/json", },
     cache: "no-store",
     signal: AbortSignal.timeout(20_000),
   });
