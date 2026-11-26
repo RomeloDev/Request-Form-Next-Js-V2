@@ -105,7 +105,7 @@ export default function LandingMobileNav({ links }: LandingMobileNavProps) {
 
           <div className="my-4 h-px bg-slate-200" />
 
-          <div className="flex items-center justify-between gap-3">
+          {/* <div className="flex items-center justify-between gap-3">
             <LandingThemeControl
               id="landing-theme-mobile"
               className="w-full justify-between border-slate-300 sm:w-auto"
@@ -113,7 +113,7 @@ export default function LandingMobileNav({ links }: LandingMobileNavProps) {
             <span className="hidden text-xs leading-5 text-slate-500 sm:block">
               Choose your viewing theme
             </span>
-          </div>
+          </div> */}
 
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Link

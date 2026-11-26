@@ -27,18 +27,7 @@ const supportedRequests: {
 
 export default function LandingHero() {
   return (
-    <section
-      aria-labelledby="hero-title"
-      className="relative isolate overflow-hidden"
-    >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[image:var(--landing-hero-wash)]"
-      >
-        <div className="absolute -top-40 -right-32 size-[32rem] rounded-full bg-landing-blue/10 blur-3xl" />
-        <div className="absolute top-32 -left-40 size-[28rem] rounded-full bg-landing-navy/5 blur-3xl" />
-      </div>
-
+    <section aria-labelledby="hero-title">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 pt-12 pb-16 sm:px-6 sm:pt-16 lg:grid-cols-[minmax(0,0.95fr)_minmax(32rem,1.05fr)] lg:items-start lg:gap-12 lg:px-8 lg:pt-16 lg:pb-24">
         <div className="lg:pt-6">
           <div className="border-l-4 border-[#2458d3] pl-4">

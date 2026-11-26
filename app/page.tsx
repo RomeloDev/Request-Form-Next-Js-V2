@@ -4,6 +4,7 @@ import LandingFaq from "@/components/landing/landing-faq";
 import LandingFooter from "@/components/landing/landing-footer";
 import LandingHeader from "@/components/landing/landing-header";
 import LandingHero from "@/components/landing/landing-hero";
+import LandingHeroBackground from "@/components/landing/landing-hero-background";
 import LandingLifecycle from "@/components/landing/landing-lifecycle";
 import LandingSection from "@/components/landing/landing-section";
 import LandingThemeProvider from "@/components/landing/landing-theme";
@@ -31,16 +32,22 @@ export default function Home() {
         tabIndex={-1}
         className="flex-1 focus:outline-none"
       >
-        <LandingHero />
+        <div className="relative isolate overflow-hidden">
+          <LandingHeroBackground />
 
-        <LandingSection
-          id="how-it-works"
-          eyebrow="How it works"
-          title="One documented route for every request"
-          description="Stock, purchase order, cash disbursement, and check issuance requests follow one visible path from submission to completion."
-        >
-          <LandingLifecycle />
-        </LandingSection>
+          <div className="relative z-10">
+            <LandingHero />
+
+            <LandingSection
+              id="how-it-works"
+              eyebrow="How it works"
+              title="One documented route for every request"
+              description="Stock, purchase order, cash disbursement, and check issuance requests follow one visible path from submission to completion."
+            >
+              <LandingLifecycle />
+            </LandingSection>
+          </div>
+        </div>
 
         <LandingSection
           id="benefits"

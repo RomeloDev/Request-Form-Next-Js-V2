@@ -13,7 +13,7 @@ export type LandingTheme = "system" | "light" | "dark";
 
 const THEME_STORAGE_KEY = "smct-landing-theme";
 const THEME_CHANGE_EVENT = "smct-landing-theme-change";
-const DEFAULT_THEME: LandingTheme = "system";
+const DEFAULT_THEME: LandingTheme = "light";
 
 /*
  * The in-memory value makes theme changes work even when browser storage is
