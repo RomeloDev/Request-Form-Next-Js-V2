@@ -276,6 +276,13 @@ export default function MyRequestsPage({
       iconClassName: "bg-emerald-100 text-emerald-700",
     },
     {
+      label: "Ongoing requests",
+      value: loading ? "—" : summary.ongoing.toLocaleString(),
+      description: "Requests currently in progress",
+      icon: "progress",
+      iconClassName: "bg-blue-100 text-blue-700",
+    },
+    {
       label: "Canceled requests",
       value: loading ? "—" : summary.canceled.toLocaleString(),
       description: "Requests marked as canceled",
@@ -333,7 +340,7 @@ export default function MyRequestsPage({
           <h2 id="my-requests-summary-title" className="sr-only">
             Request summary
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             {kpiCards.map((card) => (
               <article
                 key={card.label}

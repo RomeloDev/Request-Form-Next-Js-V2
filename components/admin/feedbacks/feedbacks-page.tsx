@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import PageHeader from "@/components/layouts/page-header";
 import DataTable, {
   type TableColumn,
 } from "@/components/ui/data-table";
 import FormAlert from "@/components/ui/form-alert";
+import Modal from "@/components/ui/modal";
 import RefreshButton from "@/components/ui/refresh-button";
+import RowAction from "@/components/ui/row-action";
 import TablePagination from "@/components/ui/table-pagination";
 import {
   isFeedbackPerPage,
@@ -38,6 +41,20 @@ function formatSubmittedDate(value: string | null): string {
   }).format(date);
 }
 
+function formatSubmittedDateTime(value: string | null): string {
+  if (!value) return "Not provided";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "Not provided";
+
+  return new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "long",
+    timeStyle: "short",
+    timeZone: "Asia/Manila",
+  }).format(date);
+}
+
 function phoneLabel(value: string | null): string {
   return value?.trim() ? value : "Not provided";
 }
@@ -59,9 +76,68 @@ function opinionLabel(feedback: FeedbackListItem): string {
     : "Not provided";
 }
 
+function FeedbackDetailsDialog({
+  feedback,
+  onClose,
+}: {
+  feedback: FeedbackListItem | null;
+  onClose: () => void;
+}) {
+  return (
+    <Modal
+      open={Boolean(feedback)}
+      title="Feedback details"
+      onClose={onClose}
+      maxWidth="3xl"
+    >
+      {feedback && (
+        <div className="space-y-6">
+          <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+            {[
+              ["Feedback ID", `#${feedback.id}`],
+              ["Feedback code", feedback.feedback_code],
+              ["Name", feedback.name],
+              ["Email address", feedback.email],
+              ["Phone number", phoneLabel(feedback.phone)],
+              ["Department", feedback.department],
+              ["Opinion", feedback.opinion.trim() || "Not provided"],
+              ["Submitted", formatSubmittedDateTime(feedback.created_at)],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-sm leading-6 text-muted">{label}</dt>
+                <dd className="mt-1 text-sm leading-6 font-medium [overflow-wrap:anywhere]">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          {feedback.opinion.trim().toLowerCase() === "other" && (
+            <section className="border-t border-line/60 pt-5">
+              <h3 className="text-sm leading-6 text-muted">Other opinion</h3>
+              <p className="mt-1 whitespace-pre-wrap text-sm leading-6 font-medium [overflow-wrap:anywhere]">
+                {feedback.other_opinion?.trim() || "Not specified"}
+              </p>
+            </section>
+          )}
+
+          <section className="border-t border-line/60 pt-5">
+            <h3 className="text-sm leading-6 text-muted">Message</h3>
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 [overflow-wrap:anywhere]">
+              {feedback.message.trim() || "Not provided"}
+            </p>
+          </section>
+        </div>
+      )}
+    </Modal>
+  );
+}
+
 export default function FeedbacksPage({
   initialPage,
 }: FeedbacksPageProps) {
+  const [selectedFeedback, setSelectedFeedback] =
+    useState<FeedbackListItem | null>(null);
   const {
     records,
     meta,
@@ -142,7 +218,7 @@ export default function FeedbacksPage({
       render: (feedback) => (
         // Plain text only: whitespace is preserved and long unbroken
         // strings wrap instead of stretching the table.
-        <p className="min-w-64 max-w-96 whitespace-pre-wrap [overflow-wrap:anywhere]">
+        <p className="min-w-64 max-w-96 whitespace-pre-wrap [overflow-wrap:anywhere] line-clamp-1">
           {feedback.message}
         </p>
       ),
@@ -154,6 +230,20 @@ export default function FeedbacksPage({
         <span className="whitespace-nowrap">
           {formatSubmittedDate(feedback.created_at)}
         </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (feedback) => (
+        <div className="flex items-center gap-2">
+          <RowAction
+            label={`View details for feedback ${feedback.feedback_code}`}
+            icon="eye"
+            tone="blue"
+            onClick={() => setSelectedFeedback(feedback)}
+          />
+        </div>
       ),
     },
   ];
@@ -270,6 +360,11 @@ export default function FeedbacksPage({
           />
         </section>
       )}
+
+      <FeedbackDetailsDialog
+        feedback={selectedFeedback}
+        onClose={() => setSelectedFeedback(null)}
+      />
     </div>
   );
 }
