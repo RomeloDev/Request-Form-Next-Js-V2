@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import LandingMobileNav from "./landing-mobile-nav";
-import LandingThemeControl from "./landing-theme-control";
+// import LandingThemeControl from "./landing-theme-control";
 
 const sectionLinks = [
   { href: "#how-it-works", label: "How it works" },

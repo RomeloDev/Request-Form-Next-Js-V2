@@ -28,10 +28,10 @@ export default function ConsoleBranding() {
 
     hasLoggedBrand = true;
     console.info("%cSMCT REQUEST FORM", BRAND_STYLE);
-    console.info(
-      "%cOfficial request routing and approval system.",
-      TAGLINE_STYLE,
-    );
+    // console.info(
+    //   "%cOfficial request routing and approval system.",
+    //   TAGLINE_STYLE,
+    // );
     console.info("%cDeveloped by John Romel D. Lucot", TAGLINE_STYLE);
   }, []);
 

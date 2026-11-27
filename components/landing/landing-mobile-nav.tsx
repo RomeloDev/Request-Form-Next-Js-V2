@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import LandingThemeControl from "./landing-theme-control";
+// import LandingThemeControl from "./landing-theme-control";
 
 type MobileNavLink = {
   href: string;
